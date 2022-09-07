@@ -2,6 +2,34 @@
 import { supabase } from './supabase';
 
 export const createApi = (db = supabase) => {
+  const getUser = () => db.auth.getUser();
+
+  const signUp = async ({ email, password }) => {
+    const { user, error } = await db.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    return user;
+  };
+
+  const signIn = async ({ email, password }) => {
+    const { user, error } = await db.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    return user;
+  };
+
   const addNote = async (text, tags) => {
     // TODO: Supabase
     console.log('text', text);
@@ -31,6 +59,9 @@ export const createApi = (db = supabase) => {
   // Tags are required to have user, text, color
 
   return {
+    getUser,
+    signUp,
+    signIn,
     addNote,
     addTag,
     loadTags,

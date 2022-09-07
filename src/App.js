@@ -20,7 +20,34 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
+function LogIn() {
+  return 'Hi';
+}
+
 export default function App({ api }) {
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    api
+      // .getUser()
+      .signUp({ email: 'jboyle617@gmail.com', password: 'abcd1234' })
+      .then((res) => {
+        console.log('res', res);
+        setUser(res);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [api]);
+
+  if (!user) {
+    return <LogIn />;
+  }
+
+  return <Main api={api} />;
+}
+
+function Main({ api }) {
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
   const [tags, setTags] = React.useState([]);
@@ -37,7 +64,6 @@ export default function App({ api }) {
     const color = getRandomColor();
     handleAddTagToNote({ text: tag, color });
     api.addTag({ text: tag, color }).catch((err) => {
-      console.log('err', err);
       setErrorMessage(err.message);
     });
   };
