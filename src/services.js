@@ -3,9 +3,10 @@ import { supabase } from './supabase';
 
 export const createApi = (db = supabase) => {
   const getUser = () => db.auth.getUser();
+  const getSession = () => db.auth.getSession();
 
   const signUp = async ({ email, password }) => {
-    const { user, error } = await db.auth.signUp({
+    const { data, error } = await db.auth.signUp({
       email,
       password,
     });
@@ -14,11 +15,11 @@ export const createApi = (db = supabase) => {
       throw error;
     }
 
-    return user;
+    return data;
   };
 
   const signIn = async ({ email, password }) => {
-    const { user, error } = await db.auth.signInWithPassword({
+    const { data, error } = await db.auth.signInWithPassword({
       email,
       password,
     });
@@ -27,7 +28,14 @@ export const createApi = (db = supabase) => {
       throw error;
     }
 
-    return user;
+    return data;
+  };
+
+  const addUser = async ({ id }) => {
+    const { error } = await db.from('users').insert([{ id }]);
+    if (error) {
+      throw error;
+    }
   };
 
   const addNote = async (text, tags) => {
@@ -37,10 +45,13 @@ export const createApi = (db = supabase) => {
   };
 
   const addTag = async ({ text, color }) => {
-    // TODO: Supabase
+    const {
+      data: { user },
+    } = await db.auth.getUser();
+    console.log('user', user);
     const { data, error } = await db
       .from('tags')
-      .insert([{ text: text.toLowerCase(), color }]);
+      .insert([{ text: text.toLowerCase(), color, user_id: user.id }]);
 
     if (error) {
       throw error;
@@ -50,9 +61,13 @@ export const createApi = (db = supabase) => {
   };
 
   const loadTags = async () => {
-    // TODO: Supabase
-    return db.from('tags').select('*');
-    // return Promise.resolve([{ color: 'cornflowerblue', text: 'hello' }]);
+    const { data: tags, error } = await db.from('tags').select('*');
+
+    if (error) {
+      throw error;
+    }
+
+    return tags || [];
   };
 
   // Coerce tags to lowercase
@@ -65,5 +80,7 @@ export const createApi = (db = supabase) => {
     addNote,
     addTag,
     loadTags,
+    getSession,
+    addUser,
   };
 };

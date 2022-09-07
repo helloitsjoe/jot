@@ -29,16 +29,16 @@ export default function App({ api }) {
 
   React.useEffect(() => {
     api
-      // .getUser()
-      .signUp({ email: 'jboyle617@gmail.com', password: 'abcd1234' })
-      .then((res) => {
-        console.log('res', res);
-        setUser(res);
+      .signIn({ email: 'jboyle617@gmail.com', password: 'lalala' })
+      .then((data) => {
+        setUser(data.user);
       })
       .catch((err) => {
         console.error(err);
       });
   }, [api]);
+
+  console.log('user', user);
 
   if (!user) {
     return <LogIn />;
@@ -81,6 +81,7 @@ function Main({ api }) {
     api
       .loadTags()
       .then((fetchedRecentTags) => {
+        console.log('fetchedRecentTags', fetchedRecentTags);
         setStatus(SUCCESS);
         setRecentTags(fetchedRecentTags);
       })
