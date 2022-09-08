@@ -1,3 +1,0 @@
-- Get runtimerundown@gmail.com
-- POP servers forward from name@runtimerundown.com
-- TODO list for the website
