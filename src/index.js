@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
-import { createApi } from './services';
+import { createApi } from './api';
 import { supabase } from './supabase';
 import App from './App';
 

@@ -20,28 +20,74 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-function LogIn() {
-  return 'Hi';
+function LogIn({ api, onSuccess }) {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [errorMessage, setErrorMessage] = React.useState('');
+
+  const handleSignIn = (e) => {
+    e.preventDefault();
+    api
+      .signIn({ email, password })
+      .then((data) => {
+        onSuccess(data.user);
+      })
+      .catch((err) => {
+        console.error(err);
+        setErrorMessage(err.message);
+      });
+  };
+
+  return (
+    <Box
+      as="form"
+      m="auto"
+      width="12em"
+      display="flex"
+      flexDirection="column"
+      onSubmit={handleSignIn}
+    >
+      <label>
+        <Box>Email</Box>
+        <input
+          type="text"
+          onChange={(e) => setEmail(e.target.value)}
+          value={email}
+        />
+      </label>
+      <label>
+        <Box>Password</Box>
+        <input
+          type="password"
+          onChange={(e) => setPassword(e.target.value)}
+          value={password}
+        />
+      </label>
+      <Box m="0.5em 0" as="button" type="submit">
+        Submit
+      </Box>
+      {errorMessage && (
+        <Box bg="tomato" color="white" fontStyle="bold" p="0.5em">
+          {errorMessage}
+        </Box>
+      )}
+    </Box>
+  );
 }
 
 export default function App({ api }) {
   const [user, setUser] = React.useState(null);
 
   React.useEffect(() => {
-    api
-      .signIn({ email: 'jboyle617@gmail.com', password: 'lalala' })
-      .then((data) => {
-        setUser(data.user);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    api.getUser().then((data) => {
+      setUser(data.user);
+    });
   }, [api]);
 
   console.log('user', user);
 
   if (!user) {
-    return <LogIn />;
+    return <LogIn api={api} onSuccess={setUser} />;
   }
 
   return <Main api={api} />;
@@ -68,9 +114,26 @@ function Main({ api }) {
     });
   };
 
+  const handleDeleteTag = (id) => {
+    api
+      .deleteTag({ id })
+      .then(() => {
+        setRecentTags((r) => r.filter((t) => t.id !== id));
+      })
+      .catch((err) => {
+        setErrorMessage(err.message);
+      });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     api.addNote(note, tags).catch((err) => {
+      setErrorMessage(err.message);
+    });
+  };
+
+  const handleSignOut = () => {
+    api.signOut().catch((err) => {
       setErrorMessage(err.message);
     });
   };
@@ -135,9 +198,13 @@ function Main({ api }) {
 
           return recentTags.length > 0 ? (
             <Box>
-              {recentTags.map(({ text, color }) => {
+              {recentTags.map(({ id, text, color }) => {
                 return (
-                  <Tag key={text} color={color} onSelect={handleAddTagToNote}>
+                  <Tag
+                    key={text}
+                    color={color}
+                    onSelect={() => handleDeleteTag(id)}
+                  >
                     {text}
                   </Tag>
                 );
@@ -147,6 +214,16 @@ function Main({ api }) {
             <p>No recent tags!</p>
           );
         })()}
+      </Box>
+      <Box
+        as="button"
+        type="button"
+        border="0"
+        bgColor="none"
+        textDecoration="underline"
+        onClick={handleSignOut}
+      >
+        Sign out
       </Box>
     </Box>
   );
