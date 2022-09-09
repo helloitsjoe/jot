@@ -22,6 +22,7 @@ const getRandomColor = () => {
 };
 
 export default function App({ api }) {
+  // TODO: Move this to context?
   const [user, setUser] = React.useState(null);
 
   React.useEffect(() => {
@@ -36,10 +37,10 @@ export default function App({ api }) {
     return <LogIn api={api} onSuccess={setUser} />;
   }
 
-  return <Main api={api} />;
+  return <Main api={api} onSignOut={() => setUser(null)} />;
 }
 
-function Main({ api }) {
+function Main({ api, onSignOut }) {
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
   const [tags, setTags] = React.useState([]);
@@ -50,12 +51,17 @@ function Main({ api }) {
   const handleNoteChange = (e) => setNote(e.target.value);
   const handleTagChange = (e) => setTag(e.target.value);
   const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
+  const handleAddRecentTag = (newTag) =>
+    setRecentTags((prev) => [...prev, newTag]);
 
   const addNewTag = (e) => {
     e.preventDefault();
     const color = getRandomColor();
     handleAddTagToNote({ text: tag, color });
+    handleAddRecentTag({ text: tag, color });
     api.addTag({ text: tag, color }).catch((err) => {
+      setRecentTags((p) => p.filter((r) => r.text !== tag));
+      setTags((p) => p.filter((r) => r.text !== tag));
       setErrorMessage(err.message);
     });
   };
@@ -79,9 +85,14 @@ function Main({ api }) {
   };
 
   const handleSignOut = () => {
-    api.signOut().catch((err) => {
-      setErrorMessage(err.message);
-    });
+    api
+      .signOut()
+      .then(() => {
+        onSignOut();
+      })
+      .catch((err) => {
+        setErrorMessage(err.message);
+      });
   };
 
   React.useEffect(() => {
@@ -115,7 +126,13 @@ function Main({ api }) {
             <Box>
               {tags.map(({ text, color }) => {
                 return (
-                  <Tag key={text} color={color} onSelect={handleAddTagToNote}>
+                  <Tag
+                    key={text}
+                    color={color}
+                    onDelete={() =>
+                      setTags((p) => p.filter((t) => t.text !== text))
+                    }
+                  >
                     {text}
                   </Tag>
                 );
@@ -128,9 +145,20 @@ function Main({ api }) {
         <h2>Tags</h2>
         <label>
           <Box>Add a tag</Box>
-          {/* TODO: Dropdown offers existing tags, filter on type */}
-          <input value={tag} onChange={handleTagChange} />
-          <button type="submit">Add Tag</button>
+          <input
+            type="text"
+            value={tag}
+            onChange={handleTagChange}
+            list="tags"
+          />
+          <datalist id="tags">
+            {recentTags.map((t) => (
+              <option key={t.text} value={t.text}>
+                {t.text}
+              </option>
+            ))}
+          </datalist>
+          <button type="submit">Add a new tag</button>
         </label>
         {errorMessage && (
           <Box color="white" bgColor="red">
@@ -144,17 +172,20 @@ function Main({ api }) {
 
           return recentTags.length > 0 ? (
             <Box>
-              {recentTags.map(({ id, text, color }) => {
-                return (
-                  <Tag
-                    key={text}
-                    color={color}
-                    onSelect={() => handleDeleteTag(id)}
-                  >
-                    {text}
-                  </Tag>
-                );
-              })}
+              {recentTags
+                .filter(({ text }) => !tag || text.includes(tag))
+                .map(({ id, text, color }) => {
+                  return (
+                    <Tag
+                      key={text}
+                      color={color}
+                      onDelete={() => handleDeleteTag(id)}
+                      onSelect={handleAddTagToNote}
+                    >
+                      {text}
+                    </Tag>
+                  );
+                })}
             </Box>
           ) : (
             <p>No recent tags!</p>

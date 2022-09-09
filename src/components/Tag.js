@@ -2,7 +2,12 @@
 import React from 'react';
 import Box from './Box';
 
-export default function Tag({ children, color, onSelect }) {
+export default function Tag({
+  children,
+  color,
+  onSelect = () => {},
+  onDelete,
+}) {
   return (
     <Box
       as="span"
@@ -13,7 +18,19 @@ export default function Tag({ children, color, onSelect }) {
       borderRadius="1em"
       onClick={() => onSelect({ text: children, color })}
     >
-      {children}
+      <span>{children}</span>
+      {onDelete && (
+        <Box
+          as="button"
+          ml="0.5em"
+          type="button"
+          onClick={onDelete}
+          bg="transparent"
+          border="none"
+        >
+          X
+        </Box>
+      )}
     </Box>
   );
 }
