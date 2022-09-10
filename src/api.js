@@ -36,6 +36,15 @@ export const createApi = (db = supabase) => {
     return validate(res);
   };
 
+  const updateUser = async ({ email, password }) => {
+    const res = await db.auth.updateUser({
+      email,
+      password,
+    });
+
+    return validate(res);
+  };
+
   const signOut = async () => {
     const res = await db.auth.signOut();
     return validate(res);
@@ -93,5 +102,6 @@ export const createApi = (db = supabase) => {
     addUser,
     deleteTag,
     updateTag,
+    updateUser,
   };
 };
