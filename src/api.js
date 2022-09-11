@@ -55,10 +55,9 @@ export const createApi = (db = supabase) => {
     return validate(res);
   };
 
-  const addNote = async (text, tags) => {
-    // TODO: Supabase
-    console.log('text', text);
-    console.log('tags', tags);
+  const addNote = async (text, tagIds) => {
+    const res = await db.from('notes').insert([{ text, tag_ids: tagIds }]);
+    return validate(res);
   };
 
   const addTag = async ({ text, color }) => {
@@ -69,7 +68,9 @@ export const createApi = (db = supabase) => {
     // Tags are required to have user, text, color
     const res = await db
       .from('tags')
-      .insert([{ text: text.toLowerCase(), color, user_id: user.id }]);
+      .insert([{ text: text.toLowerCase(), color, user_id: user.id }])
+      .select();
+    console.log('res', res);
 
     return validate(res);
   };

@@ -57,13 +57,20 @@ function Main({ api, onSignOut }) {
   const addNewTag = (e) => {
     e.preventDefault();
     const color = getRandomColor();
-    handleAddTagToNote({ text: tag, color });
     handleAddRecentTag({ text: tag, color });
-    api.addTag({ text: tag, color }).catch((err) => {
-      setRecentTags((p) => p.filter((r) => r.text !== tag));
-      setTags((p) => p.filter((r) => r.text !== tag));
-      setErrorMessage(err.message);
-    });
+    api
+      .addTag({ text: tag, color })
+      .then((res) => {
+        console.log(res);
+        // TODO: Add tag to note, make sure id propagates
+        // handleAddTagToNote({ text, color });
+        setTag('');
+      })
+      .catch((err) => {
+        setRecentTags((p) => p.filter((r) => r.text !== tag));
+        setTags((p) => p.filter((r) => r.text !== tag));
+        setErrorMessage(err.message);
+      });
   };
 
   const handleDeleteTag = (id) => {
@@ -77,9 +84,10 @@ function Main({ api, onSignOut }) {
       });
   };
 
-  const handleSubmit = (e) => {
+  const handleAddNote = (e) => {
     e.preventDefault();
-    api.addNote(note, tags).catch((err) => {
+    const tagIds = tags.map(({ id }) => id);
+    api.addNote(note, tagIds).catch((err) => {
       setErrorMessage(err.message);
     });
   };
@@ -101,7 +109,6 @@ function Main({ api, onSignOut }) {
     api
       .loadTags()
       .then((fetchedRecentTags) => {
-        console.log('fetchedRecentTags', fetchedRecentTags);
         setStatus(SUCCESS);
         setRecentTags(fetchedRecentTags);
       })
@@ -113,7 +120,7 @@ function Main({ api, onSignOut }) {
 
   return (
     <Box width="700px" m="2em auto">
-      <Box as="form" onSubmit={handleSubmit}>
+      <Box as="form" onSubmit={handleAddNote}>
         <h1>Jot!</h1>
         <Box>
           <h2>Note</h2>
@@ -129,9 +136,9 @@ function Main({ api, onSignOut }) {
                   <Tag
                     key={text}
                     color={color}
-                    onDelete={() =>
-                      setTags((p) => p.filter((t) => t.text !== text))
-                    }
+                    onDelete={() => {
+                      setTags((p) => p.filter((t) => t.text !== text));
+                    }}
                   >
                     {text}
                   </Tag>
@@ -161,7 +168,7 @@ function Main({ api, onSignOut }) {
           <button type="submit">Add a new tag</button>
         </label>
         {errorMessage && (
-          <Box color="white" bgColor="red">
+          <Box color="white" bg="red">
             {errorMessage}
           </Box>
         )}
@@ -177,9 +184,13 @@ function Main({ api, onSignOut }) {
                 .map(({ id, text, color }) => {
                   return (
                     <Tag
-                      key={text}
+                      id={id}
+                      key={id}
                       color={color}
-                      onDelete={() => handleDeleteTag(id)}
+                      onDelete={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTag(id);
+                      }}
                       onSelect={handleAddTagToNote}
                     >
                       {text}

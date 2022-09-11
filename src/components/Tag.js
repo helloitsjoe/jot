@@ -3,8 +3,9 @@ import React from 'react';
 import Box from './Box';
 
 export default function Tag({
-  children,
+  id,
   color,
+  children,
   onSelect = () => {},
   onDelete,
 }) {
@@ -16,7 +17,7 @@ export default function Tag({
       m="1em"
       display="inline-block"
       borderRadius="1em"
-      onClick={() => onSelect({ text: children, color })}
+      onClick={() => onSelect({ text: children, color, id })}
     >
       <span>{children}</span>
       {onDelete && (
