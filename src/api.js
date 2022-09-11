@@ -1,4 +1,5 @@
 /* eslint-disable import/prefer-default-export */
+/* eslint-disable camelcase */
 import { supabase } from './supabase';
 
 const validate = (res) => {
@@ -55,8 +56,14 @@ export const createApi = (db = supabase) => {
     return validate(res);
   };
 
-  const addNote = async (text, tagIds) => {
-    const res = await db.from('notes').insert([{ text, tag_ids: tagIds }]);
+  const addNote = async (text, tag_ids) => {
+    const {
+      user: { id: user_id },
+    } = await getUser();
+    const res = await db
+      .from('notes')
+      .insert([{ user_id, text, tag_ids }])
+      .select();
     return validate(res);
   };
 
@@ -87,7 +94,17 @@ export const createApi = (db = supabase) => {
 
   const loadTags = async () => {
     const res = await db.from('tags').select('*');
+    return validate(res) || [];
+  };
 
+  const loadNotes = async () => {
+    // TODO: Many-to-many: https://github.com/supabase/supabase/discussions/710
+    const res = await db.from('notes').select(`
+      tag_ids,
+      tags (
+        tag_ids
+      )
+    `);
     return validate(res) || [];
   };
 
@@ -99,6 +116,7 @@ export const createApi = (db = supabase) => {
     addNote,
     addTag,
     loadTags,
+    loadNotes,
     getSession,
     addUser,
     deleteTag,

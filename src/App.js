@@ -3,10 +3,8 @@ import * as React from 'react';
 import Box from './components/Box';
 import Tag from './components/Tag';
 import LogIn from './components/LogIn';
-
-const SUCCESS = 'success';
-const ERROR = 'error';
-const LOADING = 'loading';
+import Notes from './components/Notes';
+import { SUCCESS, ERROR, LOADING } from './constants';
 
 const getRandomColor = () => {
   const colors = [
@@ -202,6 +200,9 @@ function Main({ api, onSignOut }) {
             <p>No recent tags!</p>
           );
         })()}
+      </Box>
+      <Box>
+        <Notes api={api} />
       </Box>
       <Box
         as="button"
