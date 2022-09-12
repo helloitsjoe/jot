@@ -1,5 +1,7 @@
+/* eslint-disable react/prop-types */
 import * as React from 'react';
 import Box from './Box';
+import Tag from './Tag';
 import { SUCCESS, ERROR, LOADING } from '../constants';
 
 export default function Notes({ api }) {
@@ -20,7 +22,7 @@ export default function Notes({ api }) {
         setErrorMessage(err.message);
         setStatus(ERROR);
       });
-  }, []);
+  }, [api]);
 
   if (status === LOADING) {
     return <Box>Loading notes...</Box>;
@@ -34,7 +36,16 @@ export default function Notes({ api }) {
     );
   }
 
-  return notes.map(({ text, id }) => {
-    return <Box key={id}>{text}</Box>;
+  return notes.map(({ text, id, tags }) => {
+    return (
+      <Box key={id}>
+        {text}
+        {tags.map((tag) => (
+          <Tag key={tag.text} color={tag.color}>
+            {tag.text}
+          </Tag>
+        ))}
+      </Box>
+    );
   });
 }

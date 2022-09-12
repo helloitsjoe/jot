@@ -10,6 +10,20 @@ const validate = (res) => {
   return data;
 };
 
+export const addTagsToNotes = (notesTags) => {
+  const notesMap = notesTags.reduce((acc, { notes, tags }) => {
+    const noteId = notes.id;
+    if (!acc[noteId]) {
+      acc[noteId] = notes;
+    }
+    const prevAddedTags = acc[noteId].tags || [];
+    acc[noteId].tags = [...prevAddedTags, tags];
+    return acc;
+  }, {});
+
+  return Object.values(notesMap);
+};
+
 export const createApi = (db = supabase) => {
   const getSession = () => db.auth.getSession();
 
@@ -60,6 +74,7 @@ export const createApi = (db = supabase) => {
     const {
       user: { id: user_id },
     } = await getUser();
+    // TODO: Add note/tags to notes_tags
     const res = await db
       .from('notes')
       .insert([{ user_id, text, tag_ids }])
@@ -98,14 +113,18 @@ export const createApi = (db = supabase) => {
   };
 
   const loadNotes = async () => {
-    // TODO: Many-to-many: https://github.com/supabase/supabase/discussions/710
-    const res = await db.from('notes').select(`
-      tag_ids,
+    // TODO: Make sure this works for all of the current user's notes
+    const res = await db.from('notes_tags').select(`
+      notes (
+        *
+      ),
       tags (
-        tag_ids
+        *
       )
     `);
-    return validate(res) || [];
+    const notesTags = validate(res);
+
+    return addTagsToNotes(notesTags);
   };
 
   return {
