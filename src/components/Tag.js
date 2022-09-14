@@ -12,11 +12,13 @@ export default function Tag({
   return (
     <Box
       as="span"
-      bg={color}
-      p="0.5em"
-      m="1em"
+      // bg={color}
+      border={`2px solid ${color}`}
+      color={color}
+      p="0.2em 0.4em"
+      m="0.25em"
       display="inline-block"
-      borderRadius="1em"
+      borderRadius="0.4em"
       onClick={() => onSelect({ text: children, color, id })}
     >
       <span>{children}</span>

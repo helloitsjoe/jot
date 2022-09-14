@@ -72,14 +72,13 @@ function Main({ api, onSignOut }) {
   };
 
   const handleDeleteTag = (id) => {
+    // TODO: Confirm deletion
     api
       .deleteTag({ id })
       .then(() => {
         setRecentTags((r) => r.filter((t) => t.id !== id));
       })
-      .catch((err) => {
-        setErrorMessage(err.message);
-      });
+      .catch(({ message }) => setErrorMessage(message));
   };
 
   const handleAddNote = (e) => {
@@ -118,8 +117,7 @@ function Main({ api, onSignOut }) {
 
   return (
     <Box width="700px" m="2em auto">
-      <Box as="form" onSubmit={handleAddNote}>
-        <h1>Jot!</h1>
+      <Box as="form" onSubmit={handleAddNote} m="1em 0">
         <Box>
           <h2>Note</h2>
           <label>
@@ -146,7 +144,7 @@ function Main({ api, onSignOut }) {
           )}
         </Box>
       </Box>
-      <Box as="form" onSubmit={addNewTag}>
+      <Box as="form" onSubmit={addNewTag} m="1em 0">
         <h2>Tags</h2>
         <label>
           <Box>Add a tag</Box>
@@ -201,7 +199,8 @@ function Main({ api, onSignOut }) {
           );
         })()}
       </Box>
-      <Box>
+      <Box m="1em 0">
+        <h2>Existing notes</h2>
         <Notes api={api} />
       </Box>
       <Box

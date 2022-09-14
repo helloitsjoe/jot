@@ -71,18 +71,31 @@ export const createApi = (db = supabase) => {
   };
 
   const addNote = async (text, tag_ids) => {
+    // TODO: updated_at
     const {
       user: { id: user_id },
     } = await getUser();
-    // TODO: Add note/tags to notes_tags
     const res = await db
       .from('notes')
       .insert([{ user_id, text, tag_ids }])
       .select();
-    return validate(res);
+
+    const [note] = validate(res);
+
+    await Promise.all(
+      tag_ids.map((tag_id) =>
+        db
+          .from('notes_tags')
+          .insert([{ user_id, note_id: note.id, tag_id }])
+          .then(validate)
+      )
+    );
+
+    return note;
   };
 
   const addTag = async ({ text, color }) => {
+    // TODO: updated_at
     const {
       data: { user },
     } = await db.auth.getUser();
@@ -98,6 +111,7 @@ export const createApi = (db = supabase) => {
   };
 
   const updateTag = async ({ id, color, text }) => {
+    // TODO: updated_at
     const res = await db.from('tags').update({ id, color, text });
     return validate(res);
   };
@@ -113,15 +127,16 @@ export const createApi = (db = supabase) => {
   };
 
   const loadNotes = async () => {
-    // TODO: Make sure this works for all of the current user's notes
-    const res = await db.from('notes_tags').select(`
+    const res = await db.from('notes_tags').select(
+      `
       notes (
         *
       ),
       tags (
         *
       )
-    `);
+    `
+    );
     const notesTags = validate(res);
 
     return addTagsToNotes(notesTags);

@@ -36,7 +36,12 @@ export default function Notes({ api }) {
     );
   }
 
-  return notes.map(({ text, id, tags }) => {
+  // Most recent first
+  const sortedNotes = [...notes].sort((a, b) =>
+    a.created_at < b.created_at ? 1 : -1
+  );
+
+  return sortedNotes.map(({ text, id, tags }) => {
     return (
       <Box key={id}>
         {text}
