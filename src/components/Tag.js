@@ -30,6 +30,7 @@ export default function Tag({
           onClick={onDelete}
           bg="transparent"
           border="none"
+          color="gray"
         >
           X
         </Box>

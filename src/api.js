@@ -117,6 +117,7 @@ export const createApi = (db = supabase) => {
   };
 
   const deleteTag = async ({ id }) => {
+    await db.from('notes_tags').delete().eq('tag_id', id).then(validate);
     const res = await db.from('tags').delete().eq('id', id);
     return validate(res);
   };

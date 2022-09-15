@@ -4,6 +4,8 @@ import Box from './components/Box';
 import Tag from './components/Tag';
 import LogIn from './components/LogIn';
 import Notes from './components/Notes';
+import Input from './components/Input';
+import { SubmitButton } from './components/Button';
 import { SUCCESS, ERROR, LOADING } from './constants';
 
 const getRandomColor = () => {
@@ -119,12 +121,12 @@ function Main({ api, onSignOut }) {
     <Box width="700px" m="2em auto">
       <Box as="form" onSubmit={handleAddNote} m="1em 0">
         <Box>
-          <h2>Note</h2>
-          <label>
-            <Box>Add a note</Box>
-            <input value={note} onChange={handleNoteChange} />
-          </label>
-          <button type="submit">Submit</button>
+          <Input
+            label={<h3>Add a note</h3>}
+            value={note}
+            onChange={handleNoteChange}
+          />
+          <SubmitButton>Submit</SubmitButton>
           {tags.length > 0 && (
             <Box>
               {tags.map(({ text, color }) => {
@@ -145,24 +147,20 @@ function Main({ api, onSignOut }) {
         </Box>
       </Box>
       <Box as="form" onSubmit={addNewTag} m="1em 0">
-        <h2>Tags</h2>
-        <label>
-          <Box>Add a tag</Box>
-          <input
-            type="text"
-            value={tag}
-            onChange={handleTagChange}
-            list="tags"
-          />
-          <datalist id="tags">
-            {recentTags.map((t) => (
-              <option key={t.text} value={t.text}>
-                {t.text}
-              </option>
-            ))}
-          </datalist>
-          <button type="submit">Add a new tag</button>
-        </label>
+        <Input
+          label={<h3>Add a tag</h3>}
+          value={tag}
+          onChange={handleTagChange}
+          list="tags"
+        />
+        <datalist id="tags">
+          {recentTags.map((t) => (
+            <option key={t.text} value={t.text}>
+              {t.text}
+            </option>
+          ))}
+        </datalist>
+        <SubmitButton>Add a new tag</SubmitButton>
         {errorMessage && (
           <Box color="white" bg="red">
             {errorMessage}
@@ -200,14 +198,14 @@ function Main({ api, onSignOut }) {
         })()}
       </Box>
       <Box m="1em 0">
-        <h2>Existing notes</h2>
+        <h3>Existing notes</h3>
         <Notes api={api} />
       </Box>
       <Box
         as="button"
-        type="button"
         border="0"
-        bgColor="none"
+        bg="transparent"
+        color="white"
         textDecoration="underline"
         onClick={handleSignOut}
       >
