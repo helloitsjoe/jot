@@ -71,6 +71,10 @@ export const createApi = (db = supabase) => {
   };
 
   const addNote = async (text, tag_ids) => {
+    if (!tag_ids.length) {
+      // TODO: Revisit this
+      throw new Error('Notes must have tags');
+    }
     // TODO: updated_at
     const {
       user: { id: user_id },
@@ -82,14 +86,13 @@ export const createApi = (db = supabase) => {
 
     const [note] = validate(res);
 
-    await Promise.all(
-      tag_ids.map((tag_id) =>
-        db
-          .from('notes_tags')
-          .insert([{ user_id, note_id: note.id, tag_id }])
-          .then(validate)
-      )
-    );
+    const toInsert = tag_ids.map((tag_id) => ({
+      user_id,
+      note_id: note.id,
+      tag_id,
+    }));
+
+    await db.from('notes_tags').insert(toInsert).then(validate);
 
     return note;
   };
@@ -119,6 +122,12 @@ export const createApi = (db = supabase) => {
   const deleteTag = async ({ id }) => {
     await db.from('notes_tags').delete().eq('tag_id', id).then(validate);
     const res = await db.from('tags').delete().eq('id', id);
+    return validate(res);
+  };
+
+  const deleteNote = async ({ id }) => {
+    await db.from('notes_tags').delete().eq('note_id', id).then(validate);
+    const res = await db.from('notes').delete().eq('id', id);
     return validate(res);
   };
 
@@ -155,6 +164,7 @@ export const createApi = (db = supabase) => {
     getSession,
     addUser,
     deleteTag,
+    deleteNote,
     updateTag,
     updateUser,
   };

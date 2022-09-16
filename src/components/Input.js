@@ -14,7 +14,9 @@ export default function Input({
       <Box>{label}</Box>
       <Box
         as="input"
-        p="0.5em"
+        p="1em"
+        borderRadius="0"
+        color="white"
         type={type}
         value={value}
         onChange={onChange}

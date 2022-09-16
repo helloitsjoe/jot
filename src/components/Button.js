@@ -2,17 +2,22 @@
 import * as React from 'react';
 import Box from './Box';
 
-export default function Button({
-  children,
-  onClick = () => {},
-  type = 'button',
-}) {
-  return (
+export default function Button({ textOnly, children, onClick = () => {} }) {
+  if (textOnly) {
     <Box
       as="button"
-      type={type === 'submit' ? 'submit' : 'button'}
+      type="button"
+      border="1 px solid white"
+      bg="transparent"
+      color="white"
       onClick={onClick}
     >
+      {children}
+    </Box>;
+  }
+
+  return (
+    <Box as="button" type="button" onClick={onClick}>
       {children}
     </Box>
   );
@@ -21,7 +26,7 @@ export default function Button({
 export function SubmitButton({ children }) {
   return (
     <Box
-      p="0.5em"
+      p="1em"
       as="button"
       type="submit"
       color="white"

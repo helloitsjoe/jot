@@ -2,6 +2,7 @@
 import * as React from 'react';
 import Box from './Box';
 import Tag from './Tag';
+import Button from './Button';
 import { SUCCESS, ERROR, LOADING } from '../constants';
 
 export default function Notes({ api }) {
@@ -23,6 +24,19 @@ export default function Notes({ api }) {
         setStatus(ERROR);
       });
   }, [api]);
+
+  const handleDeleteNote = (id) => {
+    api
+      .deleteNote({ id })
+      .then(() => {
+        setNotes((p) => p.filter((n) => n.id !== id));
+        setStatus(SUCCESS);
+      })
+      .catch((err) => {
+        setErrorMessage(err.message);
+        setStatus(ERROR);
+      });
+  };
 
   if (status === LOADING) {
     return <Box>Loading notes...</Box>;
@@ -50,6 +64,9 @@ export default function Notes({ api }) {
             {tag.text}
           </Tag>
         ))}
+        <Button textOnly onClick={() => handleDeleteNote(id)}>
+          X
+        </Button>
       </Box>
     );
   });
