@@ -172,7 +172,7 @@ function Main({ api, onSignOut }) {
           }
 
           return recentTags.length > 0 ? (
-            <Box>
+            <Box m="0.5em 0">
               {recentTags
                 .filter(({ text }) => !tag || text.includes(tag))
                 .map(({ id, text, color }) => {

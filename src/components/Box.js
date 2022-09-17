@@ -7,6 +7,7 @@ import {
   flexbox,
   typography,
   position,
+  shadow,
 } from 'styled-system';
 
 const Box = styled.div`
@@ -17,6 +18,7 @@ const Box = styled.div`
   ${flexbox}
   ${typography}
   ${position}
+  ${shadow}
 `;
 
 export default Box;

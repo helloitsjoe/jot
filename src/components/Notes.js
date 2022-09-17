@@ -10,6 +10,7 @@ export default function Notes({ api }) {
   const [notes, setNotes] = React.useState([]);
   const [errorMessage, setErrorMessage] = React.useState('');
 
+  // TODO NEXT: Clicking tags in existing notes filters
   React.useEffect(() => {
     setStatus(LOADING);
     api
@@ -57,16 +58,25 @@ export default function Notes({ api }) {
 
   return sortedNotes.map(({ text, id, tags }) => {
     return (
-      <Box key={id}>
+      <Box
+        key={id}
+        borderRadius="0.5em"
+        boxShadow="0 0 16px blueviolet"
+        p="1em"
+        m="0.5em 0"
+        width="50%"
+      >
         {text}
-        {tags.map((tag) => (
-          <Tag key={tag.text} color={tag.color}>
-            {tag.text}
-          </Tag>
-        ))}
         <Button textOnly onClick={() => handleDeleteNote(id)}>
           X
         </Button>
+        <Box m="0.5em 0">
+          {tags.map((tag) => (
+            <Tag key={tag.text} color={tag.color}>
+              {tag.text}
+            </Tag>
+          ))}
+        </Box>
       </Box>
     );
   });
