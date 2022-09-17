@@ -105,7 +105,7 @@ export default function App({ api, onSignOut }) {
   }, [api]);
 
   return (
-    <Box width="500px" m="2em auto">
+    <Box maxWidth="500px" m="2em auto">
       <Box as="form" onSubmit={handleAddNote} m="1em 0">
         <Input
           label={<h3>Add a note</h3>}

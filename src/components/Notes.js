@@ -88,10 +88,10 @@ export default function Notes({ api }) {
             key={id}
             borderRadius="0.5em"
             border="1px solid blueviolet"
+            justifyContent="space-between"
             display="flex"
             p="1em"
             m="0.5em 0"
-            width="50%"
           >
             <Box display="flex" flexDirection="column">
               <Box>{text}</Box>
@@ -113,7 +113,6 @@ export default function Notes({ api }) {
               textOnly
               onClick={() => handleDeleteNote(id)}
               display="flex"
-              justifySelf="flex-end"
               alignSelf="flex-start"
             >
               X
