@@ -4,7 +4,8 @@
   "description": "Quick notes",
   "scripts": {
     "test": "jest",
-    "build": "webpack --mode production",
+    "clean": "rm -rf dist && cp assets/ dist",
+    "build": "yarn clean && webpack --mode production",
     "watch": "webpack --mode development --watch",
     "dev": "webpack serve"
   },
