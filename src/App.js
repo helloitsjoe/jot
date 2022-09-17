@@ -1,8 +1,6 @@
-/* eslint-disable react/prop-types */
 import * as React from 'react';
 import Box from './components/Box';
 import Tag from './components/Tag';
-import LogIn from './components/LogIn';
 import Notes from './components/Notes';
 import Input from './components/Input';
 import { SubmitButton } from './components/Button';
@@ -21,36 +19,7 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-export default function App({ api }) {
-  // TODO: Move this to context?
-  const [user, setUser] = React.useState(null);
-  const [status, setStatus] = React.useState(LOADING);
-
-  React.useEffect(() => {
-    api.getUser().then((data) => {
-      setUser(data.user);
-      setStatus(SUCCESS);
-    });
-  }, [api]);
-
-  console.log('user', user);
-
-  if (status === LOADING) {
-    return (
-      <Box display="flex" justifyContent="center">
-        Loading...
-      </Box>
-    );
-  }
-
-  if (!user) {
-    return <LogIn api={api} onSuccess={setUser} />;
-  }
-
-  return <Main api={api} onSignOut={() => setUser(null)} />;
-}
-
-function Main({ api, onSignOut }) {
+export default function App({ api, onSignOut }) {
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
   const [tags, setTags] = React.useState([]);
@@ -63,7 +32,7 @@ function Main({ api, onSignOut }) {
   const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
   const handleAddRecentTag = (newTag) =>
     setRecentTags((prev) => [...prev, newTag]);
-  // Quick and dirty way to rerender Notes
+  // Quick and dirty way to rerender Notes, make this better.
   const [count, setCount] = React.useState(0);
 
   const addNewTag = (e) => {
@@ -72,7 +41,6 @@ function Main({ api, onSignOut }) {
     api
       .addTag({ text: tag, color })
       .then((res) => {
-        console.log('added', res);
         handleAddRecentTag(res[0]);
         // TODO: Add tag to note, make sure id propagates
         // handleAddTagToNote({ text, color });
@@ -122,7 +90,7 @@ function Main({ api, onSignOut }) {
   };
 
   React.useEffect(() => {
-    // TODO: swr
+    // TODO NEXT: swr
     setStatus(LOADING);
     api
       .loadTags()

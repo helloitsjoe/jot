@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react';
 import Box from './Box';
+import Input from './Input';
 
 const LOADING = 'LOADING';
 const SUCCESS = 'SUCCESS';
@@ -38,22 +39,18 @@ export default function LogIn({ api, onSuccess }) {
       flexDirection="column"
       onSubmit={handleSignIn}
     >
-      <label>
-        <Box>Email</Box>
-        <input
-          type="text"
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
-        />
-      </label>
-      <label>
-        <Box>Password</Box>
-        <input
-          type="password"
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
-        />
-      </label>
+      <Input
+        type="text"
+        label="Email"
+        onChange={(e) => setEmail(e.target.value)}
+        value={email}
+      />
+      <Input
+        type="password"
+        label="Password"
+        onChange={(e) => setPassword(e.target.value)}
+        value={password}
+      />
       <Box m="0.5em 0" as="button" type="submit" disabled={status === LOADING}>
         Submit
       </Box>

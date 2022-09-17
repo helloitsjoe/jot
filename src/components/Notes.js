@@ -10,7 +10,6 @@ export default function Notes({ api }) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const [activeTags, setActiveTags] = React.useState(new Set());
 
-  // TODO NEXT: Clicking tags in existing notes filters
   React.useEffect(() => {
     setStatus(LOADING);
     api

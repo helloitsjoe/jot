@@ -3,8 +3,13 @@ import { createRoot } from 'react-dom/client';
 import { createApi } from './api';
 import { supabase } from './supabase';
 import App from './App';
+import AuthProvider from './components/Auth';
 
 const api = createApi(supabase);
 
 const root = createRoot(document.getElementById('root'));
-root.render(<App api={api} />);
+root.render(
+  <AuthProvider api={api}>
+    {({ signOut }) => <App api={api} onSignOut={signOut} />}
+  </AuthProvider>
+);
