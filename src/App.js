@@ -24,14 +24,24 @@ const getRandomColor = () => {
 export default function App({ api }) {
   // TODO: Move this to context?
   const [user, setUser] = React.useState(null);
+  const [status, setStatus] = React.useState(LOADING);
 
   React.useEffect(() => {
     api.getUser().then((data) => {
       setUser(data.user);
+      setStatus(SUCCESS);
     });
   }, [api]);
 
   console.log('user', user);
+
+  if (status === LOADING) {
+    return (
+      <Box display="flex" justifyContent="center">
+        Loading...
+      </Box>
+    );
+  }
 
   if (!user) {
     return <LogIn api={api} onSuccess={setUser} />;
@@ -53,15 +63,17 @@ function Main({ api, onSignOut }) {
   const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
   const handleAddRecentTag = (newTag) =>
     setRecentTags((prev) => [...prev, newTag]);
+  // Quick and dirty way to rerender Notes
+  const [count, setCount] = React.useState(0);
 
   const addNewTag = (e) => {
     e.preventDefault();
     const color = getRandomColor();
-    handleAddRecentTag({ text: tag, color });
     api
       .addTag({ text: tag, color })
       .then((res) => {
-        console.log(res);
+        console.log('added', res);
+        handleAddRecentTag(res[0]);
         // TODO: Add tag to note, make sure id propagates
         // handleAddTagToNote({ text, color });
         setTag('');
@@ -86,9 +98,16 @@ function Main({ api, onSignOut }) {
   const handleAddNote = (e) => {
     e.preventDefault();
     const tagIds = tags.map(({ id }) => id);
-    api.addNote(note, tagIds).catch((err) => {
-      setErrorMessage(err.message);
-    });
+    api
+      .addNote(note, tagIds)
+      .then(() => {
+        setNote('');
+        setTags([]);
+        setCount((c) => c + 1);
+      })
+      .catch((err) => {
+        setErrorMessage(err.message);
+      });
   };
 
   const handleSignOut = () => {
@@ -118,33 +137,31 @@ function Main({ api, onSignOut }) {
   }, [api]);
 
   return (
-    <Box width="700px" m="2em auto">
+    <Box width="500px" m="2em auto">
       <Box as="form" onSubmit={handleAddNote} m="1em 0">
-        <Box>
-          <Input
-            label={<h3>Add a note</h3>}
-            value={note}
-            onChange={handleNoteChange}
-          />
-          <SubmitButton>Submit</SubmitButton>
-          {tags.length > 0 && (
-            <Box>
-              {tags.map(({ text, color }) => {
-                return (
-                  <Tag
-                    key={text}
-                    color={color}
-                    onDelete={() => {
-                      setTags((p) => p.filter((t) => t.text !== text));
-                    }}
-                  >
-                    {text}
-                  </Tag>
-                );
-              })}
-            </Box>
-          )}
-        </Box>
+        <Input
+          label={<h3>Add a note</h3>}
+          value={note}
+          onChange={handleNoteChange}
+        />
+        <SubmitButton>Submit</SubmitButton>
+        {tags.length > 0 && (
+          <Box>
+            {tags.map(({ text, color }) => {
+              return (
+                <Tag
+                  key={text}
+                  color={color}
+                  onDelete={() => {
+                    setTags((p) => p.filter((t) => t.text !== text));
+                  }}
+                >
+                  {text}
+                </Tag>
+              );
+            })}
+          </Box>
+        )}
       </Box>
       <Box as="form" onSubmit={addNewTag} m="1em 0">
         <Input
@@ -172,7 +189,7 @@ function Main({ api, onSignOut }) {
           }
 
           return recentTags.length > 0 ? (
-            <Box m="0.5em 0">
+            <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
               {recentTags
                 .filter(({ text }) => !tag || text.includes(tag))
                 .map(({ id, text, color }) => {
@@ -197,9 +214,9 @@ function Main({ api, onSignOut }) {
           );
         })()}
       </Box>
-      <Box m="1em 0">
+      <Box m="3em 0">
         <h3>Existing notes</h3>
-        <Notes api={api} />
+        <Notes api={api} key={count} />
       </Box>
       <Box
         as="button"

@@ -19,6 +19,7 @@ const Box = styled.div`
   ${typography}
   ${position}
   ${shadow}
+  ${({ gap }) => (gap ? `gap: ${gap}` : '')}
 `;
 
 export default Box;

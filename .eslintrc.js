@@ -1,6 +1,9 @@
 module.exports = {
   extends: 'helloitsjoe',
   rules: {
+    indent: 'off',
+    'react/jsx-curly-newline': 'off',
+    'react/prop-types': 'off',
     'import/extensions': [
       'error',
       'ignorePackages',

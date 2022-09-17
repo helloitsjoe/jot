@@ -2,18 +2,26 @@
 import * as React from 'react';
 import Box from './Box';
 
-export default function Button({ textOnly, children, onClick = () => {} }) {
+export default function Button({
+  textOnly,
+  children,
+  onClick = () => {},
+  ...props
+}) {
   if (textOnly) {
-    <Box
-      as="button"
-      type="button"
-      border="1 px solid white"
-      bg="transparent"
-      color="white"
-      onClick={onClick}
-    >
-      {children}
-    </Box>;
+    return (
+      <Box
+        as="button"
+        type="button"
+        border="none"
+        bg="transparent"
+        color="gray"
+        onClick={onClick}
+        {...props}
+      >
+        {children}
+      </Box>
+    );
   }
 
   return (

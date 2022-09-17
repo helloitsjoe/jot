@@ -71,6 +71,7 @@ export const createApi = (db = supabase) => {
   };
 
   const addNote = async (text, tag_ids) => {
+    console.log('tag_ids', tag_ids);
     if (!tag_ids.length) {
       // TODO: Revisit this
       throw new Error('Notes must have tags');
@@ -79,12 +80,14 @@ export const createApi = (db = supabase) => {
     const {
       user: { id: user_id },
     } = await getUser();
+
     const res = await db
       .from('notes')
       .insert([{ user_id, text, tag_ids }])
       .select();
 
     const [note] = validate(res);
+    console.log('note.id', note.id);
 
     const toInsert = tag_ids.map((tag_id) => ({
       user_id,
@@ -147,6 +150,7 @@ export const createApi = (db = supabase) => {
       )
     `
     );
+
     const notesTags = validate(res);
 
     return addTagsToNotes(notesTags);
