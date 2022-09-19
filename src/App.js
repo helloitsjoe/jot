@@ -1,4 +1,5 @@
 import * as React from 'react';
+import onSwipe, { Directions } from 'swipey';
 import Box from './components/Box';
 import Tag from './components/Tag';
 import Notes from './components/Notes';
@@ -17,6 +18,13 @@ const getRandomColor = () => {
     'teal',
   ];
   return colors[Math.floor(Math.random() * colors.length)];
+};
+
+const initSwipeHandlers = () => {
+  const reload = () => window.location.reload(true);
+  const offDown = onSwipe(Directions.DOWN, reload, { fromTop: true });
+
+  return () => offDown();
 };
 
 export default function App({ api, onSignOut }) {
@@ -99,7 +107,7 @@ export default function App({ api, onSignOut }) {
     // Focus on load on phone
     setTimeout(() => {
       inputRef.current.focus();
-    }, 100);
+    }, 300);
 
     // TODO NEXT: swr
     setStatus(LOADING);
@@ -113,6 +121,8 @@ export default function App({ api, onSignOut }) {
         setStatus(ERROR);
         setErrorMessage(err.message);
       });
+
+    return initSwipeHandlers();
   }, [api]);
 
   return (
@@ -123,7 +133,6 @@ export default function App({ api, onSignOut }) {
           value={note}
           onChange={handleNoteChange}
           ref={inputRef}
-          autoFocus
         />
         <SubmitButton>Submit</SubmitButton>
         {tags.length > 0 && (
