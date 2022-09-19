@@ -35,6 +35,8 @@ export default function App({ api, onSignOut }) {
   // Quick and dirty way to rerender Notes, make this better.
   const [count, setCount] = React.useState(0);
 
+  const inputRef = React.useRef();
+
   const addNewTag = (e) => {
     e.preventDefault();
     setErrorMessage('');
@@ -94,6 +96,11 @@ export default function App({ api, onSignOut }) {
   };
 
   React.useEffect(() => {
+    // Focus on load on phone
+    setTimeout(() => {
+      inputRef.current.focus();
+    }, 100);
+
     // TODO NEXT: swr
     setStatus(LOADING);
     api
@@ -115,6 +122,7 @@ export default function App({ api, onSignOut }) {
           label={<h3>Add a note</h3>}
           value={note}
           onChange={handleNoteChange}
+          ref={inputRef}
           autoFocus
         />
         <SubmitButton>Submit</SubmitButton>
