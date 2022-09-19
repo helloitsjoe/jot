@@ -1,10 +1,10 @@
 import * as React from 'react';
+import useSWR, { useSWRConfig } from 'swr';
 import Box from './components/Box';
 import Tag from './components/Tag';
 import Notes from './components/Notes';
 import Input from './components/Input';
 import { SubmitButton } from './components/Button';
-import { SUCCESS, ERROR, LOADING } from './constants';
 
 const getRandomColor = () => {
   const colors = [
@@ -20,62 +20,53 @@ const getRandomColor = () => {
 };
 
 export default function App({ api, onSignOut }) {
+  const {
+    data: recentTags,
+    error: fetchTagErr,
+    mutate: mutateTags,
+  } = useSWR('tags', api.loadTags);
+  const { mutate } = useSWRConfig();
+  console.log('recentTags', recentTags);
+
+  console.log('fetchTagErr', fetchTagErr);
+
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
   const [tags, setTags] = React.useState([]);
-  const [status, setStatus] = React.useState(LOADING);
-  const [recentTags, setRecentTags] = React.useState([]);
-  const [errorMessage, setErrorMessage] = React.useState('');
 
   const handleNoteChange = (e) => setNote(e.target.value);
   const handleTagChange = (e) => setTag(e.target.value);
   const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
-  const handleAddRecentTag = (newTag) =>
-    setRecentTags((prev) => [...prev, newTag]);
-  // Quick and dirty way to rerender Notes, make this better.
-  const [count, setCount] = React.useState(0);
 
-  const addNewTag = (e) => {
+  const addNewTag = async (e) => {
     e.preventDefault();
     const color = getRandomColor();
-    api
-      .addTag({ text: tag, color })
-      .then((res) => {
-        handleAddRecentTag(res[0]);
-        // TODO: Add tag to note, make sure id propagates
-        // handleAddTagToNote({ text, color });
-        setTag('');
-      })
-      .catch((err) => {
-        setRecentTags((p) => p.filter((r) => r.text !== tag));
-        setTags((p) => p.filter((r) => r.text !== tag));
-        setErrorMessage(err.message);
-      });
+    // TODO: Add tag to note, make sure id propagates
+    // TODO: Fix "loading" flash
+    mutateTags(() => api.addTag({ text: tag, color }))
+      .then(() => setTag(''))
+      .catch(() => {});
+    // .catch((err) => {
+    //   setErrorMessage(err.message);
+    // });
   };
 
   const handleDeleteTag = (id) => {
     // TODO: Confirm deletion
-    api
-      .deleteTag({ id })
-      .then(() => {
-        setRecentTags((r) => r.filter((t) => t.id !== id));
-      })
-      .catch(({ message }) => setErrorMessage(message));
+    // TODO: Fix "loading" flash
+    const optimisticData = recentTags.filter((t) => t.id !== id);
+    const options = { optimisticData, revalidate: false };
+    mutateTags(() => api.deleteTag({ id }), options);
   };
 
   const handleAddNote = (e) => {
     e.preventDefault();
     const tagIds = tags.map(({ id }) => id);
-    api
-      .addNote(note, tagIds)
-      .then(() => {
-        setNote('');
-        setTags([]);
-        setCount((c) => c + 1);
-      })
-      .catch((err) => {
-        setErrorMessage(err.message);
-      });
+    api.addNote(note, tagIds).then(() => {
+      mutate('notes');
+      setNote('');
+      setTags([]);
+    });
   };
 
   const handleSignOut = () => {
@@ -88,21 +79,6 @@ export default function App({ api, onSignOut }) {
         setErrorMessage(err.message);
       });
   };
-
-  React.useEffect(() => {
-    // TODO NEXT: swr
-    setStatus(LOADING);
-    api
-      .loadTags()
-      .then((fetchedRecentTags) => {
-        setStatus(SUCCESS);
-        setRecentTags(fetchedRecentTags);
-      })
-      .catch((err) => {
-        setStatus(ERROR);
-        setErrorMessage(err.message);
-      });
-  }, [api]);
 
   return (
     <Box maxWidth="500px" m="2em auto">
@@ -139,20 +115,21 @@ export default function App({ api, onSignOut }) {
           list="tags"
         />
         <datalist id="tags">
-          {recentTags.map((t) => (
+          {(recentTags || []).map((t) => (
             <option key={t.text} value={t.text}>
               {t.text}
             </option>
           ))}
         </datalist>
         <SubmitButton>Add a new tag</SubmitButton>
-        {errorMessage && (
+        {/* TODO: Why isn't this error persisting? */}
+        {fetchTagErr && (
           <Box color="white" bg="red">
-            {errorMessage}
+            {fetchTagErr.message}
           </Box>
         )}
         {(() => {
-          if (status === LOADING) {
+          if (!recentTags) {
             return 'Loading...';
           }
 
@@ -184,7 +161,7 @@ export default function App({ api, onSignOut }) {
       </Box>
       <Box m="3em 0">
         <h3>Existing notes</h3>
-        <Notes api={api} key={count} />
+        <Notes api={api} />
       </Box>
       <Box
         as="button"
