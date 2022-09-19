@@ -115,6 +115,7 @@ export default function App({ api, onSignOut }) {
           label={<h3>Add a note</h3>}
           value={note}
           onChange={handleNoteChange}
+          autoFocus
         />
         <SubmitButton>Submit</SubmitButton>
         {tags.length > 0 && (
