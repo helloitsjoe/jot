@@ -26,13 +26,16 @@ export default function Notes({ api }) {
   }, [api]);
 
   const handleDeleteNote = (id) => {
+    setErrorMessage('');
+    const unfilteredNotes = notes;
+    setNotes((p) => p.filter((n) => n.id !== id));
     api
       .deleteNote({ id })
       .then(() => {
-        setNotes((p) => p.filter((n) => n.id !== id));
         setStatus(SUCCESS);
       })
       .catch((err) => {
+        setNotes(unfilteredNotes);
         setErrorMessage(err.message);
         setStatus(ERROR);
       });

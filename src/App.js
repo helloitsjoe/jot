@@ -28,7 +28,7 @@ export default function App({ api, onSignOut }) {
   const [errorMessage, setErrorMessage] = React.useState('');
 
   const handleNoteChange = (e) => setNote(e.target.value);
-  const handleTagChange = (e) => setTag(e.target.value);
+  const handleTagChange = (e) => setTag(e.target.value.toLowerCase());
   const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
   const handleAddRecentTag = (newTag) =>
     setRecentTags((prev) => [...prev, newTag]);
@@ -37,9 +37,10 @@ export default function App({ api, onSignOut }) {
 
   const addNewTag = (e) => {
     e.preventDefault();
-    const color = getRandomColor();
+    setErrorMessage('');
+
     api
-      .addTag({ text: tag, color })
+      .addTag({ text: tag, color: getRandomColor() })
       .then((res) => {
         handleAddRecentTag(res[0]);
         // TODO: Add tag to note, make sure id propagates
@@ -55,6 +56,7 @@ export default function App({ api, onSignOut }) {
 
   const handleDeleteTag = (id) => {
     // TODO: Confirm deletion
+    setErrorMessage('');
     api
       .deleteTag({ id })
       .then(() => {
@@ -65,6 +67,7 @@ export default function App({ api, onSignOut }) {
 
   const handleAddNote = (e) => {
     e.preventDefault();
+    setErrorMessage('');
     const tagIds = tags.map(({ id }) => id);
     api
       .addNote(note, tagIds)
@@ -79,6 +82,7 @@ export default function App({ api, onSignOut }) {
   };
 
   const handleSignOut = () => {
+    setErrorMessage('');
     api
       .signOut()
       .then(() => {

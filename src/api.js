@@ -102,6 +102,10 @@ export const createApi = (db = supabase) => {
 
   const addTag = async ({ text, color }) => {
     // TODO: updated_at
+    if (!text || !color) {
+      throw new Error('Text and color are required for tags!');
+    }
+
     const {
       data: { user },
     } = await db.auth.getUser();
