@@ -104,11 +104,6 @@ export default function App({ api, onSignOut }) {
   };
 
   React.useEffect(() => {
-    // Focus on load on phone
-    setTimeout(() => {
-      inputRef.current.focus();
-    }, 300);
-
     // TODO NEXT: swr
     setStatus(LOADING);
     api
@@ -132,7 +127,7 @@ export default function App({ api, onSignOut }) {
           label={<h3>Add a note</h3>}
           value={note}
           onChange={handleNoteChange}
-          ref={inputRef}
+          autoFocus
         />
         <SubmitButton>Submit</SubmitButton>
         {tags.length > 0 && (
