@@ -122,8 +122,9 @@ export default function App({ api, onSignOut }) {
 
   return (
     <Box maxWidth="500px" m="2em auto">
-      <Box as="form" onSubmit={handleAddNote} m="1em 0">
+      <Box onSubmit={handleAddNote} m="1em 0">
         <Input
+          width="auto"
           label={<h3>Add a note</h3>}
           value={note}
           onChange={handleNoteChange}
