@@ -25,14 +25,13 @@ export default function App({ api, onSignOut }) {
     error: fetchTagErr,
     mutate: mutateTags,
   } = useSWR('tags', api.loadTags);
-  const { mutate } = useSWRConfig();
-  console.log('recentTags', recentTags);
 
-  console.log('fetchTagErr', fetchTagErr);
+  const { mutate } = useSWRConfig();
 
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
   const [tags, setTags] = React.useState([]);
+  const [submitting, setSubmitting] = React.useState(false);
 
   const handleNoteChange = (e) => setNote(e.target.value);
   const handleTagChange = (e) => setTag(e.target.value);
@@ -40,44 +39,53 @@ export default function App({ api, onSignOut }) {
 
   const addNewTag = async (e) => {
     e.preventDefault();
+
+    const existingTag = recentTags.find((r) => r.text === tag);
+    if (existingTag) {
+      setTags((t) => [...t, existingTag]);
+      setTag('');
+      return;
+    }
+
     const color = getRandomColor();
     // TODO: Add tag to note, make sure id propagates
-    // TODO: Fix "loading" flash
-    mutateTags(() => api.addTag({ text: tag, color }))
-      .then(() => setTag(''))
-      .catch(() => {});
-    // .catch((err) => {
-    //   setErrorMessage(err.message);
-    // });
+    const newTags = await mutateTags(api.addTag({ text: tag, color }));
+    const newTag = newTags.find((t) => t.text === tag);
+
+    setTags((t) => [...t, newTag]);
+    setTag('');
   };
 
   const handleDeleteTag = (id) => {
     // TODO: Confirm deletion
-    // TODO: Fix "loading" flash
     const optimisticData = recentTags.filter((t) => t.id !== id);
     const options = { optimisticData, revalidate: false };
-    mutateTags(() => api.deleteTag({ id }), options);
+    mutateTags(async () => {
+      await api.deleteTag({ id });
+      return optimisticData;
+    }, options);
   };
 
   const handleAddNote = (e) => {
     e.preventDefault();
+    setSubmitting(true);
     const tagIds = tags.map(({ id }) => id);
-    api.addNote(note, tagIds).then(() => {
-      mutate('notes');
+    mutate('notes', async () => {
+      await api.addNote(note, tagIds);
+      setSubmitting(false);
       setNote('');
+      setTag('');
       setTags([]);
     });
   };
 
   const handleSignOut = () => {
-    api
-      .signOut()
-      .then(() => {
-        onSignOut();
-      })
-      .catch((err) => {
-        setErrorMessage(err.message);
-      });
+    api.signOut().then(() => {
+      onSignOut();
+    });
+    // .catch((err) => {
+    //   setErrorMessage(err.message);
+    // });
   };
 
   return (
@@ -88,7 +96,9 @@ export default function App({ api, onSignOut }) {
           value={note}
           onChange={handleNoteChange}
         />
-        <SubmitButton>Submit</SubmitButton>
+        <SubmitButton disabled={submitting}>
+          {submitting ? 'Adding...' : 'Submit'}
+        </SubmitButton>
         {tags.length > 0 && (
           <Box>
             {tags.map(({ text, color }) => {
@@ -107,6 +117,7 @@ export default function App({ api, onSignOut }) {
           </Box>
         )}
       </Box>
+      {/* TODO: If tag exists, add it to note instead of tags */}
       <Box as="form" onSubmit={addNewTag} m="1em 0">
         <Input
           label={<h3>Add a tag</h3>}

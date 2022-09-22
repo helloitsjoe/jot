@@ -10,12 +10,18 @@ export default function Notes({ api }) {
     error,
     mutate: mutateNotes,
   } = useSWR('notes', api.loadNotes);
-  // const [notes, setNotes] = React.useState([]);
-  // const [errorMessage, setErrorMessage] = React.useState('');
+
   const [activeTags, setActiveTags] = React.useState(new Set());
 
   const handleDeleteNote = (id) => {
-    mutateNotes(() => api.deleteNote({ id }));
+    const optimisticData = notes.filter((note) => note.id !== id);
+    mutateNotes(
+      async () => {
+        await api.deleteNote({ id });
+        return optimisticData;
+      },
+      { optimisticData, revalidate: false }
+    );
   };
 
   if (!notes) {
@@ -29,7 +35,6 @@ export default function Notes({ api }) {
       </Box>
     );
   }
-  console.log('notes', notes);
 
   // Most recent first
   const sortedNotes = [...notes].sort((a, b) =>
