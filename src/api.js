@@ -102,6 +102,10 @@ export const createApi = (db = supabase) => {
 
   const addTag = async ({ text, color }) => {
     // TODO: updated_at
+    if (!text || !color) {
+      throw new Error('Text and color are required for tags!');
+    }
+
     const {
       data: { user },
     } = await db.auth.getUser();
@@ -122,6 +126,7 @@ export const createApi = (db = supabase) => {
     return validate(res);
   };
 
+  // TODO: Soft delete
   const deleteTag = async ({ id }) => {
     await db.from('notes_tags').delete().eq('tag_id', id).then(validate);
     const res = await db.from('tags').delete().eq('id', id);

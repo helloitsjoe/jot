@@ -1,5 +1,6 @@
 import * as React from 'react';
 import useSWR, { useSWRConfig } from 'swr';
+import onSwipe, { Directions } from 'swipey';
 import Box from './components/Box';
 import Tag from './components/Tag';
 import Notes from './components/Notes';
@@ -19,6 +20,13 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
+const initSwipeHandlers = () => {
+  const reload = () => window.location.reload(true);
+  const offDown = onSwipe(Directions.DOWN, reload, { fromTop: true });
+
+  return () => offDown();
+};
+
 export default function App({ api, onSignOut }) {
   const {
     data: recentTags,
@@ -34,7 +42,7 @@ export default function App({ api, onSignOut }) {
   const [submitting, setSubmitting] = React.useState(false);
 
   const handleNoteChange = (e) => setNote(e.target.value);
-  const handleTagChange = (e) => setTag(e.target.value);
+  const handleTagChange = (e) => setTag(e.target.value.toLowerCase());
   const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
 
   const addNewTag = async (e) => {
@@ -88,13 +96,19 @@ export default function App({ api, onSignOut }) {
     // });
   };
 
+  React.useEffect(() => {
+    return initSwipeHandlers();
+  }, [api]);
+
   return (
     <Box maxWidth="500px" m="2em auto">
       <Box as="form" onSubmit={handleAddNote} m="1em 0">
         <Input
+          width="auto"
           label={<h3>Add a note</h3>}
           value={note}
           onChange={handleNoteChange}
+          autoFocus
         />
         <SubmitButton disabled={submitting}>
           {submitting ? 'Adding...' : 'Submit'}
