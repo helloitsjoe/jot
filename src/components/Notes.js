@@ -1,54 +1,37 @@
 import * as React from 'react';
+import useSWR from 'swr';
 import Box from './Box';
 import Tag from './Tag';
 import Button from './Button';
-import { SUCCESS, ERROR, LOADING } from '../constants';
 
 export default function Notes({ api }) {
-  const [status, setStatus] = React.useState(SUCCESS);
-  const [notes, setNotes] = React.useState([]);
-  const [errorMessage, setErrorMessage] = React.useState('');
+  const {
+    data: notes,
+    error,
+    mutate: mutateNotes,
+  } = useSWR('notes', api.loadNotes);
+
   const [activeTags, setActiveTags] = React.useState(new Set());
 
-  React.useEffect(() => {
-    setStatus(LOADING);
-    api
-      .loadNotes()
-      .then((fetchedNotes) => {
-        console.log('res', fetchedNotes);
-        setNotes(fetchedNotes);
-        setStatus(SUCCESS);
-      })
-      .catch((err) => {
-        setErrorMessage(err.message);
-        setStatus(ERROR);
-      });
-  }, [api]);
-
   const handleDeleteNote = (id) => {
-    setErrorMessage('');
-    const unfilteredNotes = notes;
-    setNotes((p) => p.filter((n) => n.id !== id));
-    api
-      .deleteNote({ id })
-      .then(() => {
-        setStatus(SUCCESS);
-      })
-      .catch((err) => {
-        setNotes(unfilteredNotes);
-        setErrorMessage(err.message);
-        setStatus(ERROR);
-      });
+    const optimisticData = notes.filter((note) => note.id !== id);
+    mutateNotes(
+      async () => {
+        await api.deleteNote({ id });
+        return optimisticData;
+      },
+      { optimisticData, revalidate: false }
+    );
   };
 
-  if (status === LOADING) {
+  if (!notes) {
     return <Box>Loading notes...</Box>;
   }
 
-  if (status === ERROR) {
+  if (error) {
     return (
       <Box color="white" bg="tomato">
-        {errorMessage}
+        {error.message}
       </Box>
     );
   }

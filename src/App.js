@@ -1,11 +1,11 @@
 import * as React from 'react';
+import useSWR, { useSWRConfig } from 'swr';
 import onSwipe, { Directions } from 'swipey';
 import Box from './components/Box';
 import Tag from './components/Tag';
 import Notes from './components/Notes';
 import Input from './components/Input';
 import { SubmitButton } from './components/Button';
-import { SUCCESS, ERROR, LOADING } from './constants';
 
 const getRandomColor = () => {
   const colors = [
@@ -28,95 +28,75 @@ const initSwipeHandlers = () => {
 };
 
 export default function App({ api, onSignOut }) {
+  const {
+    data: recentTags,
+    error: fetchTagErr,
+    mutate: mutateTags,
+  } = useSWR('tags', api.loadTags);
+
+  const { mutate } = useSWRConfig();
+
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
   const [tags, setTags] = React.useState([]);
-  const [status, setStatus] = React.useState(LOADING);
-  const [recentTags, setRecentTags] = React.useState([]);
-  const [errorMessage, setErrorMessage] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
 
   const handleNoteChange = (e) => setNote(e.target.value);
   const handleTagChange = (e) => setTag(e.target.value.toLowerCase());
   const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
-  const handleAddRecentTag = (newTag) =>
-    setRecentTags((prev) => [...prev, newTag]);
-  // Quick and dirty way to rerender Notes, make this better.
-  const [count, setCount] = React.useState(0);
 
-  const inputRef = React.useRef();
-
-  const addNewTag = (e) => {
+  const addNewTag = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
 
-    api
-      .addTag({ text: tag, color: getRandomColor() })
-      .then((res) => {
-        handleAddRecentTag(res[0]);
-        // TODO: Add tag to note, make sure id propagates
-        // handleAddTagToNote({ text, color });
-        setTag('');
-      })
-      .catch((err) => {
-        setRecentTags((p) => p.filter((r) => r.text !== tag));
-        setTags((p) => p.filter((r) => r.text !== tag));
-        setErrorMessage(err.message);
-      });
+    const existingTag = recentTags.find((r) => r.text === tag);
+    if (existingTag) {
+      setTags((t) => [...t, existingTag]);
+      setTag('');
+      return;
+    }
+
+    const color = getRandomColor();
+    // TODO: Add tag to note, make sure id propagates
+    const newTags = await mutateTags(api.addTag({ text: tag, color }));
+    const newTag = newTags.find((t) => t.text === tag);
+
+    setTags((t) => [...t, newTag]);
+    setTag('');
   };
 
   const handleDeleteTag = (id) => {
     // TODO: Confirm deletion
-    setErrorMessage('');
-    api
-      .deleteTag({ id })
-      .then(() => {
-        setRecentTags((r) => r.filter((t) => t.id !== id));
-      })
-      .catch(({ message }) => setErrorMessage(message));
+    const optimisticData = recentTags.filter((t) => t.id !== id);
+    const options = { optimisticData, revalidate: false };
+    mutateTags(async () => {
+      await api.deleteTag({ id });
+      return optimisticData;
+    }, options);
   };
 
   const handleAddNote = (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    setSubmitting(true);
     const tagIds = tags.map(({ id }) => id);
-    api
-      .addNote(note, tagIds)
-      .then(() => {
-        setNote('');
-        setTags([]);
-        setCount((c) => c + 1);
-      })
-      .catch((err) => {
-        setErrorMessage(err.message);
-      });
+    mutate('notes', async () => {
+      await api.addNote(note, tagIds);
+      setSubmitting(false);
+      setNote('');
+      setTag('');
+      setTags([]);
+    });
   };
 
   const handleSignOut = () => {
-    setErrorMessage('');
-    api
-      .signOut()
-      .then(() => {
-        onSignOut();
-      })
-      .catch((err) => {
-        setErrorMessage(err.message);
-      });
+    api.signOut().then(() => {
+      onSignOut();
+    });
+    // .catch((err) => {
+    //   setErrorMessage(err.message);
+    // });
   };
 
   React.useEffect(() => {
-    // TODO NEXT: swr
-    setStatus(LOADING);
-    api
-      .loadTags()
-      .then((fetchedRecentTags) => {
-        setStatus(SUCCESS);
-        setRecentTags(fetchedRecentTags);
-      })
-      .catch((err) => {
-        setStatus(ERROR);
-        setErrorMessage(err.message);
-      });
-
     return initSwipeHandlers();
   }, [api]);
 
@@ -130,7 +110,9 @@ export default function App({ api, onSignOut }) {
           onChange={handleNoteChange}
           autoFocus
         />
-        <SubmitButton>Submit</SubmitButton>
+        <SubmitButton disabled={submitting}>
+          {submitting ? 'Adding...' : 'Submit'}
+        </SubmitButton>
         {tags.length > 0 && (
           <Box>
             {tags.map(({ text, color }) => {
@@ -149,6 +131,7 @@ export default function App({ api, onSignOut }) {
           </Box>
         )}
       </Box>
+      {/* TODO: If tag exists, add it to note instead of tags */}
       <Box as="form" onSubmit={addNewTag} m="1em 0">
         <Input
           label={<h3>Add a tag</h3>}
@@ -157,20 +140,21 @@ export default function App({ api, onSignOut }) {
           list="tags"
         />
         <datalist id="tags">
-          {recentTags.map((t) => (
+          {(recentTags || []).map((t) => (
             <option key={t.text} value={t.text}>
               {t.text}
             </option>
           ))}
         </datalist>
         <SubmitButton>Add a new tag</SubmitButton>
-        {errorMessage && (
+        {/* TODO: Why isn't this error persisting? */}
+        {fetchTagErr && (
           <Box color="white" bg="red">
-            {errorMessage}
+            {fetchTagErr.message}
           </Box>
         )}
         {(() => {
-          if (status === LOADING) {
+          if (!recentTags) {
             return 'Loading...';
           }
 
@@ -202,7 +186,7 @@ export default function App({ api, onSignOut }) {
       </Box>
       <Box m="3em 0">
         <h3>Existing notes</h3>
-        <Notes api={api} key={count} />
+        <Notes api={api} />
       </Box>
       <Box
         as="button"
