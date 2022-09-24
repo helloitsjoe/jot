@@ -35,6 +35,7 @@ export default function Notes({ api }) {
       </Box>
     );
   }
+  console.log('notes', notes);
 
   // Most recent first
   const sortedNotes = [...notes].sort((a, b) =>

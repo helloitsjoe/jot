@@ -84,7 +84,9 @@ export default function App({ api, onSignOut }) {
       setNote('');
       setTag('');
       setTags([]);
-    });
+    })
+      .then(console.log)
+      .catch(console.error);
   };
 
   const handleSignOut = () => {

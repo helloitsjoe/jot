@@ -10,7 +10,7 @@ const validate = (res) => {
   return data;
 };
 
-export const addTagsToNotes = (notesTags) => {
+export const addTagsToNotes = (allNotes, notesTags) => {
   const notesMap = notesTags.reduce((acc, { notes, tags }) => {
     const noteId = notes.id;
     if (!acc[noteId]) {
@@ -20,8 +20,16 @@ export const addTagsToNotes = (notesTags) => {
     acc[noteId].tags = [...prevAddedTags, tags];
     return acc;
   }, {});
+  console.log('notesMap', notesMap);
 
-  return Object.values(notesMap);
+  // const notesWithTags = Object.values(notesMap);
+
+  return allNotes.map((note) => {
+    if (notesMap[note.id]) {
+      return notesMap[note.id];
+    }
+    return { ...note, tags: [] };
+  });
 };
 
 export const createApi = (db = supabase) => {
@@ -72,10 +80,7 @@ export const createApi = (db = supabase) => {
 
   const addNote = async (text, tag_ids) => {
     console.log('tag_ids', tag_ids);
-    if (!tag_ids.length) {
-      // TODO: Revisit this
-      throw new Error('Notes must have tags');
-    }
+
     // TODO: updated_at
     const {
       user: { id: user_id },
@@ -95,7 +100,11 @@ export const createApi = (db = supabase) => {
       tag_id,
     }));
 
-    await db.from('notes_tags').insert(toInsert).then(validate);
+    console.log('toInsert', toInsert);
+
+    const foo = await db.from('notes_tags').insert(toInsert).select('*');
+
+    console.log('foo', foo);
 
     return note;
   };
@@ -145,8 +154,11 @@ export const createApi = (db = supabase) => {
   };
 
   const loadNotes = async () => {
-    const res = await db.from('notes_tags').select(
-      `
+    const notesPromise = db.from('notes').select('*').then(validate);
+    const notesTagsPromise = db
+      .from('notes_tags')
+      .select(
+        `
       notes (
         *
       ),
@@ -154,11 +166,16 @@ export const createApi = (db = supabase) => {
         *
       )
     `
-    );
+      )
+      .then(validate);
 
-    const notesTags = validate(res);
+    const [notes, notesTags] = await Promise.all([
+      notesPromise,
+      notesTagsPromise,
+    ]);
 
-    return addTagsToNotes(notesTags);
+    // Combine notes with tags and notes without tags
+    return addTagsToNotes(notes, notesTags);
   };
 
   return {
