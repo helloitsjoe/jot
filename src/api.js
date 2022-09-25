@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable camelcase */
 import { supabase } from './supabase';
 
 const validate = (res) => {
@@ -20,9 +18,6 @@ export const addTagsToNotes = (allNotes, notesTags) => {
     acc[noteId].tags = [...prevAddedTags, tags];
     return acc;
   }, {});
-  console.log('notesMap', notesMap);
-
-  // const notesWithTags = Object.values(notesMap);
 
   return allNotes.map((note) => {
     if (notesMap[note.id]) {

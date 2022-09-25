@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import * as React from 'react';
 import Box from './Box';
 import { SubmitButton } from './Button';
