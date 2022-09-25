@@ -33,6 +33,7 @@ export default function App({ api, onSignOut }) {
     error: fetchTagErr,
     mutate: mutateTags,
   } = useSWR('tags', api.loadTags);
+  const { data: notes, error: fetchNotesErr } = useSWR('notes', api.loadNotes);
 
   const { mutate } = useSWRConfig();
 
@@ -188,7 +189,7 @@ export default function App({ api, onSignOut }) {
       </Box>
       <Box m="3em 0">
         <h3>Existing notes</h3>
-        <Notes api={api} />
+        <Notes error={fetchNotesErr} notes={notes} api={api} />
       </Box>
       <Box
         as="button"
