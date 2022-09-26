@@ -2,6 +2,28 @@ import { addTagsToNotes } from '../api';
 
 describe('addTagsToNotes', () => {
   // TODO: make individual note/tag objects for reuse
+  const allNotes = [
+    {
+      id: 7,
+      created_at: '2022-09-11T04:04:47.477906+00:00',
+      user_id: '82523071-2532-4023-88db-2551344807d9',
+      tag_ids: [18, 19],
+      text: 'test',
+    },
+    {
+      id: 8,
+      created_at: '2022-09-11T04:04:47.477906+00:00',
+      user_id: '82523071-2532-4023-88db-2551344807d9',
+      tag_ids: [19],
+      text: 'test',
+    },
+    {
+      id: 9,
+      created_at: '2022-09-12T04:04:47.477906+00:00',
+      user_id: '82523071-2532-4023-88db-2551344807d9',
+      text: 'test-no-tags',
+    },
+  ];
   const notesTags = [
     {
       notes: {
@@ -57,7 +79,7 @@ describe('addTagsToNotes', () => {
   ];
 
   it('denormalizes notes_tags', () => {
-    expect(addTagsToNotes(notesTags)).toEqual([
+    expect(addTagsToNotes(allNotes, notesTags)).toEqual([
       {
         id: 7,
         created_at: '2022-09-11T04:04:47.477906+00:00',
@@ -99,6 +121,13 @@ describe('addTagsToNotes', () => {
             user_id: '82523071-2532-4023-88db-2551344807d9',
           },
         ],
+      },
+      {
+        id: 9,
+        created_at: '2022-09-12T04:04:47.477906+00:00',
+        user_id: '82523071-2532-4023-88db-2551344807d9',
+        text: 'test-no-tags',
+        tags: [],
       },
     ]);
   });
