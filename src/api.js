@@ -32,7 +32,6 @@ export const createApi = (db = supabase) => {
 
   const getUser = async () => {
     const res = await db.auth.getUser();
-    console.log('res', res);
     return validate(res);
   };
 
@@ -95,7 +94,7 @@ export const createApi = (db = supabase) => {
       tag_id,
     }));
 
-    console.log('toInsert', toInsert);
+    // console.log('toInsert', toInsert);
 
     const foo = await db.from('notes_tags').insert(toInsert).select('*');
 
@@ -144,11 +143,13 @@ export const createApi = (db = supabase) => {
   };
 
   const loadTags = async () => {
+    console.log('loading tags...');
     const res = await db.from('tags').select('*');
     return validate(res) || [];
   };
 
   const loadNotes = async () => {
+    console.log('loading notes......');
     const notesPromise = db.from('notes').select('*').then(validate);
     const notesTagsPromise = db
       .from('notes_tags')

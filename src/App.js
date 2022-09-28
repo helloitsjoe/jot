@@ -32,10 +32,16 @@ export default function App({ api, onSignOut }) {
     data: recentTags,
     error: fetchTagErr,
     mutate: mutateTags,
-  } = useSWR('tags', api.loadTags);
-  const { data: notes, error: fetchNotesErr } = useSWR('notes', api.loadNotes);
-
-  const { mutate } = useSWRConfig();
+    isValidating: isValidatingTags,
+  } = useSWR('tags', () => api.loadTags());
+  console.log('isValidatingTags', isValidatingTags);
+  const {
+    data: notes,
+    error: fetchNotesErr,
+    mutate: mutateNotes,
+    isValidating,
+  } = useSWR('notes', () => api.loadNotes());
+  console.log('isValidating', isValidating);
 
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
@@ -75,19 +81,18 @@ export default function App({ api, onSignOut }) {
     }, options);
   };
 
-  const handleAddNote = (e) => {
+  const handleAddNote = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     const tagIds = tags.map(({ id }) => id);
-    mutate('notes', async () => {
-      await api.addNote(note, tagIds);
-      setSubmitting(false);
-      setNote('');
-      setTag('');
-      setTags([]);
-    })
-      .then(console.log)
-      .catch(console.error);
+    const newNote = await api.addNote(note, tagIds);
+    mutateNotes((currNotes) => {
+      return [...currNotes, { ...newNote, tags }];
+    });
+    setSubmitting(false);
+    setNote('');
+    setTag('');
+    setTags([]);
   };
 
   const handleSignOut = () => {

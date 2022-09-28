@@ -6,6 +6,7 @@ import Button from './Button';
 
 export default function Notes({ notes, error, api }) {
   const { mutate } = useSWR('notes');
+  console.log('notes', notes);
 
   const [activeTags, setActiveTags] = React.useState(new Set());
 
@@ -16,7 +17,7 @@ export default function Notes({ notes, error, api }) {
         await api.deleteNote({ id });
         return optimisticData;
       },
-      { optimisticData, revalidate: false }
+      { optimisticData }
     );
   };
 
@@ -31,7 +32,6 @@ export default function Notes({ notes, error, api }) {
       </Box>
     );
   }
-  console.log('notes', notes);
 
   // Most recent first
   const sortedNotes = [...notes].sort((a, b) =>
