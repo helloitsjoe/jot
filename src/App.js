@@ -1,5 +1,5 @@
 import * as React from 'react';
-import useSWR, { useSWRConfig } from 'swr';
+import useSWR from 'swr';
 import onSwipe, { Directions } from 'swipey';
 import Box from './components/Box';
 import Tag from './components/Tag';
@@ -32,21 +32,18 @@ export default function App({ api, onSignOut }) {
     data: recentTags,
     error: fetchTagErr,
     mutate: mutateTags,
-    isValidating: isValidatingTags,
   } = useSWR('tags', () => api.loadTags());
-  console.log('isValidatingTags', isValidatingTags);
+
   const {
     data: notes,
     error: fetchNotesErr,
     mutate: mutateNotes,
-    isValidating,
   } = useSWR('notes', () => api.loadNotes());
-  console.log('isValidating', isValidating);
 
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
   const [tags, setTags] = React.useState([]);
-  const [submitting, setSubmitting] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleNoteChange = (e) => setNote(e.target.value);
   const handleTagChange = (e) => setTag(e.target.value.toLowerCase());
@@ -64,11 +61,12 @@ export default function App({ api, onSignOut }) {
 
     const color = getRandomColor();
     // TODO: Add tag to note, make sure id propagates
-    const newTags = await mutateTags(api.addTag({ text: tag, color }));
-    const newTag = newTags.find((t) => t.text === tag);
+    mutateTags(async () => {
+      const newTag = await api.addTag({ text: tag, color });
 
-    setTags((t) => [...t, newTag]);
-    setTag('');
+      setTags((t) => [...t, newTag]);
+      setTag('');
+    });
   };
 
   const handleDeleteTag = (id) => {
@@ -76,6 +74,7 @@ export default function App({ api, onSignOut }) {
     const optimisticData = recentTags.filter((t) => t.id !== id);
     const options = { optimisticData, revalidate: false };
     mutateTags(async () => {
+      setTags((prev) => prev.filter((t) => t.id !== id));
       await api.deleteTag({ id });
       return optimisticData;
     }, options);
@@ -83,16 +82,19 @@ export default function App({ api, onSignOut }) {
 
   const handleAddNote = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
     const tagIds = tags.map(({ id }) => id);
-    const newNote = await api.addNote(note, tagIds);
-    mutateNotes((currNotes) => {
-      return [...currNotes, { ...newNote, tags }];
-    });
-    setSubmitting(false);
-    setNote('');
-    setTag('');
-    setTags([]);
+    const optimisticData = [...notes, { ...note, tags }];
+    mutateNotes(
+      async () => {
+        setIsSubmitting(true);
+        await api.addNote(note, tagIds);
+        setIsSubmitting(false);
+        setNote('');
+        setTag('');
+        setTags([]);
+      },
+      { optimisticData }
+    );
   };
 
   const handleSignOut = () => {
@@ -118,8 +120,8 @@ export default function App({ api, onSignOut }) {
           onChange={handleNoteChange}
           autoFocus
         />
-        <SubmitButton disabled={submitting}>
-          {submitting ? 'Adding...' : 'Submit'}
+        <SubmitButton disabled={isSubmitting}>
+          {isSubmitting ? 'Adding...' : 'Submit'}
         </SubmitButton>
         {tags.length > 0 && (
           <Box>

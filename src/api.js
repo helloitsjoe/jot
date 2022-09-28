@@ -116,11 +116,15 @@ export const createApi = (db = supabase) => {
     // Tags are required to have user, text, color
     const res = await db
       .from('tags')
-      .insert([{ text: text.toLowerCase(), color, user_id: user.id }])
+      .insert([{ text: text.toLowerCase(), color, user_id: user.id }], {
+        return: 'representation',
+      })
       .select();
     console.log('res', res);
 
-    return validate(res);
+    const [newTag] = validate(res);
+
+    return newTag;
   };
 
   const updateTag = async ({ id, color, text }) => {
@@ -133,6 +137,7 @@ export const createApi = (db = supabase) => {
   const deleteTag = async ({ id }) => {
     await db.from('notes_tags').delete().eq('tag_id', id).then(validate);
     const res = await db.from('tags').delete().eq('id', id);
+    console.log('deleted', res);
     return validate(res);
   };
 

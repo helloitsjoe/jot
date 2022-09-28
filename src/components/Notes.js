@@ -1,18 +1,18 @@
 import * as React from 'react';
-import useSWR from 'swr';
+import { useSWRConfig } from 'swr';
 import Box from './Box';
 import Tag from './Tag';
 import Button from './Button';
 
 export default function Notes({ notes, error, api }) {
-  const { mutate } = useSWR('notes');
-  console.log('notes', notes);
+  const { mutate } = useSWRConfig();
 
   const [activeTags, setActiveTags] = React.useState(new Set());
 
   const handleDeleteNote = (id) => {
     const optimisticData = notes.filter((note) => note.id !== id);
     mutate(
+      'notes',
       async () => {
         await api.deleteNote({ id });
         return optimisticData;
