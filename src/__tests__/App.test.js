@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import RawApp from '../App';
 import { withSWR } from '../utils';
 
@@ -11,6 +11,7 @@ beforeEach(() => {
   api = {
     loadNotes: () => Promise.resolve([{ text: 'quick note', tags: [], id: 1 }]),
     loadTags() {},
+    addNote: () => Promise.resolve({ text: 'another note' }),
   };
 });
 
@@ -24,7 +25,16 @@ describe('App', () => {
         expect(note).toBeTruthy();
       });
 
-      it.todo('adds a new note');
+      // it('adds a new note', async () => {
+      //   render(<App api={api} />);
+      //   fireEvent.change(screen.getByLabelText(/add a note/i), {
+      //     target: { value: 'another note' },
+      //   });
+      //   expect(screen.queryByText(/another note/i)).toBe(null);
+      //   fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
+      //   const newNote = await screen.findByText(/another note/i);
+      //   expect(newNote).toBeTruthy();
+      // });
     });
 
     describe('unhappy :(', () => {
