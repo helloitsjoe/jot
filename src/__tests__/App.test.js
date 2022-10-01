@@ -1,5 +1,10 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import RawApp from '../App';
 import { withSWR } from '../utils';
 
@@ -9,9 +14,11 @@ let api;
 
 beforeEach(() => {
   api = {
-    loadNotes: () => Promise.resolve([{ text: 'quick note', tags: [], id: 1 }]),
+    loadNotes: jest
+      .fn()
+      .mockResolvedValue([{ text: 'quick note', tags: [], id: 1 }]),
     loadTags() {},
-    addNote: () => Promise.resolve({ text: 'another note' }),
+    addNote: jest.fn().mockResolvedValue({ text: 'another note' }),
   };
 });
 
@@ -25,16 +32,22 @@ describe('App', () => {
         expect(note).toBeTruthy();
       });
 
-      // it('adds a new note', async () => {
-      //   render(<App api={api} />);
-      //   fireEvent.change(screen.getByLabelText(/add a note/i), {
-      //     target: { value: 'another note' },
-      //   });
-      //   expect(screen.queryByText(/another note/i)).toBe(null);
-      //   fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
-      //   const newNote = await screen.findByText(/another note/i);
-      //   expect(newNote).toBeTruthy();
-      // });
+      it('adds a new note', async () => {
+        render(<App api={api} />);
+        expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+        await screen.findByText(/quick note/i);
+        expect(api.loadNotes).toBeCalledTimes(1);
+        fireEvent.change(screen.getByLabelText(/add a note/i), {
+          target: { value: 'another note' },
+        });
+        expect(screen.queryByText(/another note/i)).toBe(null);
+        fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
+        await waitForElementToBeRemoved(() => screen.getByText(/adding.../i));
+        // const newNote = await screen.findByText(/another note/i);
+        // expect(newNote).toBeTruthy();
+        expect(api.addNote).toBeCalledWith('another note', []);
+        expect(api.loadNotes).toBeCalledTimes(2);
+      });
     });
 
     describe('unhappy :(', () => {

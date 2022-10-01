@@ -21,16 +21,16 @@ export default function Notes({ notes, error, api }) {
     );
   };
 
-  if (!notes) {
-    return <Box>Loading notes...</Box>;
-  }
-
   if (error) {
     return (
       <Box color="white" bg="tomato">
         {error.message}
       </Box>
     );
+  }
+
+  if (!notes) {
+    return <Box>Loading notes...</Box>;
   }
 
   // Most recent first

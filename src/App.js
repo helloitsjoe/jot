@@ -20,6 +20,9 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
+// Create an optimistic tempId for a key
+const createTempId = () => Date.now();
+
 const initSwipeHandlers = () => {
   const reload = () => window.location.reload(true);
   const offDown = onSwipe(Directions.DOWN, reload, { fromTop: true });
@@ -83,7 +86,7 @@ export default function App({ api, onSignOut }) {
   const handleAddNote = async (e) => {
     e.preventDefault();
     const tagIds = tags.map(({ id }) => id);
-    const optimisticData = [...notes, { ...note, tags }];
+    const optimisticData = [...notes, { text: note, tags, id: createTempId() }];
     mutateNotes(
       async () => {
         setIsSubmitting(true);
