@@ -35,13 +35,13 @@ export default function App({ api, onSignOut }) {
     data: recentTags,
     error: fetchTagErr,
     mutate: mutateTags,
-  } = useSWR('tags', () => api.loadTags());
+  } = useSWR('tags', api.loadTags);
 
   const {
     data: notes,
     error: fetchNotesErr,
     mutate: mutateNotes,
-  } = useSWR('notes', () => api.loadNotes());
+  } = useSWR('notes', api.loadNotes);
 
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
@@ -90,6 +90,9 @@ export default function App({ api, onSignOut }) {
     mutateNotes(
       async () => {
         setIsSubmitting(true);
+        // TODO: Figure out the best way to handle errors here.
+        // Errors thrown here are caught in mutateNotes.catch.
+        // Maybe wrap the useSWR and treat a data error instance as an error?
         await api.addNote(note, tagIds);
         setIsSubmitting(false);
         setNote('');
@@ -111,7 +114,7 @@ export default function App({ api, onSignOut }) {
 
   React.useEffect(() => {
     return initSwipeHandlers();
-  }, [api]);
+  }, []);
 
   return (
     <Box maxWidth="500px" m="2em auto">

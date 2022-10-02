@@ -55,11 +55,22 @@ describe('App', () => {
         api.loadNotes = () => Promise.reject(new Error('ruh roh'));
         render(<App api={api} />);
         expect(screen.queryByText(/ruh roh/i)).toBe(null);
-        const foo = await screen.findByText('ruh roh');
-        expect(foo).toBeTruthy();
+        const errorMessage = await screen.findByText('ruh roh');
+        expect(errorMessage).toBeTruthy();
       });
 
-      it.todo('shows error when adding a note');
+      // fit('shows error when adding a note', async () => {
+      //   api.addNote = jest.fn().mockRejectedValue(new Error('add failed!'));
+      //   render(<App api={api} />);
+      //   await screen.findByText(/quick note/i);
+      //   fireEvent.change(screen.getByLabelText(/add a note/i), {
+      //     target: { value: 'another note' },
+      //   });
+      //   expect(screen.queryByText(/add failed!/i)).toBe(null);
+      //   fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
+      //   const errorMessage = await screen.findByText(/add failed!/i);
+      //   expect(errorMessage).toBeTruthy();
+      // });
     });
   });
 
