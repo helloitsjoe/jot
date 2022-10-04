@@ -73,6 +73,8 @@ describe('App', () => {
       //   const errorMessage = await screen.findByText(/add failed!/i);
       //   expect(errorMessage).toBeTruthy();
       // });
+
+      it.todo('filters notes when a tag is clicked');
     });
   });
 
@@ -86,12 +88,16 @@ describe('App', () => {
       });
 
       it.todo('adds a new tag');
-
-      it.todo('filters notes when a tag is clicked');
     });
 
     describe('unhappy', () => {
-      it.todo('shows error when fetching tags');
+      it('shows error when fetching tags', async () => {
+        api.loadTags.mockRejectedValue(new Error('taggle waggle'));
+        render(<App api={api} />);
+        expect(screen.queryByText(/taggle waggle/i)).toBe(null);
+        const errorMessage = await screen.findByText('taggle waggle');
+        expect(errorMessage).toBeTruthy();
+      });
 
       it.todo('shows error when adding a tag');
     });
