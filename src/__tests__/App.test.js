@@ -17,7 +17,9 @@ beforeEach(() => {
     loadNotes: jest
       .fn()
       .mockResolvedValue([{ text: 'quick note', tags: [], id: 1 }]),
-    loadTags() {},
+    loadTags: jest
+      .fn()
+      .mockResolvedValue([{ text: 'meta', id: 1, color: 'lime' }]),
     addNote: jest.fn().mockResolvedValue({ text: 'another note' }),
   };
 });
@@ -76,7 +78,12 @@ describe('App', () => {
 
   describe('tags', () => {
     describe('happy', () => {
-      it.todo('renders tags');
+      it('renders tags', async () => {
+        render(<App api={api} />);
+        expect(screen.queryByText(/meta/i)).toBe(null);
+        const tag = await screen.findAllByText(/meta/i);
+        expect(tag.length).toBeGreaterThan(0);
+      });
 
       it.todo('adds a new tag');
 
