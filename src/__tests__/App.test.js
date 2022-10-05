@@ -6,20 +6,26 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import RawApp from '../App';
+import Notes from '../components/Notes';
 import { withSWR } from '../utils';
 
 const App = withSWR(RawApp);
+
+const mockTagMeta = { text: 'meta', id: 1, color: 'lime' };
+const mockTagWork = { text: 'work', id: 2, color: 'blueviolet' };
+
+const mockNotes = [
+  { text: 'quick note', id: 1, tags: [mockTagMeta] },
+  { text: 'something for work', id: 2, tags: [mockTagWork] },
+];
+const mockTags = [mockTagMeta, mockTagWork];
 
 let api;
 
 beforeEach(() => {
   api = {
-    loadNotes: jest
-      .fn()
-      .mockResolvedValue([{ text: 'quick note', tags: [], id: 1 }]),
-    loadTags: jest
-      .fn()
-      .mockResolvedValue([{ text: 'meta', id: 1, color: 'lime' }]),
+    loadNotes: jest.fn().mockResolvedValue(mockNotes),
+    loadTags: jest.fn().mockResolvedValue(mockTags),
     addNote: jest.fn().mockResolvedValue({ text: 'another note' }),
   };
 });
@@ -50,6 +56,25 @@ describe('App', () => {
         expect(api.addNote).toBeCalledWith('another note', []);
         expect(api.loadNotes).toBeCalledTimes(2);
       });
+
+      it('filters notes when a tag is clicked', async () => {
+        render(<Notes notes={mockNotes} api={api} />);
+
+        expect(screen.queryByText('meta')).toBeTruthy();
+        expect(screen.queryByText('quick note')).toBeTruthy();
+
+        expect(screen.queryByText('work')).toBeTruthy();
+        expect(screen.queryByText('something for work')).toBeTruthy();
+
+        fireEvent.click(screen.queryByText('work'));
+
+        expect(screen.queryByText('meta')).not.toBeTruthy();
+        expect(screen.queryByText('quick note')).not.toBeTruthy();
+
+        // Should show tag in filter and on note
+        expect(screen.queryAllByText('work').length).toBe(2);
+        expect(screen.queryByText('something for work')).toBeTruthy();
+      });
     });
 
     describe('unhappy :(', () => {
@@ -73,8 +98,6 @@ describe('App', () => {
       //   const errorMessage = await screen.findByText(/add failed!/i);
       //   expect(errorMessage).toBeTruthy();
       // });
-
-      it.todo('filters notes when a tag is clicked');
     });
   });
 
