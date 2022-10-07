@@ -155,13 +155,13 @@ export default function App({ api, onSignOut }) {
           onChange={handleTagChange}
           list="tags"
         />
-        <datalist id="tags">
-          {(recentTags || []).map((t) => (
-            <option key={t.text} value={t.text}>
-              {t.text}
-            </option>
-          ))}
-        </datalist>
+        {/* <datalist id="tags"> */}
+        {/*   {(recentTags || []).map((t) => ( */}
+        {/*     <option key={t.text} value={t.text}> */}
+        {/*       {t.text} */}
+        {/*     </option> */}
+        {/*   ))} */}
+        {/* </datalist> */}
         <SubmitButton>Add a new tag</SubmitButton>
         {/* TODO: Why isn't this error persisting? */}
         {fetchTagErr && (

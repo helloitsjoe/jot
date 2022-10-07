@@ -111,6 +111,20 @@ describe('App', () => {
       });
 
       it.todo('adds a new tag');
+
+      it('filters tags when typing', async () => {
+        api.loadNotes.mockResolvedValue([]);
+        render(<App api={api} />);
+        await screen.findByText(/meta/i);
+        expect(screen.queryByText(/work/i)).toBeTruthy();
+        expect(screen.queryByText(/meta/i)).toBeTruthy();
+
+        const event = { target: { value: 'wor' } };
+        fireEvent.change(screen.getByLabelText(/add a tag/i), event);
+
+        expect(screen.queryByText(/work/i)).toBeTruthy();
+        expect(screen.queryByText(/meta/i)).not.toBeTruthy();
+      });
     });
 
     describe('unhappy', () => {
