@@ -26,7 +26,8 @@ beforeEach(() => {
   api = {
     loadNotes: jest.fn().mockResolvedValue(mockNotes),
     loadTags: jest.fn().mockResolvedValue(mockTags),
-    addNote: jest.fn().mockResolvedValue({ text: 'another note' }),
+    addNote: jest.fn().mockResolvedValue(),
+    addTag: jest.fn().mockResolvedValue(),
   };
 });
 
@@ -75,6 +76,8 @@ describe('App', () => {
         expect(screen.queryAllByText('work').length).toBe(2);
         expect(screen.queryByText('something for work')).toBeTruthy();
       });
+
+      it.todo('adds a tag to a note');
     });
 
     describe('unhappy :(', () => {
@@ -101,33 +104,47 @@ describe('App', () => {
     });
   });
 
-  describe('tags', () => {
-    describe('happy', () => {
-      it('renders tags', async () => {
-        render(<App api={api} />);
-        expect(screen.queryByText(/meta/i)).toBe(null);
-        const tag = await screen.findAllByText(/meta/i);
-        expect(tag.length).toBeGreaterThan(0);
-      });
-
-      it.todo('adds a new tag');
-
-      it('filters tags when typing', async () => {
-        api.loadNotes.mockResolvedValue([]);
-        render(<App api={api} />);
-        await screen.findByText(/meta/i);
-        expect(screen.queryByText(/work/i)).toBeTruthy();
-        expect(screen.queryByText(/meta/i)).toBeTruthy();
-
-        const event = { target: { value: 'wor' } };
-        fireEvent.change(screen.getByLabelText(/add a tag/i), event);
-
-        expect(screen.queryByText(/work/i)).toBeTruthy();
-        expect(screen.queryByText(/meta/i)).not.toBeTruthy();
-      });
+  describe('happy tags', () => {
+    beforeEach(() => {
+      api.loadNotes.mockResolvedValue([]);
     });
 
-    describe('unhappy', () => {
+    it('renders tags', async () => {
+      render(<App api={api} />);
+      expect(screen.queryByText(/meta/i)).toBe(null);
+      const tag = await screen.findAllByText(/meta/i);
+      expect(tag.length).toBeGreaterThan(0);
+    });
+
+    it('adds a new tag', async () => {
+      const NEW_TAG_TEXT = 'todo';
+      api.addTag.mockResolvedValue({ text: NEW_TAG_TEXT });
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+
+      const event = { target: { value: NEW_TAG_TEXT } };
+      fireEvent.change(screen.getByLabelText(/add a tag/i), event);
+      expect(screen.queryByText(NEW_TAG_TEXT)).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByRole('button', { name: /add a new tag/i }));
+      const addedTag = await screen.findByText(NEW_TAG_TEXT);
+      expect(addedTag).toBeTruthy();
+    });
+
+    it('filters tags when typing', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+      expect(screen.queryByText(/work/i)).toBeTruthy();
+      expect(screen.queryByText(/meta/i)).toBeTruthy();
+
+      const event = { target: { value: 'wor' } };
+      fireEvent.change(screen.getByLabelText(/add a tag/i), event);
+
+      expect(screen.queryByText(/work/i)).toBeTruthy();
+      expect(screen.queryByText(/meta/i)).not.toBeTruthy();
+    });
+
+    describe('unhappy tags', () => {
       it('shows error when fetching tags', async () => {
         api.loadTags.mockRejectedValue(new Error('taggle waggle'));
         render(<App api={api} />);
