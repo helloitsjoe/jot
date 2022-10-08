@@ -45,6 +45,7 @@ export default function App({ api, onSignOut }) {
 
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
+  const [errorMessage, setErrorMessage] = React.useState('');
   const [tags, setTags] = React.useState([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -69,7 +70,7 @@ export default function App({ api, onSignOut }) {
 
       setTags((t) => [...t, newTag]);
       setTag('');
-    });
+    }).catch((e) => setErrorMessage(e.message));
   };
 
   const handleDeleteTag = (id) => {
@@ -200,6 +201,8 @@ export default function App({ api, onSignOut }) {
           );
         })()}
       </Box>
+      {/* TODO: Handle this with swr */}
+      {errorMessage}
       <Box m="3em 0">
         <h3>Existing notes</h3>
         <Notes error={fetchNotesErr} notes={notes} api={api} />

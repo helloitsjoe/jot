@@ -143,17 +143,35 @@ describe('App', () => {
       expect(screen.queryByText(/work/i)).toBeTruthy();
       expect(screen.queryByText(/meta/i)).not.toBeTruthy();
     });
+  });
 
-    describe('unhappy tags', () => {
-      it('shows error when fetching tags', async () => {
-        api.loadTags.mockRejectedValue(new Error('taggle waggle'));
-        render(<App api={api} />);
-        expect(screen.queryByText(/taggle waggle/i)).toBe(null);
-        const errorMessage = await screen.findByText('taggle waggle');
-        expect(errorMessage).toBeTruthy();
-      });
+  describe('unhappy tags', () => {
+    beforeEach(() => {
+      api.loadNotes.mockResolvedValue([]);
+    });
 
-      it.todo('shows error when adding a tag');
+    it('shows error when fetching tags', async () => {
+      api.loadTags.mockRejectedValue(new Error('taggle waggle'));
+      render(<App api={api} />);
+      expect(screen.queryByText(/taggle waggle/i)).toBe(null);
+      const errorMessage = await screen.findByText('taggle waggle');
+      expect(errorMessage).toBeTruthy();
+    });
+
+    it('shows error when adding a tag', async () => {
+      const NEW_TAG_TEXT = 'foo';
+      api.addTag.mockRejectedValue(new Error('addle taggle'));
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+
+      const event = { target: { value: NEW_TAG_TEXT } };
+      fireEvent.change(screen.getByLabelText(/add a tag/i), event);
+      expect(screen.queryByText(/addle taggle/i)).toBe(null);
+
+      fireEvent.click(screen.queryByRole('button', { name: /add a new tag/i }));
+      const errorMessage = await screen.findByText('addle taggle');
+      expect(screen.queryByText(NEW_TAG_TEXT)).not.toBeTruthy();
+      expect(errorMessage).toBeTruthy();
     });
   });
 });
