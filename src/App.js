@@ -1,6 +1,6 @@
 import * as React from 'react';
-import useSWR from 'swr';
 import onSwipe, { Directions } from 'swipey';
+import { useCustomSwr, catchSwr } from './utils';
 import Box from './components/Box';
 import Tag from './components/Tag';
 import Notes from './components/Notes';
@@ -35,17 +35,17 @@ export default function App({ api, onSignOut }) {
     data: recentTags,
     error: fetchTagErr,
     mutate: mutateTags,
-  } = useSWR('tags', api.loadTags);
+  } = useCustomSwr('tags', api.loadTags);
 
   const {
     data: notes,
     error: fetchNotesErr,
     mutate: mutateNotes,
-  } = useSWR('notes', api.loadNotes);
+  } = useCustomSwr('notes', api.loadNotes);
 
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
-  const [errorMessage, setErrorMessage] = React.useState('');
+  // const [errorMessage, setErrorMessage] = React.useState('');
   const [tags, setTags] = React.useState([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -65,12 +65,12 @@ export default function App({ api, onSignOut }) {
 
     const color = getRandomColor();
     // TODO: Add tag to note, make sure id propagates
+
     mutateTags(async () => {
       const newTag = await api.addTag({ text: tag, color });
-
       setTags((t) => [...t, newTag]);
       setTag('');
-    }).catch((e) => setErrorMessage(e.message));
+    }).catch(catchSwr(mutateTags));
   };
 
   const handleDeleteTag = (id) => {
@@ -93,7 +93,7 @@ export default function App({ api, onSignOut }) {
         setIsSubmitting(true);
         // TODO: Figure out the best way to handle errors here.
         // Errors thrown here are caught in mutateNotes.catch.
-        // Maybe wrap the useSWR and treat a data error instance as an error?
+        // Maybe wrap the useCustomSwr and treat a data error instance as an error?
         await api.addNote(note, tagIds);
         setIsSubmitting(false);
         setNote('');
@@ -201,8 +201,6 @@ export default function App({ api, onSignOut }) {
           );
         })()}
       </Box>
-      {/* TODO: Handle this with swr */}
-      {errorMessage}
       <Box m="3em 0">
         <h3>Existing notes</h3>
         <Notes error={fetchNotesErr} notes={notes} api={api} />

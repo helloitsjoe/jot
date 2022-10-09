@@ -1,5 +1,17 @@
 import React from 'react';
-import { SWRConfig } from 'swr';
+import useSWR, { SWRConfig } from 'swr';
+
+export const useCustomSwr = (...args) => {
+  const rtn = useSWR(...args);
+  if (rtn.data instanceof Error) {
+    return { ...rtn, data: null, error: rtn.data };
+  }
+  return rtn;
+};
+
+export const catchSwr = (mutate) => (err) => {
+  mutate(err, false);
+};
 
 export const withSWR = (Component) => (props) => {
   // This is needed to isolate tests.
