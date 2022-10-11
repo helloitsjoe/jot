@@ -32,76 +32,78 @@ beforeEach(() => {
 });
 
 describe('App', () => {
-  describe('notes', () => {
-    describe('happy!', () => {
-      it('renders notes', async () => {
-        render(<App api={api} />);
-        expect(screen.queryByText(/quick note/i)).toBe(null);
-        const note = await screen.findByText(/quick note/i);
-        expect(note).toBeTruthy();
-      });
-
-      it('adds a new note', async () => {
-        render(<App api={api} />);
-        expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
-        await screen.findByText(/quick note/i);
-        expect(api.loadNotes).toBeCalledTimes(1);
-        fireEvent.change(screen.getByLabelText(/add a note/i), {
-          target: { value: 'another note' },
-        });
-        expect(screen.queryByText(/another note/i)).toBe(null);
-        fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
-        await waitForElementToBeRemoved(() => screen.getByText(/adding.../i));
-        // const newNote = await screen.findByText(/another note/i);
-        // expect(newNote).toBeTruthy();
-        expect(api.addNote).toBeCalledWith('another note', []);
-        expect(api.loadNotes).toBeCalledTimes(2);
-      });
-
-      it('filters notes when a tag is clicked', async () => {
-        render(<Notes notes={mockNotes} api={api} />);
-
-        expect(screen.queryByText('meta')).toBeTruthy();
-        expect(screen.queryByText('quick note')).toBeTruthy();
-
-        expect(screen.queryByText('work')).toBeTruthy();
-        expect(screen.queryByText('something for work')).toBeTruthy();
-
-        fireEvent.click(screen.queryByText('work'));
-
-        expect(screen.queryByText('meta')).not.toBeTruthy();
-        expect(screen.queryByText('quick note')).not.toBeTruthy();
-
-        // Should show tag in filter and on note
-        expect(screen.queryAllByText('work').length).toBe(2);
-        expect(screen.queryByText('something for work')).toBeTruthy();
-      });
-
-      it.todo('adds a tag to a note');
+  describe('happy notes!', () => {
+    it('renders notes', async () => {
+      render(<App api={api} />);
+      expect(screen.queryByText(/quick note/i)).toBe(null);
+      const note = await screen.findByText(/quick note/i);
+      expect(note).toBeTruthy();
     });
 
-    describe('unhappy :(', () => {
-      it('shows error when fetching notes', async () => {
-        api.loadNotes = () => Promise.reject(new Error('ruh roh'));
-        render(<App api={api} />);
-        expect(screen.queryByText(/ruh roh/i)).toBe(null);
-        const errorMessage = await screen.findByText('ruh roh');
-        expect(errorMessage).toBeTruthy();
+    it('adds a new note', async () => {
+      render(<App api={api} />);
+      expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+      await screen.findByText(/quick note/i);
+      expect(api.loadNotes).toBeCalledTimes(1);
+      fireEvent.change(screen.getByLabelText(/add a note/i), {
+        target: { value: 'another note' },
       });
-
-      // fit('shows error when adding a note', async () => {
-      //   api.addNote = jest.fn().mockRejectedValue(new Error('add failed!'));
-      //   render(<App api={api} />);
-      //   await screen.findByText(/quick note/i);
-      //   fireEvent.change(screen.getByLabelText(/add a note/i), {
-      //     target: { value: 'another note' },
-      //   });
-      //   expect(screen.queryByText(/add failed!/i)).toBe(null);
-      //   fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
-      //   const errorMessage = await screen.findByText(/add failed!/i);
-      //   expect(errorMessage).toBeTruthy();
-      // });
+      expect(screen.queryByText(/another note/i)).toBe(null);
+      fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
+      await waitForElementToBeRemoved(() => screen.getByText(/adding.../i));
+      // const newNote = await screen.findByText(/another note/i);
+      // expect(newNote).toBeTruthy();
+      expect(api.addNote).toBeCalledWith('another note', []);
+      expect(api.loadNotes).toBeCalledTimes(2);
     });
+
+    it('filters notes when a tag is clicked', async () => {
+      render(<Notes notes={mockNotes} api={api} />);
+
+      expect(screen.queryByText('meta')).toBeTruthy();
+      expect(screen.queryByText('quick note')).toBeTruthy();
+
+      expect(screen.queryByText('work')).toBeTruthy();
+      expect(screen.queryByText('something for work')).toBeTruthy();
+
+      fireEvent.click(screen.queryByText('work'));
+
+      expect(screen.queryByText('meta')).not.toBeTruthy();
+      expect(screen.queryByText('quick note')).not.toBeTruthy();
+
+      // Should show tag in filter and on note
+      expect(screen.queryAllByText('work').length).toBe(2);
+      expect(screen.queryByText('something for work')).toBeTruthy();
+    });
+
+    it.todo('adds a tag to a note');
+    it.todo('removing a tag from a note does not delete the tag');
+    it.todo('deletes a note');
+  });
+
+  describe('unhappy notes :(', () => {
+    it('shows error when fetching notes', async () => {
+      api.loadNotes = () => Promise.reject(new Error('ruh roh'));
+      render(<App api={api} />);
+      expect(screen.queryByText(/ruh roh/i)).toBe(null);
+      const errorMessage = await screen.findByText('ruh roh');
+      expect(errorMessage).toBeTruthy();
+    });
+
+    it('shows error when adding a note', async () => {
+      api.addNote = jest.fn().mockRejectedValue(new Error('add failed!'));
+      render(<App api={api} />);
+      await screen.findByText(/quick note/i);
+      fireEvent.change(screen.getByLabelText(/add a note/i), {
+        target: { value: 'another note' },
+      });
+      expect(screen.queryByText(/add failed!/i)).toBe(null);
+      fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
+      const errorMessage = await screen.findByText(/add failed!/i);
+      expect(errorMessage).toBeTruthy();
+    });
+
+    it.todo('shows error when deleting a note');
   });
 
   describe('happy tags', () => {
@@ -143,6 +145,8 @@ describe('App', () => {
       expect(screen.queryByText(/work/i)).toBeTruthy();
       expect(screen.queryByText(/meta/i)).not.toBeTruthy();
     });
+
+    it.todo('deletes a tag');
   });
 
   describe('unhappy tags', () => {
@@ -173,5 +177,7 @@ describe('App', () => {
       expect(screen.queryByText(NEW_TAG_TEXT)).not.toBeTruthy();
       expect(errorMessage).toBeTruthy();
     });
+
+    it.todo('shows error when deleting a tag');
   });
 });

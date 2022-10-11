@@ -91,9 +91,6 @@ export default function App({ api, onSignOut }) {
     mutateNotes(
       async () => {
         setIsSubmitting(true);
-        // TODO: Figure out the best way to handle errors here.
-        // Errors thrown here are caught in mutateNotes.catch.
-        // Maybe wrap the useCustomSwr and treat a data error instance as an error?
         await api.addNote(note, tagIds);
         setIsSubmitting(false);
         setNote('');
@@ -101,7 +98,7 @@ export default function App({ api, onSignOut }) {
         setTags([]);
       },
       { optimisticData }
-    );
+    ).catch(catchSwr(mutateNotes));
   };
 
   const handleSignOut = () => {
