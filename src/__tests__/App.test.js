@@ -76,7 +76,22 @@ describe('App', () => {
       expect(screen.queryByText('something for work')).toBeTruthy();
     });
 
-    it.todo('adds a tag to a note');
+    it('adds a tag to a note', async () => {
+      api.loadNotes.mockResolvedValue([]);
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+      fireEvent.change(screen.getByLabelText(/add a note/i), {
+        target: { value: 'another note' },
+      });
+      expect(screen.queryAllByText('meta').length).toBe(1);
+      fireEvent.click(screen.queryByText('meta'));
+      expect(screen.queryAllByText('meta').length).toBe(2);
+
+      fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
+      await waitForElementToBeRemoved(() => screen.getByText(/adding.../i));
+      expect(api.addNote).toBeCalledWith('another note', [mockTagMeta.id]);
+    });
+
     it.todo('removing a tag from a note does not delete the tag');
     it.todo('deletes a note');
   });
