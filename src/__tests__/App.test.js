@@ -4,26 +4,30 @@ import {
   render,
   screen,
   waitForElementToBeRemoved,
+  waitFor,
+  act,
 } from '@testing-library/react';
 import RawApp from '../App';
-import Notes from '../components/Notes';
+import RawNotes from '../components/Notes';
 import { withSWR } from '../utils';
 
 const App = withSWR(RawApp);
+const Notes = withSWR(RawNotes);
 
 const mockTagMeta = { text: 'meta', id: 1, color: 'lime' };
 const mockTagWork = { text: 'work', id: 2, color: 'blueviolet' };
 
-const mockNotes = [
-  { text: 'quick note', id: 1, tags: [mockTagMeta] },
-  { text: 'something for work', id: 2, tags: [mockTagWork] },
-];
+const mockNoteQuick = { text: 'quick note', id: 1, tags: [mockTagMeta] };
+const mockNoteWork = { text: 'work reminder', id: 2, tags: [mockTagWork] };
+
+const mockNotes = [mockNoteQuick, mockNoteWork];
 const mockTags = [mockTagMeta, mockTagWork];
 
 let api;
 
 beforeEach(() => {
   api = {
+    deleteNote: jest.fn().mockResolvedValue(),
     loadNotes: jest.fn().mockResolvedValue(mockNotes),
     loadTags: jest.fn().mockResolvedValue(mockTags),
     addNote: jest.fn().mockResolvedValue(),
@@ -64,7 +68,7 @@ describe('App', () => {
       expect(screen.queryByText('quick note')).toBeTruthy();
 
       expect(screen.queryByText('work')).toBeTruthy();
-      expect(screen.queryByText('something for work')).toBeTruthy();
+      expect(screen.queryByText('work reminder')).toBeTruthy();
 
       fireEvent.click(screen.queryByText('work'));
 
@@ -73,7 +77,7 @@ describe('App', () => {
 
       // Should show tag in filter and on note
       expect(screen.queryAllByText('work').length).toBe(2);
-      expect(screen.queryByText('something for work')).toBeTruthy();
+      expect(screen.queryByText('work reminder')).toBeTruthy();
     });
 
     it('adds a tag to a note', async () => {
@@ -92,8 +96,14 @@ describe('App', () => {
       expect(api.addNote).toBeCalledWith('another note', [mockTagMeta.id]);
     });
 
-    it.todo('removing a tag from a note does not delete the tag');
-    it.todo('deletes a note');
+    it('deletes a note', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/quick note/i);
+      // TODO: How to get rid of act warning with optimistic data update?
+      fireEvent.click(screen.queryByTestId('note-1-delete'));
+      expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+      expect(api.deleteNote).toBeCalledWith({ id: 1 });
+    });
   });
 
   describe('unhappy notes :(', () => {

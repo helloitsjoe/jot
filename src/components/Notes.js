@@ -97,6 +97,7 @@ export default function Notes({ notes, error, api }) {
               onClick={() => handleDeleteNote(id)}
               display="flex"
               alignSelf="flex-start"
+              data-testid={`note-${id}-delete`}
             >
               X
             </Button>
