@@ -171,7 +171,11 @@ describe('App', () => {
       expect(screen.queryByText(/meta/i)).not.toBeTruthy();
     });
 
-    it.todo('deletes a tag');
+    it('deletes a tag', async () => {
+      render(<App api={api} />);
+      const tag = await screen.findByText(/meta/i);
+      expect(tag).toBeTruthy();
+    });
   });
 
   describe('unhappy tags', () => {
