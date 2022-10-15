@@ -4,8 +4,6 @@ import {
   render,
   screen,
   waitForElementToBeRemoved,
-  waitFor,
-  act,
 } from '@testing-library/react';
 import RawApp from '../App';
 import RawNotes from '../components/Notes';
@@ -28,6 +26,7 @@ let api;
 beforeEach(() => {
   api = {
     deleteNote: jest.fn().mockResolvedValue(),
+    deleteTag: jest.fn().mockResolvedValue(),
     loadNotes: jest.fn().mockResolvedValue(mockNotes),
     loadTags: jest.fn().mockResolvedValue(mockTags),
     addNote: jest.fn().mockResolvedValue(),
@@ -173,8 +172,9 @@ describe('App', () => {
 
     it('deletes a tag', async () => {
       render(<App api={api} />);
-      const tag = await screen.findByText(/meta/i);
-      expect(tag).toBeTruthy();
+      await screen.findByText(/meta/i);
+      fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));
+      expect(api.deleteTag).toBeCalledWith({ id: mockTagMeta.id });
     });
   });
 

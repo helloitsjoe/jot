@@ -76,12 +76,14 @@ export default function App({ api, onSignOut }) {
   const handleDeleteTag = (id) => {
     // TODO: Confirm deletion
     const optimisticData = recentTags.filter((t) => t.id !== id);
-    const options = { optimisticData, revalidate: false };
-    mutateTags(async () => {
-      setTags((prev) => prev.filter((t) => t.id !== id));
-      await api.deleteTag({ id });
-      return optimisticData;
-    }, options);
+    mutateTags(
+      async () => {
+        setTags((prev) => prev.filter((t) => t.id !== id));
+        await api.deleteTag({ id });
+        return optimisticData;
+      },
+      { optimisticData, revalidate: false }
+    );
   };
 
   const handleAddNote = async (e) => {

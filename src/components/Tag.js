@@ -29,6 +29,7 @@ export default function Tag({
           bg="transparent"
           border="none"
           color="gray"
+          data-testid={`tag-${id}-delete`}
         >
           X
         </Box>

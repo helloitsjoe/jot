@@ -17,7 +17,7 @@ export default function Notes({ notes, error, api }) {
         await api.deleteNote({ id });
         return optimisticData;
       },
-      { optimisticData }
+      { optimisticData, revalidate: false }
     );
   };
 
