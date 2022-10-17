@@ -178,7 +178,7 @@ describe('App', () => {
       expect(screen.queryByText(/meta/i)).not.toBeTruthy();
     });
 
-    it('deletes a tag', async () => {
+    it('deletes a tag after confirming', async () => {
       render(
         <ModalProvider>
           <App api={api} />
@@ -192,6 +192,22 @@ describe('App', () => {
       await waitForElementToBeRemoved(() =>
         screen.getByRole('button', { name: /delete/i })
       );
+    });
+
+    it('does not delete a tag if delete is canceled', async () => {
+      render(
+        <ModalProvider>
+          <App api={api} />
+        </ModalProvider>
+      );
+      await screen.findByText(/meta/i);
+      fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));
+      expect(api.deleteTag).not.toBeCalled();
+      fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+      expect(api.deleteTag).not.toBeCalled();
+      expect(
+        screen.queryByRole('button', { name: /delete/i })
+      ).not.toBeTruthy();
     });
   });
 
