@@ -8,6 +8,7 @@ import {
 import RawApp from '../App';
 import RawNotes from '../components/Notes';
 import { withSWR } from '../utils';
+import ModalProvider from '../components/Modal';
 
 const App = withSWR(RawApp);
 const Notes = withSWR(RawNotes);
@@ -54,8 +55,7 @@ describe('App', () => {
       expect(screen.queryByText(/another note/i)).toBe(null);
       fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
       await waitForElementToBeRemoved(() => screen.getByText(/adding.../i));
-      // const newNote = await screen.findByText(/another note/i);
-      // expect(newNote).toBeTruthy();
+
       expect(api.addNote).toBeCalledWith('another note', []);
       expect(api.loadNotes).toBeCalledTimes(2);
     });
@@ -98,7 +98,6 @@ describe('App', () => {
     it('deletes a note', async () => {
       render(<App api={api} />);
       await screen.findByText(/quick note/i);
-      // TODO: How to get rid of act warning with optimistic data update?
       fireEvent.click(screen.queryByTestId('note-1-delete'));
       expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
       expect(api.deleteNote).toBeCalledWith({ id: 1 });
@@ -127,7 +126,16 @@ describe('App', () => {
       expect(errorMessage).toBeTruthy();
     });
 
-    it.todo('shows error when deleting a note');
+    xit('shows error when deleting a note', async () => {
+      api.deleteNote = jest.fn().mockRejectedValue(new Error('delete failed!'));
+      render(<App api={api} />);
+      await screen.findByText(/quick note/i);
+      fireEvent.click(screen.queryByTestId('note-1-delete'));
+      expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+      expect(api.deleteNote).toBeCalledWith({ id: 1 });
+      // expect(screen.queryByText(/quick note/i)).toBeTruthy();
+      expect(screen.queryByText(/delete failed/i)).toBeTruthy();
+    });
   });
 
   describe('happy tags', () => {
@@ -171,10 +179,19 @@ describe('App', () => {
     });
 
     it('deletes a tag', async () => {
-      render(<App api={api} />);
+      render(
+        <ModalProvider>
+          <App api={api} />
+        </ModalProvider>
+      );
       await screen.findByText(/meta/i);
       fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));
+      expect(api.deleteTag).not.toBeCalled();
+      fireEvent.click(screen.getByRole('button', { name: /delete/i }));
       expect(api.deleteTag).toBeCalledWith({ id: mockTagMeta.id });
+      await waitForElementToBeRemoved(() =>
+        screen.getByRole('button', { name: /delete/i })
+      );
     });
   });
 

@@ -2,9 +2,10 @@ import * as React from 'react';
 import onSwipe, { Directions } from 'swipey';
 import { useCustomSwr, catchSwr } from './utils';
 import Box from './components/Box';
-import Tag from './components/Tag';
+import Tag, { ConfirmDeleteTag } from './components/Tag';
 import Notes from './components/Notes';
 import Input from './components/Input';
+import { ModalContext } from './components/Modal';
 import { SubmitButton } from './components/Button';
 
 const getRandomColor = () => {
@@ -43,6 +44,9 @@ export default function App({ api, onSignOut }) {
     mutate: mutateNotes,
   } = useCustomSwr('notes', api.loadNotes);
 
+  const { openModal, closeModal, setModalContent } =
+    React.useContext(ModalContext);
+
   const [note, setNote] = React.useState('');
   const [tag, setTag] = React.useState('');
   // const [errorMessage, setErrorMessage] = React.useState('');
@@ -74,9 +78,8 @@ export default function App({ api, onSignOut }) {
   };
 
   const handleDeleteTag = (id) => {
-    // TODO: Confirm deletion
     const optimisticData = recentTags.filter((t) => t.id !== id);
-    mutateTags(
+    return mutateTags(
       async () => {
         setTags((prev) => prev.filter((t) => t.id !== id));
         await api.deleteTag({ id });
@@ -84,6 +87,16 @@ export default function App({ api, onSignOut }) {
       },
       { optimisticData, revalidate: false }
     );
+  };
+
+  const handleConfirmDeleteTag = (id) => {
+    setModalContent(
+      <ConfirmDeleteTag
+        onConfirmDelete={() => handleDeleteTag(id).then(closeModal)}
+        onCancel={closeModal}
+      />
+    );
+    openModal();
   };
 
   const handleAddNote = async (e) => {
@@ -186,7 +199,8 @@ export default function App({ api, onSignOut }) {
                       color={color}
                       onDelete={(e) => {
                         e.stopPropagation();
-                        handleDeleteTag(id);
+                        // handleDeleteTag(id);
+                        handleConfirmDeleteTag(id);
                       }}
                       onSelect={handleAddTagToNote}
                     >

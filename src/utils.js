@@ -9,8 +9,12 @@ export const useCustomSwr = (...args) => {
   return rtn;
 };
 
-export const catchSwr = (mutate) => (err) => {
-  mutate(err, false);
+export const catchSwr = (mutate, key) => (err) => {
+  if (key) {
+    mutate(key, err, false);
+  } else {
+    mutate(err, false);
+  }
 };
 
 export const withSWR = (Component) => (props) => {

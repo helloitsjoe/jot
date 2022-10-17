@@ -24,7 +24,15 @@ export default function Button({
   }
 
   return (
-    <Box as="button" type="button" onClick={onClick}>
+    <Box
+      as="button"
+      type="button"
+      p="1em"
+      color="white"
+      bg="transparent"
+      border="1px solid gray"
+      onClick={onClick}
+    >
       {children}
     </Box>
   );
