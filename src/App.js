@@ -2,7 +2,8 @@ import * as React from 'react';
 import onSwipe, { Directions } from 'swipey';
 import { useCustomSwr, catchSwr } from './utils';
 import Box from './components/Box';
-import Tag, { ConfirmDeleteTag } from './components/Tag';
+import ConfirmDelete from './components/ConfirmDelete';
+import Tag from './components/Tag';
 import Notes from './components/Notes';
 import Input from './components/Input';
 import { ModalContext } from './components/Modal';
@@ -91,7 +92,7 @@ export default function App({ api, onSignOut }) {
 
   const handleConfirmDeleteTag = (id) => {
     setModalContent(
-      <ConfirmDeleteTag
+      <ConfirmDelete
         onConfirmDelete={() => handleDeleteTag(id).then(closeModal)}
         onCancel={closeModal}
       />

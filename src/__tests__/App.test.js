@@ -95,12 +95,21 @@ describe('App', () => {
       expect(api.addNote).toBeCalledWith('another note', [mockTagMeta.id]);
     });
 
-    it('deletes a note', async () => {
-      render(<App api={api} />);
+    it('deletes a note after confirming', async () => {
+      render(
+        <ModalProvider>
+          <App api={api} />
+        </ModalProvider>
+      );
+
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.queryByTestId('note-1-delete'));
-      expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+      expect(api.deleteNote).not.toBeCalled();
+      fireEvent.click(screen.getByRole('button', { name: /delete/i }));
       expect(api.deleteNote).toBeCalledWith({ id: 1 });
+      await waitForElementToBeRemoved(() =>
+        screen.queryByRole('button', { name: /delete/i })
+      );
     });
   });
 

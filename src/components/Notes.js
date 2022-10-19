@@ -1,17 +1,22 @@
-import * as React from 'react';
+import React from 'react';
 import { useSWRConfig } from 'swr';
 import Box from './Box';
 import Tag from './Tag';
 import Button from './Button';
+import ConfirmDelete from './ConfirmDelete';
+import { ModalContext } from './Modal';
 
 export default function Notes({ notes, error, api }) {
   const { mutate } = useSWRConfig();
+
+  const { openModal, closeModal, setModalContent } =
+    React.useContext(ModalContext);
 
   const [activeTags, setActiveTags] = React.useState(new Set());
 
   const handleDeleteNote = (id) => {
     const optimisticData = notes.filter((note) => note.id !== id);
-    mutate(
+    return mutate(
       'notes',
       async () => {
         await api.deleteNote({ id });
@@ -19,6 +24,16 @@ export default function Notes({ notes, error, api }) {
       },
       { optimisticData, revalidate: false }
     );
+  };
+
+  const handleConfirmDeleteNote = (id) => {
+    setModalContent(
+      <ConfirmDelete
+        onConfirmDelete={() => handleDeleteNote(id).then(closeModal)}
+        onCancel={closeModal}
+      />
+    );
+    openModal();
   };
 
   if (error) {
@@ -94,7 +109,7 @@ export default function Notes({ notes, error, api }) {
             </Box>
             <Button
               textOnly
-              onClick={() => handleDeleteNote(id)}
+              onClick={() => handleConfirmDeleteNote(id)}
               display="flex"
               alignSelf="flex-start"
               data-testid={`note-${id}-delete`}
