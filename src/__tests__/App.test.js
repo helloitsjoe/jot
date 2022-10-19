@@ -98,7 +98,7 @@ describe('App', () => {
     it('deletes a note after confirming', async () => {
       render(
         <ModalProvider>
-          <App api={api} />
+          <Notes notes={mockNotes} api={api} />
         </ModalProvider>
       );
 
@@ -110,6 +110,23 @@ describe('App', () => {
       await waitForElementToBeRemoved(() =>
         screen.queryByRole('button', { name: /delete/i })
       );
+    });
+
+    it('does not delete a note after canceling', async () => {
+      render(
+        <ModalProvider>
+          <Notes notes={mockNotes} api={api} />
+        </ModalProvider>
+      );
+
+      await screen.findByText(/quick note/i);
+      fireEvent.click(screen.queryByTestId('note-1-delete'));
+      expect(api.deleteNote).not.toBeCalled();
+      fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+      expect(api.deleteNote).not.toBeCalled();
+      expect(
+        screen.queryByRole('button', { name: /cancel/i })
+      ).not.toBeTruthy();
     });
   });
 
