@@ -266,6 +266,22 @@ describe('App', () => {
       expect(errorMessage).toBeTruthy();
     });
 
-    it.todo('shows error when deleting a tag');
+    xit('shows error when deleting a tag', async () => {
+      api.deleteNote = jest.fn().mockRejectedValue(new Error('delete failed!'));
+      render(
+        <ModalProvider>
+          <App api={api} />
+        </ModalProvider>
+      );
+      await screen.findByText(/meta/i);
+      fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));
+      fireEvent.click(screen.getByRole('button', { name: /delete/i }));
+      await waitForElementToBeRemoved(() =>
+        screen.getByRole('button', { name: /delete/i })
+      );
+      expect(api.deleteTag).toBeCalledWith({ id: mockTagMeta.id });
+      // expect(screen.queryByText(/quick note/i)).toBeTruthy();
+      expect(screen.queryByText(/delete failed/i)).toBeTruthy();
+    });
   });
 });
