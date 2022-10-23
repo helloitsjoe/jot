@@ -87,7 +87,8 @@ export default function App({ api, onSignOut }) {
         return optimisticData;
       },
       { optimisticData, revalidate: false }
-    );
+      // TODO: Better error handling. Currently hides all tags, forces user to refresh
+    ).catch(catchSwr(mutateTags));
   };
 
   const handleConfirmDeleteTag = (id) => {

@@ -5,6 +5,7 @@ import Tag from './Tag';
 import Button from './Button';
 import ConfirmDelete from './ConfirmDelete';
 import { ModalContext } from './Modal';
+import { catchSwr } from '../utils';
 
 export default function Notes({ notes, error, api }) {
   const { mutate } = useSWRConfig();
@@ -23,7 +24,8 @@ export default function Notes({ notes, error, api }) {
         return optimisticData;
       },
       { optimisticData, revalidate: false }
-    );
+      // TODO: Better error handling. Currently hides all notes, forces user to refresh
+    ).catch(catchSwr(mutate, 'notes'));
   };
 
   const handleConfirmDeleteNote = (id) => {

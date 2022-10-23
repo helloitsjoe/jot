@@ -152,14 +152,20 @@ describe('App', () => {
       expect(errorMessage).toBeTruthy();
     });
 
-    xit('shows error when deleting a note', async () => {
+    it('shows error when deleting a note', async () => {
       api.deleteNote = jest.fn().mockRejectedValue(new Error('delete failed!'));
-      render(<App api={api} />);
+      render(
+        <ModalProvider>
+          <App api={api} />
+        </ModalProvider>
+      );
       await screen.findByText(/quick note/i);
-      fireEvent.click(screen.queryByTestId('note-1-delete'));
-      expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+      fireEvent.click(screen.getByTestId(`note-${mockNoteQuick.id}-delete`));
+      fireEvent.click(screen.getByRole('button', { name: /delete/i }));
+      await waitForElementToBeRemoved(() =>
+        screen.getByRole('button', { name: /delete/i })
+      );
       expect(api.deleteNote).toBeCalledWith({ id: 1 });
-      // expect(screen.queryByText(/quick note/i)).toBeTruthy();
       expect(screen.queryByText(/delete failed/i)).toBeTruthy();
     });
   });
@@ -266,8 +272,8 @@ describe('App', () => {
       expect(errorMessage).toBeTruthy();
     });
 
-    xit('shows error when deleting a tag', async () => {
-      api.deleteNote = jest.fn().mockRejectedValue(new Error('delete failed!'));
+    it('shows error when deleting a tag', async () => {
+      api.deleteTag = jest.fn().mockRejectedValue(new Error('delete failed!'));
       render(
         <ModalProvider>
           <App api={api} />
