@@ -135,18 +135,16 @@ export const createApi = (db = supabase) => {
 
   // TODO: Soft delete
   const deleteTag = async ({ id }) => {
-    return Promise.reject(new Error('noooo'));
-    // await db.from('notes_tags').delete().eq('tag_id', id).then(validate);
-    // const res = await db.from('tags').delete().eq('id', id);
-    // console.log('deleted', res);
-    // return validate(res);
+    await db.from('notes_tags').delete().eq('tag_id', id).then(validate);
+    const res = await db.from('tags').delete().eq('id', id);
+    console.log('deleted', res);
+    return validate(res);
   };
 
   const deleteNote = async ({ id }) => {
-    return Promise.reject(new Error('noooo'));
-    // await db.from('notes_tags').delete().eq('note_id', id).then(validate);
-    // const res = await db.from('notes').delete().eq('id', id);
-    // return validate(res);
+    await db.from('notes_tags').delete().eq('note_id', id).then(validate);
+    const res = await db.from('notes').delete().eq('id', id);
+    return validate(res);
   };
 
   const loadTags = async () => {
