@@ -2,10 +2,90 @@ import React from 'react';
 import { useSWRConfig } from 'swr';
 import Box from './Box';
 import Tag from './Tag';
-import Button from './Button';
+import Input from './Input';
+import Button, { SubmitButton } from './Button';
 import ConfirmDelete from './ConfirmDelete';
 import { ModalContext } from './Modal';
-import { catchSwr } from '../utils';
+import { useCustomSwr, catchSwr } from '../utils';
+
+function EditNote({
+  id,
+  initialNoteText = '',
+  initialTags = [],
+  api,
+  onCancel,
+  onSuccess,
+}) {
+  const { data: recentTags } = useCustomSwr('tags', api.loadTags);
+
+  const [note, setNote] = React.useState(initialNoteText);
+  const [tags, setTags] = React.useState(initialTags);
+
+  const handleNoteChange = (e) => setNote(e.target.value);
+  const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
+
+  return (
+    <Box
+      as="form"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        await api.updateNote(
+          id,
+          note,
+          tags.map((tag) => tag.id)
+        );
+        onSuccess();
+      }}
+      m="1em 0"
+    >
+      <Input
+        width="auto"
+        label={<h3>Update Note</h3>}
+        value={note}
+        onChange={handleNoteChange}
+        autoFocus
+      />
+      <SubmitButton>Update</SubmitButton>
+      <Button onClick={onCancel}>Cancel</Button>
+      {tags.length > 0 && (
+        <Box>
+          {tags.map(({ text, color }) => {
+            return (
+              <Tag
+                key={text}
+                color={color}
+                onDelete={() => {
+                  setTags((p) => p.filter((t) => t.text !== text));
+                }}
+              >
+                {text}
+              </Tag>
+            );
+          })}
+        </Box>
+      )}
+
+      {recentTags.length > 0 ? (
+        <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
+          {recentTags.map(({ id: tagId, text, color }) => {
+            return (
+              <Tag
+                id={tagId}
+                key={tagId}
+                color={color}
+                onSelect={handleAddTagToNote}
+              >
+                {text}
+              </Tag>
+            );
+          })}
+        </Box>
+      ) : (
+        <p>No recent tags!</p>
+      )}
+    </Box>
+  );
+}
 
 export default function Notes({ notes, error, api }) {
   const { mutate } = useSWRConfig();
@@ -26,6 +106,21 @@ export default function Notes({ notes, error, api }) {
       { optimisticData, revalidate: false }
       // TODO: Better error handling. Currently hides all notes, forces user to refresh
     ).catch(catchSwr(mutate, 'notes'));
+  };
+
+  const openNoteEditModal = ({ text, id, tags }) => {
+    // Note: this is duplicated from App, maybe make this form a component
+    setModalContent(
+      <EditNote
+        id={id}
+        initialNoteText={text}
+        initialTags={tags}
+        api={api}
+        onCancel={closeModal}
+        onSuccess={closeModal}
+      />
+    );
+    openModal();
   };
 
   const handleConfirmDeleteNote = (id) => {
@@ -93,7 +188,7 @@ export default function Notes({ notes, error, api }) {
             p="1em"
             m="0.5em 0"
           >
-            <Box display="flex" flexDirection="column">
+            <Box display="flex" flex="1" flexDirection="column">
               <Box>{text}</Box>
               <Box m="0.5em 0" display="flex" gap="1em">
                 {tags.map((tag) => (
@@ -109,6 +204,14 @@ export default function Notes({ notes, error, api }) {
                 ))}
               </Box>
             </Box>
+            <Button
+              textOnly
+              onClick={() => openNoteEditModal({ text, id, tags })}
+              display="flex"
+              data-testid={`note-${id}-edit`}
+            >
+              <span className="material-symbols-outlined">edit_square</span>
+            </Button>
             <Button
               textOnly
               onClick={() => handleConfirmDeleteNote(id)}

@@ -26,6 +26,7 @@ export default function ModalProvider({ children }) {
           width="100%"
           height="100vh"
           bg="rgba(0, 0, 0, 0.7)"
+          onClick={closeModal}
         >
           <Box
             position="absolute"
@@ -33,6 +34,9 @@ export default function ModalProvider({ children }) {
             left="50%"
             transform="translateX(-50%) translateY(-50%)"
             p="2em"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
             border="1px solid lime"
             borderRadius="0.4em"
             bg="black"

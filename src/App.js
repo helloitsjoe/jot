@@ -1,5 +1,4 @@
 import * as React from 'react';
-import onSwipe, { Directions } from 'swipey';
 import { useCustomSwr, catchSwr } from './utils';
 import Box from './components/Box';
 import ConfirmDelete from './components/ConfirmDelete';
@@ -24,13 +23,6 @@ const getRandomColor = () => {
 
 // Create an optimistic tempId for a key
 const createTempId = () => Date.now();
-
-const initSwipeHandlers = () => {
-  const reload = () => window.location.reload(true);
-  const offDown = onSwipe(Directions.DOWN, reload, { fromTop: true });
-
-  return () => offDown();
-};
 
 export default function App({ api, onSignOut }) {
   const {
@@ -126,10 +118,6 @@ export default function App({ api, onSignOut }) {
     //   setErrorMessage(err.message);
     // });
   };
-
-  React.useEffect(() => {
-    return initSwipeHandlers();
-  }, []);
 
   return (
     <Box maxWidth="500px" m="2em auto">

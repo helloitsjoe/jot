@@ -103,6 +103,14 @@ export const createApi = (db = supabase) => {
     return note;
   };
 
+  const updateNote = async (id, text, tag_ids) => {
+    // TODO: updated_at
+    console.log(`Updating... ${text}, ${tag_ids}`);
+    // TODO: tag_ids
+    const res = await db.from('notes').update({ id, text });
+    return validate(res);
+  };
+
   const addTag = async ({ text, color }) => {
     // TODO: updated_at
     if (!text || !color) {
@@ -185,6 +193,7 @@ export const createApi = (db = supabase) => {
     signIn,
     signOut,
     addNote,
+    updateNote,
     addTag,
     loadTags,
     loadNotes,
