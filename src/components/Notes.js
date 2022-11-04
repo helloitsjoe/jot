@@ -8,6 +8,10 @@ import ConfirmDelete from './ConfirmDelete';
 import { ModalContext } from './Modal';
 import { useCustomSwr, catchSwr } from '../utils';
 
+const enableEdit = new URLSearchParams(window.location.search).get(
+  'enableEdit'
+);
+
 function EditNote({
   id,
   initialNoteText = '',
@@ -17,6 +21,7 @@ function EditNote({
   onSuccess,
 }) {
   const { data: recentTags } = useCustomSwr('tags', api.loadTags);
+  const { mutate } = useSWRConfig();
 
   const [note, setNote] = React.useState(initialNoteText);
   const [tags, setTags] = React.useState(initialTags);
@@ -29,12 +34,25 @@ function EditNote({
       as="form"
       onSubmit={async (e) => {
         e.preventDefault();
-        await api.updateNote(
-          id,
-          note,
-          tags.map((tag) => tag.id)
-        );
-        onSuccess();
+        mutate(
+          'notes',
+          async (allNotes) => {
+            await api.updateNote(
+              id,
+              note,
+              tags.map((tag) => tag.id)
+            );
+            onSuccess();
+            return allNotes.map((prevNote) => {
+              if (prevNote.id === id) {
+                return { ...prevNote, id, text: note, tags };
+              }
+              return prevNote;
+            });
+          },
+          { revalidate: false }
+          // TODO: Better error handling. Currently hides all notes, forces user to refresh
+        ).catch(catchSwr(mutate, 'notes'));
       }}
       m="1em 0"
     >
@@ -204,14 +222,16 @@ export default function Notes({ notes, error, api }) {
                 ))}
               </Box>
             </Box>
-            <Button
-              textOnly
-              onClick={() => openNoteEditModal({ text, id, tags })}
-              display="flex"
-              data-testid={`note-${id}-edit`}
-            >
-              <span className="material-symbols-outlined">edit_square</span>
-            </Button>
+            {enableEdit && (
+              <Button
+                textOnly
+                onClick={() => openNoteEditModal({ text, id, tags })}
+                display="flex"
+                data-testid={`note-${id}-edit`}
+              >
+                <span className="material-symbols-outlined">edit_square</span>
+              </Button>
+            )}
             <Button
               textOnly
               onClick={() => handleConfirmDeleteNote(id)}
