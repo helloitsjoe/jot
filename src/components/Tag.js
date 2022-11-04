@@ -6,12 +6,12 @@ export default function Tag({
   color,
   children,
   onSelect = () => {},
+  // onEdit,
   onDelete,
 }) {
   return (
     <Box
       as="span"
-      // bg={color}
       border={`2px solid ${color}`}
       color={color}
       p="0.2em 0.4em"
