@@ -8,10 +8,6 @@ import ConfirmDelete from './ConfirmDelete';
 import { ModalContext } from './Modal';
 import { useCustomSwr, catchSwr } from '../utils';
 
-const enableEdit = new URLSearchParams(window.location.search).get(
-  'enableEdit'
-);
-
 function EditNote({
   id,
   initialNoteText = '',
@@ -27,7 +23,7 @@ function EditNote({
   const [tags, setTags] = React.useState(initialTags);
 
   const handleNoteChange = (e) => setNote(e.target.value);
-  const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
+  // const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
 
   return (
     <Box
@@ -72,9 +68,9 @@ function EditNote({
               <Tag
                 key={text}
                 color={color}
-                onDelete={() => {
-                  setTags((p) => p.filter((t) => t.text !== text));
-                }}
+                // onDelete={() => {
+                //   setTags((p) => p.filter((t) => t.text !== text));
+                // }}
               >
                 {text}
               </Tag>
@@ -83,24 +79,24 @@ function EditNote({
         </Box>
       )}
 
-      {recentTags.length > 0 ? (
-        <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
-          {recentTags.map(({ id: tagId, text, color }) => {
-            return (
-              <Tag
-                id={tagId}
-                key={tagId}
-                color={color}
-                onSelect={handleAddTagToNote}
-              >
-                {text}
-              </Tag>
-            );
-          })}
-        </Box>
-      ) : (
-        <p>No recent tags!</p>
-      )}
+      {/* {recentTags.length > 0 ? ( */}
+      {/*   <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em"> */}
+      {/*     {recentTags.map(({ id: tagId, text, color }) => { */}
+      {/*       return ( */}
+      {/*         <Tag */}
+      {/*           id={tagId} */}
+      {/*           key={tagId} */}
+      {/*           color={color} */}
+      {/*           // onSelect={handleAddTagToNote} */}
+      {/*         > */}
+      {/*           {text} */}
+      {/*         </Tag> */}
+      {/*       ); */}
+      {/*     })} */}
+      {/*   </Box> */}
+      {/* ) : ( */}
+      {/*   <p>No recent tags!</p> */}
+      {/* )} */}
     </Box>
   );
 }
@@ -222,16 +218,14 @@ export default function Notes({ notes, error, api }) {
                 ))}
               </Box>
             </Box>
-            {enableEdit && (
-              <Button
-                textOnly
-                onClick={() => openNoteEditModal({ text, id, tags })}
-                display="flex"
-                data-testid={`note-${id}-edit`}
-              >
-                <span className="material-symbols-outlined">edit_square</span>
-              </Button>
-            )}
+            <Button
+              textOnly
+              onClick={() => openNoteEditModal({ text, id, tags })}
+              display="flex"
+              data-testid={`note-${id}-edit`}
+            >
+              <span className="material-symbols-outlined">edit_square</span>
+            </Button>
             <Button
               textOnly
               onClick={() => handleConfirmDeleteNote(id)}
