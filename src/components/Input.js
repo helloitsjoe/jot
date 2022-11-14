@@ -13,7 +13,7 @@ export default function Input({
       <Box>{label}</Box>
       <Box
         as="input"
-        p="1em"
+        lineHeight="calc(3em + 1px)"
         borderRadius="0"
         color="white"
         type={type}
