@@ -103,12 +103,40 @@ export const createApi = (db = supabase) => {
     return note;
   };
 
-  const updateNote = async (id, text, tag_ids) => {
+  const updateNote = async ({ id, text, oldTagIds = [], newTagIds = [] }) => {
     // TODO: updated_at
-    console.log(`Updating... ${text}, ${tag_ids}`);
-    // TODO: tag_ids
-    const res = await db.from('notes').update({ id, text });
-    return validate(res);
+    console.log(
+      `Updating... ${text}, old tags: ${oldTagIds}, new tags: ${newTagIds}`
+    );
+
+    const {
+      user: { id: user_id },
+    } = await getUser();
+
+    const toInsert = newTagIds
+      .filter((newId) => !oldTagIds.includes(newId))
+      .map((tag_id) => ({ user_id, note_id: id, tag_id }));
+    const toDelete = oldTagIds
+      .filter((oldId) => !newTagIds.includes(oldId))
+      .map((tag_id) => ({ note_id: id, tag_id }));
+
+    const promises = [
+      db.from('notes').update({ id, text }).select(),
+      db.from('notes_tags').insert(toInsert),
+      ...toDelete.map(({ note_id, tag_id }) =>
+        db
+          .from('notes_tags')
+          .delete()
+          .eq('note_id', note_id)
+          .eq('tag_id', tag_id)
+      ),
+    ];
+
+    // notes_tags response is unused
+    const [noteRes, notesTagsRes] = await Promise.all(promises);
+    console.log('notesTagsRes', notesTagsRes);
+    const [note] = validate(noteRes);
+    return note;
   };
 
   const addTag = async ({ text, color }) => {
