@@ -33,17 +33,13 @@ function EditNote({
         mutate(
           'notes',
           async (allNotes) => {
-            try {
-              await api.updateNote({
-                id,
-                note,
-                oldTagIds: initialTags.map((tag) => tag.id),
-                newTagIds: tags.map((tag) => tag.id),
-              });
-              onSuccess();
-            } catch (e) {
-              console.error(e);
-            }
+            await api.updateNote({
+              id,
+              note,
+              oldTagIds: initialTags.map((tag) => tag.id),
+              newTagIds: tags.map((tag) => tag.id),
+            });
+            onSuccess();
             return allNotes.map((prevNote) => {
               if (prevNote.id === id) {
                 return { ...prevNote, id, text: note, tags };
@@ -84,7 +80,7 @@ function EditNote({
         </Box>
       )}
 
-      {recentTags.length > 0 ? (
+      {recentTags?.length > 0 ? (
         <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
           {recentTags.map(({ id: tagId, text, color }) => {
             return (
