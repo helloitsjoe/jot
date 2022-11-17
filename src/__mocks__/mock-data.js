@@ -1,3 +1,4 @@
+// For denormalization tests
 const noteSingleTag = {
   id: 8,
   created_at: '2022-09-11T04:04:47.477906+00:00',
@@ -56,10 +57,26 @@ const notesTags = [
 
 const allNotes = [noteSingleTag, noteMultiTags, noteNoTags];
 
+// For component tests
+const mockTagMeta = { text: 'meta', id: 1, color: 'lime' };
+const mockTagWork = { text: 'work', id: 2, color: 'blueviolet' };
+
+const mockNoteQuick = { text: 'quick note', id: 1, tags: [mockTagMeta] };
+const mockNoteWork = { text: 'work reminder', id: 2, tags: [mockTagWork] };
+
+const mockNotes = [mockNoteQuick, mockNoteWork];
+const mockTags = [mockTagMeta, mockTagWork];
+
 module.exports = {
   noteMultiTags,
   noteSingleTag,
+  mockTagMeta,
+  mockTagWork,
+  mockNoteQuick,
+  mockNoteWork,
   noteNoTags,
+  mockNotes,
+  mockTags,
   tagBee,
   tagBuzz,
   allNotes,

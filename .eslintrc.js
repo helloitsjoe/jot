@@ -6,6 +6,7 @@ module.exports = {
     'react/prop-types': 'off',
     semi: 'off',
     camelcase: 'off',
+    'import/prefer-default-export': 'off',
     'import/extensions': [
       'error',
       'ignorePackages',

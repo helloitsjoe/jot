@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 
+// Supabase returns an error in 200 response, unwrap and throw if it exists.
 const validate = (res) => {
   const { data, error } = res;
   if (error) {

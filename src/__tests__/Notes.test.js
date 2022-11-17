@@ -5,20 +5,12 @@ import {
   screen,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
+import { mockTags, mockNotes } from '../__mocks__/mock-data';
 import RawNotes from '../components/Notes';
 import { withSWR } from '../utils';
 import ModalProvider from '../components/Modal';
 
 const Notes = withSWR(RawNotes);
-
-const mockTagMeta = { text: 'meta', id: 1, color: 'lime' };
-const mockTagWork = { text: 'work', id: 2, color: 'blueviolet' };
-
-const mockNoteQuick = { text: 'quick note', id: 1, tags: [mockTagMeta] };
-const mockNoteWork = { text: 'work reminder', id: 2, tags: [mockTagWork] };
-
-const mockNotes = [mockNoteQuick, mockNoteWork];
-const mockTags = [mockTagMeta, mockTagWork];
 
 let api;
 
