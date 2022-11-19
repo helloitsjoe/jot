@@ -34,28 +34,48 @@ describe('addTagsToNotes', () => {
   });
 });
 
-describe('loadTags', () => {
-  it('loads tags', async () => {
-    const api = createApi();
-    const tags = await api.loadTags();
-    expect(tags).toEqual(mockTags);
+describe('Tags', () => {
+  describe('loadTags', () => {
+    it('loads tags', async () => {
+      const api = createApi();
+      const tags = await api.loadTags();
+      expect(tags).toEqual(mockTags);
+    });
+
+    it('returns empty array if no tags', async () => {
+      server.use(emptyTagsHandler);
+      const api = createApi();
+      const tags = await api.loadTags();
+      expect(tags).toEqual([]);
+    });
+
+    it('throws if error response', async () => {
+      expect.assertions(1);
+      server.use(errorTagsHandler);
+      const api = createApi();
+      try {
+        await api.loadTags();
+      } catch (err) {
+        expect(err.message).toEqual('oh heck');
+      }
+    });
   });
 
-  it('returns empty array if no tags', async () => {
-    server.use(emptyTagsHandler);
-    const api = createApi();
-    const tags = await api.loadTags();
-    expect(tags).toEqual([]);
-  });
+  describe('addTag', () => {
+    it('posts a tag', async () => {
+      const api = createApi();
+      const newTag = await api.addTag({ text: 'hello', color: 'blue' });
+      expect(newTag).toEqual({ text: 'hello', color: 'blue' });
+    });
 
-  it('throws if error response', async () => {
-    expect.assertions(1);
-    server.use(errorTagsHandler);
-    const api = createApi();
-    try {
-      await api.loadTags();
-    } catch (err) {
-      expect(err.message).toEqual('oh heck');
-    }
+    it('requires text and color', async () => {
+      const api = createApi();
+      expect(api.addTag({ text: 'hello' })).rejects.toThrow(
+        /text and color are required/i
+      );
+      expect(api.addTag({ color: 'blue' })).rejects.toThrow(
+        /text and color are required/i
+      );
+    });
   });
 });
