@@ -1,7 +1,6 @@
-import { rest } from 'msw';
 import { addTagsToNotes, createApi } from '../api';
 import { server } from '../__mocks__/server';
-import { TAGS_ENDPOINT } from '../__mocks__/handlers';
+import { emptyTagsHandler, errorTagsHandler } from '../__mocks__/handlers';
 import {
   allNotes,
   tagBee,
@@ -43,17 +42,20 @@ describe('loadTags', () => {
   });
 
   it('returns empty array if no tags', async () => {
-    server.use(
-      rest.get(TAGS_ENDPOINT, (req, res, ctx) =>
-        res(ctx.status(200), ctx.json(null))
-      )
-    );
+    server.use(emptyTagsHandler);
     const api = createApi();
     const tags = await api.loadTags();
     expect(tags).toEqual([]);
   });
 
-  it('throws if error response', () => {
-    // TODO: runtime handlers: https://github.com/mswjs/msw/discussions/885
+  it('throws if error response', async () => {
+    expect.assertions(1);
+    server.use(errorTagsHandler);
+    const api = createApi();
+    try {
+      await api.loadTags();
+    } catch (err) {
+      expect(err.message).toEqual('oh heck');
+    }
   });
 });
