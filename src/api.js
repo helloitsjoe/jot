@@ -150,6 +150,8 @@ export const createApi = (db = supabase) => {
       data: { user },
     } = await db.auth.getUser();
 
+    console.log('user', user);
+
     // Tags are required to have user, text, color
     const res = await db
       .from('tags')

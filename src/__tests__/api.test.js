@@ -65,7 +65,7 @@ describe('Tags', () => {
     it('posts a tag', async () => {
       const api = createApi();
       const newTag = await api.addTag({ text: 'hello', color: 'blue' });
-      expect(newTag).toEqual({ text: 'hello', color: 'blue' });
+      expect(newTag).toEqual({ text: 'hello', color: 'blue', user_id: '123' });
     });
 
     it('requires text and color', async () => {

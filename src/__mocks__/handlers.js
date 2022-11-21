@@ -4,14 +4,14 @@ import { mockTags } from './mock-data';
 export const TAGS = 'https://faxousvhzthjbkpymmvz.supabase.co/rest/v1/tags';
 export const AUTH = 'https://faxousvhzthjbkpymmvz.supabase.co/auth/v1/user';
 
-const user = { foo: 'bar' };
+const user = { id: '123' };
 
 export const defaultHandlers = [
   rest.get(TAGS, (req, res, ctx) => {
     return res(ctx.json(mockTags));
   }),
   rest.get(AUTH, (req, res, ctx) => {
-    return res(ctx.json({ data: { user } }));
+    return res(ctx.json(user));
   }),
   rest.post(TAGS, (req, res, ctx) => {
     const newTag = req.body;
