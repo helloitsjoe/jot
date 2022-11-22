@@ -23,6 +23,10 @@ export const emptyTagsHandler = rest.get(TAGS, (req, res, ctx) =>
   res(ctx.json(null))
 );
 
-export const errorTagsHandler = rest.get(TAGS, (req, res, ctx) =>
+export const errorFetchTagsHandler = rest.get(TAGS, (req, res, ctx) =>
   res(ctx.status(500), ctx.json({ message: 'oh heck' }))
+);
+
+export const errorAddTagHandler = rest.post(TAGS, (req, res, ctx) =>
+  res(ctx.status(500), ctx.json({ message: 'adding failed' }))
 );

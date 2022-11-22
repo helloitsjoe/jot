@@ -1,6 +1,10 @@
 import { addTagsToNotes, createApi } from '../api';
 import { server } from '../__mocks__/server';
-import { emptyTagsHandler, errorTagsHandler } from '../__mocks__/handlers';
+import {
+  emptyTagsHandler,
+  errorFetchTagsHandler,
+  errorAddTagHandler,
+} from '../__mocks__/handlers';
 import {
   allNotes,
   tagBee,
@@ -51,7 +55,7 @@ describe('Tags', () => {
 
     it('throws if error response', async () => {
       expect.assertions(1);
-      server.use(errorTagsHandler);
+      server.use(errorFetchTagsHandler);
       const api = createApi();
       try {
         await api.loadTags();
@@ -76,6 +80,17 @@ describe('Tags', () => {
       expect(api.addTag({ color: 'blue' })).rejects.toThrow(
         /text and color are required/i
       );
+    });
+
+    it('throws if error response from API', async () => {
+      expect.assertions(1);
+      server.use(errorAddTagHandler);
+      const api = createApi();
+      try {
+        await api.addTag({ text: 'hello', color: 'blue' });
+      } catch (err) {
+        expect(err.message).toEqual('adding failed');
+      }
     });
   });
 });
