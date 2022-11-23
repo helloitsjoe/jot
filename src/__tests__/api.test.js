@@ -4,6 +4,8 @@ import {
   emptyTagsHandler,
   errorFetchTagsHandler,
   errorAddTagHandler,
+  errorDeleteTagHandler,
+  errorDeleteNotesTagsHandler,
 } from '../__mocks__/handlers';
 import {
   allNotes,
@@ -17,7 +19,7 @@ import {
 } from '../__mocks__/mock-data';
 
 beforeAll(() => {
-  server.listen();
+  server.listen({ onUnhandledRequest: 'error' });
 });
 
 afterEach(() => {
@@ -90,6 +92,36 @@ describe('Tags', () => {
         await api.addTag({ text: 'hello', color: 'blue' });
       } catch (err) {
         expect(err.message).toEqual('adding failed');
+      }
+    });
+  });
+
+  describe('deleteTag', () => {
+    it('deletes a tag', async () => {
+      const api = createApi();
+      const deleted = await api.deleteTag({ id: '123' });
+      expect(deleted).toEqual(true);
+    });
+
+    it('throws if error deleting tag', async () => {
+      expect.assertions(1);
+      server.use(errorDeleteTagHandler);
+      const api = createApi();
+      try {
+        await api.deleteTag({ id: '123' });
+      } catch (err) {
+        expect(err.message).toEqual('deleting tag failed');
+      }
+    });
+
+    it('throws if error deleting notes_tags entry', async () => {
+      expect.assertions(1);
+      server.use(errorDeleteNotesTagsHandler);
+      const api = createApi();
+      try {
+        await api.deleteTag({ id: '123' });
+      } catch (err) {
+        expect(err.message).toEqual('deleting notes_tags failed');
       }
     });
   });
