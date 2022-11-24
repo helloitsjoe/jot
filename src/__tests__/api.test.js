@@ -96,6 +96,15 @@ describe('Tags', () => {
     });
   });
 
+  describe('updateTag', () => {
+    it('updates a tag', async () => {
+      const api = createApi();
+      const updatedValues = { id: '123', color: 'blue', text: 'hello' };
+      const updated = await api.updateTag(updatedValues);
+      expect(updated).toEqual(updatedValues);
+    });
+  });
+
   describe('deleteTag', () => {
     it('deletes a tag', async () => {
       const api = createApi();

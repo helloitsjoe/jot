@@ -19,6 +19,10 @@ export const defaultHandlers = [
     const newTag = req.body;
     return res(ctx.json(newTag));
   }),
+  rest.patch(TAGS, (req, res, ctx) => {
+    const newTag = req.body;
+    return res(ctx.json(newTag));
+  }),
   rest.delete(TAGS, (req, res, ctx) => {
     return res(ctx.json(true));
   }),
