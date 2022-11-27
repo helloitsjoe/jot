@@ -67,16 +67,27 @@ const mockNoteWork = { text: 'work reminder', id: 2, tags: [mockTagWork] };
 const mockNotes = [mockNoteQuick, mockNoteWork];
 const mockTags = [mockTagMeta, mockTagWork];
 
+const mockUser = { id: '123' };
+const mockTokenResponse = {
+  access_token: 'foo',
+  token_type: 'bearer',
+  expires_in: 3600,
+  refresh_token: 'bar',
+  user: mockUser,
+};
+
 module.exports = {
   noteMultiTags,
   noteSingleTag,
   mockTagMeta,
   mockTagWork,
+  mockTokenResponse,
   mockNoteQuick,
   mockNoteWork,
   noteNoTags,
   mockNotes,
   mockTags,
+  mockUser,
   tagBee,
   tagBuzz,
   allNotes,

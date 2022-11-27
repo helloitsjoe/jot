@@ -6,6 +6,7 @@ import {
   errorAddTagHandler,
   errorDeleteTagHandler,
   errorDeleteNotesTagsHandler,
+  errorTokenHandler,
 } from '../__mocks__/handlers';
 import {
   allNotes,
@@ -16,6 +17,7 @@ import {
   noteSingleTag,
   notesTags,
   mockTags,
+  mockTokenResponse,
 } from '../__mocks__/mock-data';
 
 beforeAll(() => {
@@ -37,6 +39,27 @@ describe('addTagsToNotes', () => {
       { ...noteMultiTags, tags: [tagBee, tagBuzz] },
       { ...noteNoTags, tags: [] },
     ]);
+  });
+});
+
+describe('Auth', () => {
+  xdescribe('signIn', () => {
+    it('signs in', async () => {
+      const api = createApi();
+      const auth = await api.signIn({ email: 'foo@bar.com', password: '1234' });
+      expect(auth).toEqual(mockTokenResponse);
+    });
+
+    it('throws if error response', async () => {
+      expect.assertions(1);
+      server.use(errorTokenHandler);
+      const api = createApi();
+      try {
+        await api.signIn({ email: 'foo@bar.com', password: '1234' });
+      } catch (err) {
+        expect(err.message).toBe('token failed');
+      }
+    });
   });
 });
 
