@@ -43,11 +43,22 @@ describe('addTagsToNotes', () => {
 });
 
 describe('Auth', () => {
-  xdescribe('signIn', () => {
+  describe('signIn', () => {
     it('signs in', async () => {
       const api = createApi();
       const auth = await api.signIn({ email: 'foo@bar.com', password: '1234' });
-      expect(auth).toEqual(mockTokenResponse);
+      // Supabase mutates response so it's different from mock HTTP response
+      expect(auth).toEqual({
+        session: {
+          access_token: 'foo',
+          expires_at: expect.any(Number),
+          expires_in: 3600,
+          refresh_token: 'bar',
+          token_type: 'bearer',
+          user: { id: '123' },
+        },
+        user: { id: '123' },
+      });
     });
 
     it('throws if error response', async () => {
@@ -57,7 +68,7 @@ describe('Auth', () => {
       try {
         await api.signIn({ email: 'foo@bar.com', password: '1234' });
       } catch (err) {
-        expect(err.message).toBe('token failed');
+        expect(err.status).toEqual(500);
       }
     });
   });
