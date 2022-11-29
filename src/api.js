@@ -70,7 +70,8 @@ export const createApi = (db = supabase) => {
 
   const addUser = async ({ id }) => {
     const res = await db.from('users').insert([{ id }]);
-    return validate(res);
+    const [user] = validate(res);
+    return user;
   };
 
   const addNote = async (text, tag_ids) => {

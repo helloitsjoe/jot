@@ -42,7 +42,7 @@ describe('addTagsToNotes', () => {
   });
 });
 
-describe('Auth', () => {
+describe('User', () => {
   describe('signIn', () => {
     it('signs in', async () => {
       const api = createApi();
@@ -70,6 +70,15 @@ describe('Auth', () => {
       } catch (err) {
         expect(err.status).toEqual(500);
       }
+    });
+  });
+
+  describe('addUser', () => {
+    it('adds a user', async () => {
+      const id = '123';
+      const api = createApi();
+      const user = await api.addUser({ id });
+      expect(user.id).toBe('123');
     });
   });
 });
