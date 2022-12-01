@@ -177,4 +177,21 @@ describe('Tags', () => {
       }
     });
   });
+
+  describe('Notes', () => {
+    describe('addNote', () => {
+      it('adds a note', async () => {
+        const api = createApi();
+        const added = await api.addNote('I am a note!', [1, 2]);
+        expect(added).toEqual({
+          text: 'I am a note!',
+          tag_ids: [1, 2],
+          user_id: '123',
+        });
+      });
+
+      it.todo('throws if adding a note fails');
+      it.todo('throws if adding to notes_tags fails');
+    });
+  });
 });

@@ -82,6 +82,7 @@ export const createApi = (db = supabase) => {
       user: { id: user_id },
     } = await getUser();
 
+    // TODO: Batch notes and notes_tags
     const res = await db
       .from('notes')
       .insert([{ user_id, text, tag_ids }])
