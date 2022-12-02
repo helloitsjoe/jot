@@ -4,6 +4,8 @@ import {
   emptyTagsHandler,
   errorFetchTagsHandler,
   errorAddTagHandler,
+  errorAddNoteHandler,
+  errorAddNotesTagsHandler,
   errorDeleteTagHandler,
   errorDeleteNotesTagsHandler,
   errorTokenHandler,
@@ -190,8 +192,27 @@ describe('Tags', () => {
         });
       });
 
-      it.todo('throws if adding a note fails');
-      it.todo('throws if adding to notes_tags fails');
+      it('throws if adding a note fails', async () => {
+        expect.assertions(1);
+        server.use(errorAddNoteHandler);
+        const api = createApi();
+        try {
+          await api.addNote('Notey note', [1, 2]);
+        } catch (err) {
+          expect(err.message).toEqual('adding note failed');
+        }
+      });
+
+      it('throws if adding to notes_tags fails', async () => {
+        expect.assertions(1);
+        server.use(errorAddNotesTagsHandler);
+        const api = createApi();
+        try {
+          await api.addNote('Notey note', [1, 2]);
+        } catch (err) {
+          expect(err.message).toEqual('adding notes_tags failed');
+        }
+      });
     });
   });
 });

@@ -36,6 +36,10 @@ export const errorAddTagHandler = rest.post(TAGS, (req, res, ctx) =>
   res(ctx.status(500), ctx.json({ message: 'adding failed' }))
 );
 
+export const errorAddNoteHandler = rest.post(NOTES, (req, res, ctx) =>
+  res(ctx.status(500), ctx.json({ message: 'adding note failed' }))
+);
+
 export const errorDeleteTagHandler = rest.delete(TAGS, (req, res, ctx) =>
   res(ctx.status(500), ctx.json({ message: 'deleting tag failed' }))
 );
@@ -44,4 +48,8 @@ export const errorDeleteNotesTagsHandler = rest.delete(
   NOTES_TAGS,
   (req, res, ctx) =>
     res(ctx.status(500), ctx.json({ message: 'deleting notes_tags failed' }))
+);
+
+export const errorAddNotesTagsHandler = rest.post(NOTES, (req, res, ctx) =>
+  res(ctx.status(500), ctx.json({ message: 'adding notes_tags failed' }))
 );
