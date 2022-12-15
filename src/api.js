@@ -89,7 +89,6 @@ export const createApi = (db = supabase) => {
       .select();
 
     const [note] = validate(res);
-    console.log('note.id', note.id);
 
     const toInsert = tag_ids.map((tag_id) => ({
       user_id,

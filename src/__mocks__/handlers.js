@@ -18,6 +18,7 @@ export const defaultHandlers = [
   rest.post(NOTES, (req, res, ctx) => res(ctx.json(req.body))),
   rest.patch(TAGS, (req, res, ctx) => res(ctx.json(req.body))),
   rest.delete(TAGS, (req, res, ctx) => res(ctx.json(true))),
+  rest.post(NOTES_TAGS, (req, res, ctx) => res(ctx.json(req.body))),
   rest.delete(NOTES_TAGS, (req, res, ctx) => res(ctx.json(req.body))),
 ];
 
