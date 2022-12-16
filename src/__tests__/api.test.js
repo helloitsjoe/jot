@@ -233,6 +233,17 @@ describe('Tags', () => {
           expect(err.message).toEqual('deleting note failed');
         }
       });
+
+      it('throws if deleting notes_tags entry fails', async () => {
+        expect.assertions(1);
+        server.use(errorDeleteNotesTagsHandler);
+        const api = createApi();
+        try {
+          await api.deleteNote({ id: 1 });
+        } catch (err) {
+          expect(err.message).toEqual('deleting notes_tags failed');
+        }
+      });
     });
   });
 });
