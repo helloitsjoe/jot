@@ -18,6 +18,7 @@ export const defaultHandlers = [
   rest.post(NOTES, (req, res, ctx) => res(ctx.json(req.body))),
   rest.patch(TAGS, (req, res, ctx) => res(ctx.json(req.body))),
   rest.delete(TAGS, (req, res, ctx) => res(ctx.json(true))),
+  rest.delete(NOTES, (req, res, ctx) => res(ctx.json(true))),
   rest.post(NOTES_TAGS, (req, res, ctx) => res(ctx.json(req.body))),
   rest.delete(NOTES_TAGS, (req, res, ctx) => res(ctx.json(req.body))),
 ];
@@ -43,6 +44,10 @@ export const errorAddNoteHandler = rest.post(NOTES, (req, res, ctx) =>
 
 export const errorDeleteTagHandler = rest.delete(TAGS, (req, res, ctx) =>
   res(ctx.status(500), ctx.json({ message: 'deleting tag failed' }))
+);
+
+export const errorDeleteNoteHandler = rest.delete(NOTES, (req, res, ctx) =>
+  res(ctx.status(500), ctx.json({ message: 'deleting note failed' }))
 );
 
 export const errorDeleteNotesTagsHandler = rest.delete(

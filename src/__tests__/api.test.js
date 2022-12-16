@@ -6,6 +6,7 @@ import {
   errorAddTagHandler,
   errorAddNoteHandler,
   errorAddNotesTagsHandler,
+  errorDeleteNoteHandler,
   errorDeleteTagHandler,
   errorDeleteNotesTagsHandler,
   errorTokenHandler,
@@ -211,6 +212,25 @@ describe('Tags', () => {
           await api.addNote('Notey note', [1, 2]);
         } catch (err) {
           expect(err.message).toEqual('adding notes_tags failed');
+        }
+      });
+    });
+
+    describe('deleteNote', () => {
+      it('deletes a note', async () => {
+        const api = createApi();
+        const deleted = await api.deleteNote({ id: 1 });
+        expect(deleted).toEqual(true);
+      });
+
+      it('throws if deleting fails', async () => {
+        expect.assertions(1);
+        server.use(errorDeleteNoteHandler);
+        const api = createApi();
+        try {
+          await api.deleteNote({ id: 1 });
+        } catch (err) {
+          expect(err.message).toEqual('deleting note failed');
         }
       });
     });
