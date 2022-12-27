@@ -20,7 +20,6 @@ import {
   noteSingleTag,
   notesTags,
   mockTags,
-  mockTokenResponse,
 } from '../__mocks__/mock-data';
 
 beforeAll(() => {
