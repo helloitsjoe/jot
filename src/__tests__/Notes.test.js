@@ -3,6 +3,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { mockTags, mockNotes } from '../__mocks__/mock-data';
@@ -31,7 +32,6 @@ describe('Notes', () => {
     );
 
     fireEvent.click(screen.queryByTestId('note-1-edit'));
-    // expect something
     await waitForElementToBeRemoved(screen.queryByText(/no recent tags/i));
     fireEvent.change(screen.queryByLabelText(/update note/i), {
       target: { value: 'I have been sufficiently updated' },
@@ -48,6 +48,34 @@ describe('Notes', () => {
     );
   });
 
-  it.todo('note tags are editable');
+  it('note tags are editable', async () => {
+    render(
+      <ModalProvider>
+        <Notes api={api} notes={mockNotes} />
+      </ModalProvider>
+    );
+
+    expect(mockNotes[0]).toEqual({
+      id: 1,
+      tags: [{ color: 'lime', id: 1, text: 'meta' }],
+      text: 'quick note',
+    });
+
+    fireEvent.click(screen.queryByTestId('note-1-edit'));
+    await screen.findByRole('button', { name: /update/i });
+    // Click tag (within modal)
+    fireEvent.click(within(screen.queryByRole('dialog')).queryByText(/work/i));
+    fireEvent.submit(screen.queryByRole('button', { name: /update/i }));
+    expect(api.updateNote).toBeCalledWith({
+      id: 1,
+      newTagIds: [1, 2],
+      oldTagIds: [1],
+      note: 'quick note',
+    });
+    await waitForElementToBeRemoved(
+      screen.queryByRole('button', { name: /update/i })
+    );
+  });
+
   it.todo('error updating note displays error message');
 });

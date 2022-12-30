@@ -29,6 +29,8 @@ export default function ModalProvider({ children }) {
           onClick={closeModal}
         >
           <Box
+            role="dialog"
+            // TODO: aria-labelledby
             position="absolute"
             top="50%"
             left="50%"
