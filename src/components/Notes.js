@@ -64,9 +64,10 @@ function EditNote({
       <Button onClick={onCancel}>Cancel</Button>
       {tags.length > 0 && (
         <Box>
-          {tags.map(({ text, color }) => {
+          {tags.map(({ id: tagId, text, color }) => {
             return (
               <Tag
+                id={tagId}
                 key={text}
                 color={color}
                 onDelete={() => {

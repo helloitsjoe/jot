@@ -77,5 +77,44 @@ describe('Notes', () => {
     );
   });
 
+  it('deleting a tag removes it from the list', async () => {
+    render(
+      <ModalProvider>
+        <Notes api={api} notes={mockNotes} />
+      </ModalProvider>
+    );
+
+    expect(mockNotes[0]).toEqual({
+      id: 1,
+      tags: [{ color: 'lime', id: 1, text: 'meta' }],
+      text: 'quick note',
+    });
+
+    fireEvent.click(screen.queryByTestId('note-1-edit'));
+    await screen.findByRole('button', { name: /update/i });
+
+    expect(
+      within(screen.queryByRole('dialog')).queryAllByText(/meta/i).length
+    ).toBe(2);
+
+    // Click tag (within modal)
+    fireEvent.click(screen.getByTestId('tag-1-delete'));
+
+    expect(
+      within(screen.queryByRole('dialog')).queryAllByText(/meta/i).length
+    ).toBe(1);
+
+    fireEvent.submit(screen.queryByRole('button', { name: /update/i }));
+    expect(api.updateNote).toBeCalledWith({
+      id: 1,
+      newTagIds: [],
+      oldTagIds: [1],
+      note: 'quick note',
+    });
+    await waitForElementToBeRemoved(
+      screen.queryByRole('button', { name: /update/i })
+    );
+  });
+
   it.todo('error updating note displays error message');
 });
