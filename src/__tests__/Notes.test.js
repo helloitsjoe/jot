@@ -116,5 +116,17 @@ describe('Notes', () => {
     );
   });
 
+  it('selecting a tag filters by that tag', async () => {
+    render(<Notes api={api} notes={mockNotes} />);
+
+    expect(screen.queryByText(/work reminder/i)).toBeTruthy();
+    expect(screen.queryByText(/quick note/i)).toBeTruthy();
+
+    fireEvent.click(screen.getByText(/meta/i));
+
+    expect(screen.queryByText(/work reminder/i)).not.toBeTruthy();
+    expect(screen.queryByText(/quick note/i)).toBeTruthy();
+  });
+
   it.todo('error updating note displays error message');
 });
