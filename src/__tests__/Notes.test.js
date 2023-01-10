@@ -128,5 +128,11 @@ describe('Notes', () => {
     expect(screen.queryByText(/quick note/i)).toBeTruthy();
   });
 
+  it('displays error message', async () => {
+    render(<Notes error={new Error('Ruh roh')} />);
+
+    expect(screen.queryByText(/ruh roh/i)).toBeTruthy();
+  });
+
   it.todo('error updating note displays error message');
 });
