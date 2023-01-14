@@ -3,6 +3,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import {
@@ -12,7 +13,7 @@ import {
   mockTagMeta,
 } from '../__mocks__/mock-data';
 import RawApp from '../App';
-import RawNotes from '../components/Notes';
+import RawNotes, { DELETE_CANCEL_MS } from '../components/Notes';
 import { withSWR } from '../utils';
 import ModalProvider from '../components/Modal';
 
@@ -30,6 +31,12 @@ beforeEach(() => {
     addNote: jest.fn().mockResolvedValue(),
     addTag: jest.fn().mockResolvedValue(),
   };
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.runOnlyPendingTimers();
+  jest.useRealTimers();
 });
 
 describe('App', () => {
@@ -92,7 +99,7 @@ describe('App', () => {
       expect(api.addNote).toBeCalledWith('another note', [mockTagMeta.id]);
     });
 
-    it('deletes a note after confirming', async () => {
+    it('deletes a note after cancel period', async () => {
       render(
         <ModalProvider>
           <Notes notes={mockNotes} api={api} />
@@ -101,12 +108,10 @@ describe('App', () => {
 
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.queryByTestId('note-1-delete'));
+      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       expect(api.deleteNote).not.toBeCalled();
-      fireEvent.click(screen.getByRole('button', { name: /delete/i }));
+      jest.advanceTimersByTime(100);
       expect(api.deleteNote).toBeCalledWith({ id: 1 });
-      await waitForElementToBeRemoved(() =>
-        screen.queryByRole('button', { name: /delete/i })
-      );
     });
 
     it('does not delete a note after canceling', async () => {
@@ -119,11 +124,14 @@ describe('App', () => {
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.queryByTestId('note-1-delete'));
       expect(api.deleteNote).not.toBeCalled();
-      fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
-      expect(api.deleteNote).not.toBeCalled();
+      // TODO: Change note to make it clear it's in a cancelable state
+      // Click again to cancel
+      fireEvent.click(screen.queryByRole('button', { name: /cancel/i }));
       expect(
         screen.queryByRole('button', { name: /cancel/i })
       ).not.toBeTruthy();
+      jest.advanceTimersByTime(DELETE_CANCEL_MS);
+      expect(api.deleteNote).not.toBeCalled();
     });
   });
 
@@ -150,6 +158,7 @@ describe('App', () => {
     });
 
     it('shows error when deleting a note', async () => {
+      jest.useFakeTimers();
       api.deleteNote = jest.fn().mockRejectedValue(new Error('delete failed!'));
       render(
         <ModalProvider>
@@ -158,12 +167,11 @@ describe('App', () => {
       );
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.getByTestId(`note-${mockNoteQuick.id}-delete`));
-      fireEvent.click(screen.getByRole('button', { name: /delete/i }));
-      await waitForElementToBeRemoved(() =>
-        screen.getByRole('button', { name: /delete/i })
-      );
-      expect(api.deleteNote).toBeCalledWith({ id: 1 });
-      expect(screen.queryByText(/delete failed/i)).toBeTruthy();
+      jest.advanceTimersByTime(DELETE_CANCEL_MS - 50);
+      await waitFor(() => {
+        expect(api.deleteNote).toBeCalledWith({ id: 1 });
+        expect(screen.queryByText(/delete failed/i)).toBeTruthy();
+      });
     });
   });
 

@@ -4,9 +4,11 @@ import Box from './Box';
 import Tag from './Tag';
 import Input from './Input';
 import Button, { SubmitButton } from './Button';
-import ConfirmDelete from './ConfirmDelete';
+// import ConfirmDelete from './ConfirmDelete';
 import { ModalContext } from './Modal';
 import { useCustomSwr, catchSwr } from '../utils';
+
+export const DELETE_CANCEL_MS = 10_000;
 
 function EditNote({
   id,
@@ -103,13 +105,27 @@ function EditNote({
   );
 }
 
-export default function Notes({ notes, error, api }) {
+function defaultWaitForDelete(cb) {
+  return setTimeout(() => {
+    cb();
+  }, 10_000);
+}
+
+export default function Notes({
+  notes,
+  error,
+  api,
+  waitForDelete = defaultWaitForDelete,
+}) {
   const { mutate } = useSWRConfig();
+
+  const [notesToDelete, setNotesToDelete] = React.useState({});
+  const [activeTags, setActiveTags] = React.useState(new Set());
+
+  const timeouts = React.useRef({});
 
   const { openModal, closeModal, setModalContent } =
     React.useContext(ModalContext);
-
-  const [activeTags, setActiveTags] = React.useState(new Set());
 
   const handleDeleteNote = (id) => {
     const optimisticData = notes.filter((note) => note.id !== id);
@@ -139,14 +155,19 @@ export default function Notes({ notes, error, api }) {
     openModal();
   };
 
-  const handleConfirmDeleteNote = (id) => {
-    setModalContent(
-      <ConfirmDelete
-        onConfirmDelete={() => handleDeleteNote(id).then(closeModal)}
-        onCancel={closeModal}
-      />
-    );
-    openModal();
+  const handleOptimisticDeleteNote = (id) => {
+    // Optimistic delete
+    setNotesToDelete((prev) => ({ ...prev, [id]: true }));
+
+    // TODO: Make this nicer - countdown / fill bar, animate disappearing
+    timeouts.current[id] = waitForDelete(() => {
+      handleDeleteNote(id);
+    });
+  };
+
+  const handleCancelDeleteNote = (id) => {
+    clearTimeout(timeouts.current[id]);
+    setNotesToDelete((prev) => ({ ...prev, [id]: false }));
   };
 
   if (error) {
@@ -194,11 +215,12 @@ export default function Notes({ notes, error, api }) {
         </Box>
       )}
       {filteredNotes.map(({ text, id, tags }) => {
+        const deleting = notesToDelete[id] === true;
         return (
           <Box
             key={id}
             borderRadius="0.5em"
-            border="1px solid blueviolet"
+            border={deleting ? '1px solid gray' : '1px solid blueviolet'}
             justifyContent="space-between"
             display="flex"
             p="1em"
@@ -210,7 +232,7 @@ export default function Notes({ notes, error, api }) {
                 {tags.map((tag) => (
                   <Tag
                     key={tag.text}
-                    color={tag.color}
+                    color={deleting ? 'gray' : tag.color}
                     onSelect={() =>
                       setActiveTags((a) => [...new Set([...a, tag])])
                     }
@@ -230,12 +252,16 @@ export default function Notes({ notes, error, api }) {
             </Button>
             <Button
               textOnly
-              onClick={() => handleConfirmDeleteNote(id)}
+              onClick={() =>
+                deleting
+                  ? handleCancelDeleteNote(id)
+                  : handleOptimisticDeleteNote(id)
+              }
               display="flex"
               alignSelf="flex-start"
               data-testid={`note-${id}-delete`}
             >
-              X
+              {deleting ? 'Cancel' : 'X'}
             </Button>
           </Box>
         );
