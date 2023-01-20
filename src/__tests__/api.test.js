@@ -34,6 +34,14 @@ afterAll(() => {
   server.close();
 });
 
+describe('getSession', () => {
+  it('', async () => {
+    const api = createApi();
+    const user = await api.getUser();
+    expect(user).toEqual({ id: '123' });
+  });
+});
+
 describe('addTagsToNotes', () => {
   it('denormalizes notes_tags', () => {
     expect(addTagsToNotes(allNotes, notesTags)).toEqual([

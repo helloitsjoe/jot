@@ -33,7 +33,8 @@ export const createApi = (db = supabase) => {
 
   const getUser = async () => {
     const res = await db.auth.getUser();
-    return validate(res);
+    const { user } = validate(res);
+    return user;
   };
 
   const signUp = async ({ email, password }) => {
@@ -78,9 +79,7 @@ export const createApi = (db = supabase) => {
     console.log('tag_ids', tag_ids);
 
     // TODO: updated_at
-    const {
-      user: { id: user_id },
-    } = await getUser();
+    const { id: user_id } = await getUser();
 
     // TODO: Batch notes and notes_tags
     const res = await db
@@ -111,9 +110,7 @@ export const createApi = (db = supabase) => {
       `Updating... ${text}, old tags: ${oldTagIds}, new tags: ${newTagIds}`
     );
 
-    const {
-      user: { id: user_id },
-    } = await getUser();
+    const { id: user_id } = await getUser();
 
     const toInsert = newTagIds
       .filter((newId) => !oldTagIds.includes(newId))
@@ -147,9 +144,7 @@ export const createApi = (db = supabase) => {
       throw new Error('Text and color are required for tags!');
     }
 
-    const {
-      data: { user },
-    } = await db.auth.getUser();
+    const user = await getUser();
 
     console.log('user', user);
 

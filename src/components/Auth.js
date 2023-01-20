@@ -17,8 +17,8 @@ export default function AuthProvider({ api, children }) {
   React.useEffect(() => {
     api
       .getUser()
-      .then((data) => {
-        setUser(data.user);
+      .then((res) => {
+        setUser(res);
         setStatus(SUCCESS);
       })
       .catch((err) => {

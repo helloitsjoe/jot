@@ -11,7 +11,6 @@ export const NOTES_TAGS = `${BASE_URL}/rest/v1/notes_tags`;
 
 export const defaultHandlers = [
   rest.get(AUTH, (req, res, ctx) => res(ctx.json(mockUser))),
-  rest.post(TOKEN, (req, res, ctx) => res(ctx.json(mockTokenResponse))),
   rest.get(TAGS, (req, res, ctx) => res(ctx.json(mockTags))),
   rest.post(TAGS, (req, res, ctx) => res(ctx.json(req.body))),
   rest.post(USER, (req, res, ctx) => res(ctx.json(req.body))),
@@ -21,6 +20,7 @@ export const defaultHandlers = [
   rest.delete(NOTES, (req, res, ctx) => res(ctx.json(true))),
   rest.post(NOTES_TAGS, (req, res, ctx) => res(ctx.json(req.body))),
   rest.delete(NOTES_TAGS, (req, res, ctx) => res(ctx.json(req.body))),
+  rest.post(TOKEN, (req, res, ctx) => res(ctx.json(mockTokenResponse))),
 ];
 
 export const errorTokenHandler = rest.post(TOKEN, (req, res, ctx) =>
