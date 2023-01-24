@@ -156,10 +156,10 @@ export default function Notes({
   };
 
   const handleOptimisticDeleteNote = (id) => {
-    // Optimistic delete
     setNotesToDelete((prev) => ({ ...prev, [id]: true }));
 
     // TODO: Make this nicer - countdown / fill bar, animate disappearing
+    // FIXME: Indices are weird - try deleting more than one at a time
     timeouts.current[id] = waitForDelete(() => {
       handleDeleteNote(id);
     });

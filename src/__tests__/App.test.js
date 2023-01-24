@@ -35,7 +35,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.runOnlyPendingTimers();
+  jest.runAllTimers();
   jest.useRealTimers();
 });
 
@@ -133,6 +133,25 @@ describe('App', () => {
       jest.advanceTimersByTime(DELETE_CANCEL_MS);
       expect(api.deleteNote).not.toBeCalled();
     });
+
+    // it('deletes multiple notes', async () => {
+    //   // Fixed behavior where deleted notes were showing back up
+    //   render(
+    //     <ModalProvider>
+    //       <App api={api} />
+    //     </ModalProvider>
+    //   );
+    //   await screen.findByText(/quick note/i);
+    //   expect(screen.getByText(/work reminder/i)).toBeTruthy();
+    //   fireEvent.click(screen.queryByTestId('note-1-delete'));
+    //   jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+    //   fireEvent.click(screen.queryByTestId('note-2-delete'));
+    //   jest.advanceTimersByTime(200);
+    //   expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+    //   jest.advanceTimersByTime(DELETE_CANCEL_MS / 2);
+    //   expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+    //   expect(screen.queryByText(/work reminder/i)).not.toBeTruthy();
+    // });
   });
 
   describe('unhappy notes :(', () => {
