@@ -128,7 +128,13 @@ export default function Notes({
     React.useContext(ModalContext);
 
   const handleDeleteNote = (id) => {
-    const optimisticData = notes.filter((note) => note.id !== id);
+    // Optimistic data should:
+    // 1. Not include note to be deleted
+    // 2. Not include deleted notes. Reference mutable ref here to avoid
+    // stale data since this function is called in a closure
+    const optimisticData = notes.filter(
+      (note) => note.id !== id && timeouts.current[note.id] !== 'deleted'
+    );
     return mutate(
       'notes',
       async () => {
@@ -159,14 +165,15 @@ export default function Notes({
     setNotesToDelete((prev) => ({ ...prev, [id]: true }));
 
     // TODO: Make this nicer - countdown / fill bar, animate disappearing
-    // FIXME: Indices are weird - try deleting more than one at a time
     timeouts.current[id] = waitForDelete(() => {
+      timeouts.current[id] = 'deleted';
       handleDeleteNote(id);
     });
   };
 
   const handleCancelDeleteNote = (id) => {
     clearTimeout(timeouts.current[id]);
+    timeouts.current[id] = null;
     setNotesToDelete((prev) => ({ ...prev, [id]: false }));
   };
 
@@ -259,7 +266,7 @@ export default function Notes({
               }
               display="flex"
               alignSelf="flex-start"
-              data-testid={`note-${id}-delete`}
+              data-testid={`note-${id}-${deleting ? 'cancel' : 'delete'}`}
             >
               {deleting ? 'Cancel' : 'X'}
             </Button>

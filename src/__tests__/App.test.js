@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
   waitForElementToBeRemoved,
+  within,
 } from '@testing-library/react';
 import {
   mockNotes,
@@ -12,6 +13,7 @@ import {
   mockNoteQuick,
   mockTagMeta,
 } from '../__mocks__/mock-data';
+import { SWRConfig } from 'swr';
 import RawApp from '../App';
 import RawNotes, { DELETE_CANCEL_MS } from '../components/Notes';
 import { withSWR } from '../utils';
@@ -35,7 +37,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.runAllTimers();
+  jest.runOnlyPendingTimers();
   jest.useRealTimers();
 });
 
@@ -102,7 +104,7 @@ describe('App', () => {
     it('deletes a note after cancel period', async () => {
       render(
         <ModalProvider>
-          <Notes notes={mockNotes} api={api} />
+          <App api={api} />
         </ModalProvider>
       );
 
@@ -110,8 +112,43 @@ describe('App', () => {
       fireEvent.click(screen.queryByTestId('note-1-delete'));
       jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       expect(api.deleteNote).not.toBeCalled();
-      jest.advanceTimersByTime(100);
-      expect(api.deleteNote).toBeCalledWith({ id: 1 });
+      await waitFor(() => {
+        expect(api.deleteNote).toBeCalledWith({ id: 1 });
+        expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+      });
+    });
+
+    it('deletes multiple notes', async () => {
+      render(
+        <ModalProvider>
+          <App api={api} />
+        </ModalProvider>
+      );
+
+      await screen.findByText(/quick note/i);
+      expect(screen.findByText(/work reminder/i)).toBeTruthy();
+      fireEvent.click(screen.queryByTestId('note-1-delete'));
+      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      fireEvent.click(screen.queryByTestId('note-2-delete'));
+      expect(api.deleteNote).not.toBeCalled();
+
+      expect(screen.queryByText(/quick note/i)).toBeTruthy();
+      expect(screen.findByText(/work reminder/i)).toBeTruthy();
+
+      await waitFor(() => {
+        // Should delete first note before second
+        expect(api.deleteNote).toBeCalledWith({ id: 1 });
+        expect(api.deleteNote).not.toBeCalledWith({ id: 2 });
+        expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+        expect(screen.queryByText(/work reminder/i)).toBeTruthy();
+      });
+      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      await waitFor(() => {
+        // Check that both notes are deleted
+        expect(api.deleteNote).toBeCalledWith({ id: 2 });
+        expect(screen.queryByText(/work reminder/i)).not.toBeTruthy();
+        expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
+      });
     });
 
     it('does not delete a note after canceling', async () => {
@@ -134,24 +171,41 @@ describe('App', () => {
       expect(api.deleteNote).not.toBeCalled();
     });
 
-    // it('deletes multiple notes', async () => {
-    //   // Fixed behavior where deleted notes were showing back up
-    //   render(
-    //     <ModalProvider>
-    //       <App api={api} />
-    //     </ModalProvider>
-    //   );
-    //   await screen.findByText(/quick note/i);
-    //   expect(screen.getByText(/work reminder/i)).toBeTruthy();
-    //   fireEvent.click(screen.queryByTestId('note-1-delete'));
-    //   jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
-    //   fireEvent.click(screen.queryByTestId('note-2-delete'));
-    //   jest.advanceTimersByTime(200);
-    //   expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
-    //   jest.advanceTimersByTime(DELETE_CANCEL_MS / 2);
-    //   expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
-    //   expect(screen.queryByText(/work reminder/i)).not.toBeTruthy();
-    // });
+    it('shows canceled note after canceling only one', async () => {
+      render(
+        <ModalProvider>
+          <App api={api} />
+        </ModalProvider>
+      );
+
+      await screen.findByText(/quick note/i);
+      expect(screen.findByText(/work reminder/i)).toBeTruthy();
+      fireEvent.click(screen.queryByTestId('note-1-delete'));
+      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+
+      fireEvent.click(screen.queryByTestId('note-2-delete'));
+      // Cancel first after clicking second
+      fireEvent.click(screen.queryByTestId('note-1-cancel'));
+
+      expect(screen.queryByText(/quick note/i)).toBeTruthy();
+      expect(screen.findByText(/work reminder/i)).toBeTruthy();
+
+      await waitFor(() => {
+        // Should not delete either note yet
+        expect(api.deleteNote).not.toBeCalledWith({ id: 1 });
+        expect(api.deleteNote).not.toBeCalledWith({ id: 2 });
+        expect(screen.queryByText(/quick note/i)).toBeTruthy();
+        expect(screen.queryByText(/work reminder/i)).toBeTruthy();
+      });
+      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      await waitFor(() => {
+        // Check that only note 2 is deleted
+        expect(api.deleteNote).not.toBeCalledWith({ id: 1 });
+        expect(api.deleteNote).toBeCalledWith({ id: 2 });
+        expect(screen.queryByText(/work reminder/i)).not.toBeTruthy();
+        expect(screen.queryByText(/quick note/i)).toBeTruthy();
+      });
+    });
   });
 
   describe('unhappy notes :(', () => {
@@ -177,7 +231,6 @@ describe('App', () => {
     });
 
     it('shows error when deleting a note', async () => {
-      jest.useFakeTimers();
       api.deleteNote = jest.fn().mockRejectedValue(new Error('delete failed!'));
       render(
         <ModalProvider>
