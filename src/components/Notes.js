@@ -30,6 +30,7 @@ function EditNote({
   return (
     <Box
       as="form"
+      name="notes-form"
       onSubmit={async (e) => {
         e.preventDefault();
         mutate(

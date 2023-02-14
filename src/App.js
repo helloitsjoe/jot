@@ -48,7 +48,10 @@ export default function App({ api, onSignOut }) {
 
   const handleNoteChange = (e) => setNote(e.target.value);
   const handleTagChange = (e) => setTag(e.target.value.toLowerCase());
-  const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
+  const handleAddTagToNote = (newTag) => {
+    if (tags.find((t) => t.id === newTag.id)) return;
+    setTags((prev) => [...prev, newTag]);
+  };
 
   const addNewTag = async (e) => {
     e.preventDefault();
@@ -121,7 +124,12 @@ export default function App({ api, onSignOut }) {
 
   return (
     <Box maxWidth="500px" m="2em auto">
-      <Box as="form" onSubmit={handleAddNote} m="1em 0">
+      <Box
+        as="form"
+        aria-label="new-note-form"
+        onSubmit={handleAddNote}
+        m="1em 0"
+      >
         <Input
           width="auto"
           label={<h3>Add a note</h3>}
@@ -151,7 +159,7 @@ export default function App({ api, onSignOut }) {
         )}
       </Box>
       {/* TODO: If tag exists, add it to note instead of tags */}
-      <Box as="form" onSubmit={addNewTag} m="1em 0">
+      <Box as="form" aria-label="new-tag-form" onSubmit={addNewTag} m="1em 0">
         <Input
           label={<h3>Add a tag</h3>}
           value={tag}

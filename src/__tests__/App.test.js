@@ -13,7 +13,6 @@ import {
   mockNoteQuick,
   mockTagMeta,
 } from '../__mocks__/mock-data';
-import { SWRConfig } from 'swr';
 import RawApp from '../App';
 import RawNotes, { DELETE_CANCEL_MS } from '../components/Notes';
 import { withSWR } from '../utils';
@@ -99,6 +98,21 @@ describe('App', () => {
       fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
       await waitForElementToBeRemoved(() => screen.getByText(/adding.../i));
       expect(api.addNote).toBeCalledWith('another note', [mockTagMeta.id]);
+    });
+
+    it('does not add the same tag twice', async () => {
+      api.loadNotes.mockResolvedValue([]);
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+      expect(screen.getAllByText('meta').length).toBe(1);
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+      fireEvent.click(within(tagForm).getByText(/meta/i));
+      expect(within(noteForm).getAllByText('meta').length).toBe(1);
+
+      // Click again
+      fireEvent.click(within(tagForm).getByText(/meta/i));
+      expect(within(noteForm).getAllByText('meta').length).toBe(1);
     });
 
     it('deletes a note after cancel period', async () => {
