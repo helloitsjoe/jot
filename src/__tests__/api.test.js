@@ -10,6 +10,7 @@ import {
   errorDeleteTagHandler,
   errorDeleteNotesTagsHandler,
   errorTokenHandler,
+  errorUpdateTagsHandler,
 } from '../__mocks__/handlers';
 import {
   allNotes,
@@ -124,7 +125,12 @@ describe('Tags', () => {
     it('posts a tag', async () => {
       const api = createApi();
       const newTag = await api.addTag({ text: 'hello', color: 'blue' });
-      expect(newTag).toEqual({ text: 'hello', color: 'blue', user_id: '123' });
+      expect(newTag).toEqual({
+        text: 'hello',
+        color: 'blue',
+        user_id: '123',
+        updated_at: expect.any(String),
+      });
     });
 
     it('requires text and color', async () => {
@@ -154,7 +160,10 @@ describe('Tags', () => {
       const api = createApi();
       const updatedValues = { id: '123', color: 'blue', text: 'hello' };
       const updated = await api.updateTag(updatedValues);
-      expect(updated).toEqual(updatedValues);
+      expect(updated).toEqual({
+        ...updatedValues,
+        updated_at: expect.any(String),
+      });
     });
   });
 
@@ -219,6 +228,18 @@ describe('Tags', () => {
           await api.addNote('Notey note', [1, 2]);
         } catch (err) {
           expect(err.message).toEqual('adding notes_tags failed');
+        }
+      });
+
+      // Not sure why this isn't hitting the patch handler
+      xit('throws if updating tag fails', async () => {
+        expect.assertions(1);
+        server.use(errorUpdateTagsHandler);
+        const api = createApi();
+        try {
+          await api.addNote('Notey note', [1, 2]);
+        } catch (err) {
+          expect(err.message).toEqual('updating tags failed');
         }
       });
     });

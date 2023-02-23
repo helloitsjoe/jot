@@ -59,3 +59,7 @@ export const errorDeleteNotesTagsHandler = rest.delete(
 export const errorAddNotesTagsHandler = rest.post(NOTES, (req, res, ctx) =>
   res(ctx.status(500), ctx.json({ message: 'adding notes_tags failed' }))
 );
+
+export const errorUpdateTagsHandler = rest.patch(TAGS, (req, res, ctx) =>
+  res(ctx.status(500), ctx.json({ message: 'updating tags failed' }))
+);

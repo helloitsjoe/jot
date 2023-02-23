@@ -160,20 +160,6 @@ export default function App({ api, onSignOut }) {
       </Box>
       {/* TODO: If tag exists, add it to note instead of tags */}
       <Box as="form" aria-label="new-tag-form" onSubmit={addNewTag} m="1em 0">
-        <Input
-          label={<h3>Add a tag</h3>}
-          value={tag}
-          onChange={handleTagChange}
-          list="tags"
-        />
-        {/* <datalist id="tags"> */}
-        {/*   {(recentTags || []).map((t) => ( */}
-        {/*     <option key={t.text} value={t.text}> */}
-        {/*       {t.text} */}
-        {/*     </option> */}
-        {/*   ))} */}
-        {/* </datalist> */}
-        <SubmitButton>Add a new tag</SubmitButton>
         {/* TODO: Why isn't this error persisting? */}
         {fetchTagErr && (
           <Box color="white" bg="red">
@@ -185,9 +171,13 @@ export default function App({ api, onSignOut }) {
             return 'Loading...';
           }
 
-          return recentTags.length > 0 ? (
+          const sortedTags = [...recentTags].sort((a, b) =>
+            a.updated_at < b.updated_at ? 1 : -1
+          );
+
+          return sortedTags.length > 0 ? (
             <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
-              {recentTags
+              {sortedTags
                 .filter(({ text }) => !tag || text.includes(tag))
                 .map(({ id, text, color }) => {
                   return (
@@ -211,6 +201,20 @@ export default function App({ api, onSignOut }) {
             <p>No recent tags!</p>
           );
         })()}
+        <Input
+          label={<h3>Add a tag</h3>}
+          value={tag}
+          onChange={handleTagChange}
+          list="tags"
+        />
+        {/* <datalist id="tags"> */}
+        {/*   {(recentTags || []).map((t) => ( */}
+        {/*     <option key={t.text} value={t.text}> */}
+        {/*       {t.text} */}
+        {/*     </option> */}
+        {/*   ))} */}
+        {/* </datalist> */}
+        <SubmitButton>Add a new tag</SubmitButton>
       </Box>
       <Box m="3em 0">
         <h3>Existing notes</h3>

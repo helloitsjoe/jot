@@ -76,8 +76,6 @@ export const createApi = (db = supabase) => {
   };
 
   const addNote = async (text, tag_ids) => {
-    console.log('tag_ids', tag_ids);
-
     // TODO: updated_at
     const { id: user_id } = await getUser();
 
@@ -95,11 +93,14 @@ export const createApi = (db = supabase) => {
       tag_id,
     }));
 
-    // console.log('toInsert', toInsert);
+    const promises = [
+      ...tag_ids.map((id) =>
+        db.from('tags').update({ id, updated_at: new Date().toISOString() })
+      ),
+      db.from('notes_tags').insert(toInsert),
+    ];
 
-    const foo = await db.from('notes_tags').insert(toInsert).select('*');
-
-    console.log('foo', foo);
+    await Promise.all(promises);
 
     return note;
   };
@@ -151,9 +152,19 @@ export const createApi = (db = supabase) => {
     // Tags are required to have user, text, color
     const res = await db
       .from('tags')
-      .insert([{ text: text.toLowerCase(), color, user_id: user.id }], {
-        return: 'representation',
-      })
+      .insert(
+        [
+          {
+            text: text.toLowerCase(),
+            color,
+            user_id: user.id,
+            updated_at: new Date().toISOString(),
+          },
+        ],
+        {
+          return: 'representation',
+        }
+      )
       .select();
     console.log('res', res);
 
@@ -163,8 +174,9 @@ export const createApi = (db = supabase) => {
   };
 
   const updateTag = async ({ id, color, text }) => {
-    // TODO: updated_at
-    const res = await db.from('tags').update({ id, color, text });
+    const res = await db
+      .from('tags')
+      .update({ id, color, text, updated_at: new Date().toISOString() });
     return validate(res);
   };
 
