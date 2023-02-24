@@ -15,6 +15,10 @@ const getRandomColor = () => {
     'blueviolet',
     'orange',
     'lime',
+    'green',
+    'goldenrod',
+    'dodgerblue',
+    'magenta',
     'slateblue',
     'teal',
   ];
