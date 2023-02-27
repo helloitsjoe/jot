@@ -32,9 +32,6 @@ export default function ModalProvider({ children }) {
             role="dialog"
             // TODO: aria-labelledby
             position="absolute"
-            top="50%"
-            left="50%"
-            transform="translateX(-50%) translateY(-50%)"
             p="2em"
             onClick={(e) => {
               e.stopPropagation();

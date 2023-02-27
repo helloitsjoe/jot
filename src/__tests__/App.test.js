@@ -93,6 +93,7 @@ describe('App', () => {
       });
       expect(screen.queryAllByText('meta').length).toBe(1);
       fireEvent.click(screen.queryByText('meta'));
+      // TODO: Length should still be 1 but should be in tags list and not recent tags
       expect(screen.queryAllByText('meta').length).toBe(2);
 
       fireEvent.click(screen.queryByRole('button', { name: /submit/i }));

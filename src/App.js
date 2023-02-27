@@ -145,7 +145,7 @@ export default function App({ api, onSignOut }) {
           {isSubmitting ? 'Adding...' : 'Submit'}
         </SubmitButton>
         {tags.length > 0 && (
-          <Box>
+          <Box borderBottom="1px solid gray" p="1em 0" mb="1em">
             {tags.map(({ text, color }) => {
               return (
                 <Tag
@@ -162,6 +162,7 @@ export default function App({ api, onSignOut }) {
           </Box>
         )}
       </Box>
+      {/* TODO: When adding a tag to the current note, remove it from list of tags /*}
       {/* TODO: If tag exists, add it to note instead of tags */}
       <Box as="form" aria-label="new-tag-form" onSubmit={addNewTag} m="1em 0">
         {/* TODO: Why isn't this error persisting? */}
@@ -175,14 +176,17 @@ export default function App({ api, onSignOut }) {
             return 'Loading...';
           }
 
-          const sortedTags = [...recentTags].sort((a, b) =>
+          const sortedTags = recentTags.sort((a, b) =>
             a.updated_at < b.updated_at ? 1 : -1
           );
 
           return sortedTags.length > 0 ? (
             <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
               {sortedTags
-                .filter(({ text }) => !tag || text.includes(tag))
+                .filter(({ text, id }) => {
+                  if (tags.some((t) => t.id === id)) return false;
+                  return !tag || text.includes(tag);
+                })
                 .map(({ id, text, color }) => {
                   return (
                     <Tag

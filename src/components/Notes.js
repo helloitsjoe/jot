@@ -66,7 +66,7 @@ function EditNote({
       <SubmitButton>Update</SubmitButton>
       <Button onClick={onCancel}>Cancel</Button>
       {tags.length > 0 && (
-        <Box>
+        <Box borderBottom="1px solid gray" p="1em 0" mb="1em">
           {tags.map(({ id: tagId, text, color }) => {
             return (
               <Tag
