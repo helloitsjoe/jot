@@ -91,29 +91,25 @@ describe('App', () => {
       fireEvent.change(screen.getByLabelText(/add a note/i), {
         target: { value: 'another note' },
       });
+
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+
       expect(screen.queryAllByText('meta').length).toBe(1);
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+
       fireEvent.click(screen.queryByText('meta'));
-      // TODO: Length should still be 1 but should be in tags list and not recent tags
-      expect(screen.queryAllByText('meta').length).toBe(2);
+
+      expect(screen.queryAllByText('meta').length).toBe(1);
+
+      // Tag should move from tags to note
+      expect(within(tagForm).queryByText('meta')).not.toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).toBeTruthy();
 
       fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
       await waitForElementToBeRemoved(() => screen.getByText(/adding.../i));
       expect(api.addNote).toBeCalledWith('another note', [mockTagMeta.id]);
-    });
-
-    it('does not add the same tag twice', async () => {
-      api.loadNotes.mockResolvedValue([]);
-      render(<App api={api} />);
-      await screen.findByText(/meta/i);
-      expect(screen.getAllByText('meta').length).toBe(1);
-      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
-      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
-      fireEvent.click(within(tagForm).getByText(/meta/i));
-      expect(within(noteForm).getAllByText('meta').length).toBe(1);
-
-      // Click again
-      fireEvent.click(within(tagForm).getByText(/meta/i));
-      expect(within(noteForm).getAllByText('meta').length).toBe(1);
     });
 
     it('deletes a note after cancel period', async () => {
