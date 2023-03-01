@@ -162,8 +162,6 @@ export default function App({ api, onSignOut }) {
           </Box>
         )}
       </Box>
-      {/* TODO: When adding a tag to the current note, remove it from list of tags /*}
-      {/* TODO: If tag exists, add it to note instead of tags */}
       <Box as="form" aria-label="new-tag-form" onSubmit={addNewTag} m="1em 0">
         {/* TODO: Why isn't this error persisting? */}
         {fetchTagErr && (
@@ -176,9 +174,10 @@ export default function App({ api, onSignOut }) {
             return 'Loading...';
           }
 
-          const sortedTags = recentTags.sort((a, b) =>
-            a.updated_at < b.updated_at ? 1 : -1
-          );
+          const sortedTags = recentTags.sort((a, b) => {
+            if (a.updated_at === b.updated_at) return 0;
+            return a.updated_at < b.updated_at ? 1 : -1;
+          });
 
           return sortedTags.length > 0 ? (
             <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
