@@ -28,81 +28,87 @@ function EditNote({
   const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
 
   return (
-    <Box
-      as="form"
-      name="notes-form"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        mutate(
-          'notes',
-          async (allNotes) => {
-            await api.updateNote({
-              id,
-              note,
-              oldTagIds: initialTags.map((tag) => tag.id),
-              newTagIds: tags.map((tag) => tag.id),
-            });
-            onSuccess();
-            return allNotes.map((prevNote) => {
-              if (prevNote.id === id) {
-                return { ...prevNote, id, text: note, tags };
-              }
-              return prevNote;
-            });
-          },
-          { revalidate: false }
-          // TODO: Better error handling. Currently hides all notes, forces user to refresh
-        ).catch(catchSwr(mutate, 'notes'));
-      }}
-      m="1em 0"
-    >
-      <Input
-        width="auto"
-        label={<h3>Update Note</h3>}
-        value={note}
-        onChange={handleNoteChange}
-        autoFocus
-      />
-      <SubmitButton>Update</SubmitButton>
-      <Button onClick={onCancel}>Cancel</Button>
-      {tags.length > 0 && (
-        <Box borderBottom="1px solid gray" p="1em 0" mb="1em">
-          {tags.map(({ id: tagId, text, color }) => {
-            return (
-              <Tag
-                id={tagId}
-                key={text}
-                color={color}
-                onDelete={() => {
-                  setTags((p) => p.filter((t) => t.text !== text));
-                }}
-              >
-                {text}
-              </Tag>
-            );
-          })}
-        </Box>
-      )}
+    <>
+      <Box
+        as="form"
+        aria-label="notes-form"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          mutate(
+            'notes',
+            async (allNotes) => {
+              await api.updateNote({
+                id,
+                note,
+                oldTagIds: initialTags.map((tag) => tag.id),
+                newTagIds: tags.map((tag) => tag.id),
+              });
+              onSuccess();
+              return allNotes.map((prevNote) => {
+                if (prevNote.id === id) {
+                  return { ...prevNote, id, text: note, tags };
+                }
+                return prevNote;
+              });
+            },
+            { revalidate: false }
+            // TODO: Better error handling. Currently hides all notes, forces user to refresh
+          ).catch(catchSwr(mutate, 'notes'));
+        }}
+        m="1em 0"
+      >
+        <Input
+          width="auto"
+          label={<h3>Update Note</h3>}
+          value={note}
+          onChange={handleNoteChange}
+          autoFocus
+        />
+        <SubmitButton>Update</SubmitButton>
+        <Button onClick={onCancel}>Cancel</Button>
+        {tags.length > 0 && (
+          <Box borderBottom="1px solid gray" p="1em 0" mb="1em">
+            {tags.map(({ id: tagId, text, color }) => {
+              return (
+                <Tag
+                  id={tagId}
+                  key={text}
+                  color={color}
+                  onDelete={() => {
+                    setTags((p) => p.filter((t) => t.text !== text));
+                  }}
+                >
+                  {text}
+                </Tag>
+              );
+            })}
+          </Box>
+        )}
+      </Box>
 
-      {recentTags?.length > 0 ? (
-        <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
-          {recentTags.map(({ id: tagId, text, color }) => {
-            return (
-              <Tag
-                id={tagId}
-                key={tagId}
-                color={color}
-                onSelect={handleAddTagToNote}
-              >
-                {text}
-              </Tag>
-            );
-          })}
-        </Box>
-      ) : (
-        <p>No recent tags!</p>
-      )}
-    </Box>
+      <Box>
+        {recentTags?.length > 0 ? (
+          <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
+            {recentTags
+              .filter((recent) => !tags.some((t) => t.id === recent.id))
+              .map(({ id: tagId, text, color }) => {
+                return (
+                  <Tag
+                    id={tagId}
+                    key={tagId}
+                    color={color}
+                    onSelect={handleAddTagToNote}
+                  >
+                    {text}
+                  </Tag>
+                );
+              })}
+          </Box>
+        ) : (
+          <p>No recent tags!</p>
+        )}
+      </Box>
+    </>
   );
 }
 
