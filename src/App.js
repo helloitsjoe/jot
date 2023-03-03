@@ -139,6 +139,7 @@ export default function App({ api, onSignOut }) {
           label={<h3>Add a note</h3>}
           value={note}
           onChange={handleNoteChange}
+          required
           autoFocus
         />
         <SubmitButton disabled={isSubmitting}>
@@ -212,8 +213,9 @@ export default function App({ api, onSignOut }) {
           value={tag}
           onChange={handleTagChange}
           list="tags"
-          pattern="[a-zA-Z0-9]"
-          invalidMessage="Must be alphanumeric"
+          // TODO: disallow only spaces
+          pattern="[a-zA-Z0-9 ]+"
+          onInvalid={(e) => e.target.setCustomValidity('Must be alphanumeric')}
           required
         />
         {/* <datalist id="tags"> */}

@@ -6,20 +6,14 @@ export default function Input({
   value,
   type = 'text',
   onChange,
-  invalidMessage,
   ...props
 }) {
-  const handleInvalid = (e) => {
-    e.target.setCustomValidity(invalidMessage);
-  };
-
   return (
     <label>
       <Box>{label}</Box>
       <Box
         as="input"
         lineHeight="calc(3em + 1px)"
-        onInvalid={handleInvalid}
         borderRadius="0"
         color="white"
         type={type}

@@ -65,6 +65,13 @@ describe('App', () => {
       expect(api.loadNotes).toBeCalledTimes(2);
     });
 
+    it('does not add an empty note', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/quick note/i);
+      fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
+      expect(api.addNote).not.toBeCalled();
+    });
+
     it('filters notes when a tag is clicked', async () => {
       render(<Notes notes={mockNotes} api={api} />);
 
@@ -283,6 +290,13 @@ describe('App', () => {
       fireEvent.click(screen.queryByRole('button', { name: /add a new tag/i }));
       const addedTag = await screen.findByText(NEW_TAG_TEXT);
       expect(addedTag).toBeTruthy();
+    });
+
+    it('does not add an empty tag', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+      fireEvent.click(screen.queryByRole('button', { name: /add a new tag/i }));
+      expect(api.addTag).not.toBeCalled();
     });
 
     it('filters tags when typing', async () => {
