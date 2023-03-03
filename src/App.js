@@ -139,6 +139,7 @@ export default function App({ api, onSignOut }) {
           label={<h3>Add a note</h3>}
           value={note}
           onChange={handleNoteChange}
+          required
           autoFocus
         />
         <SubmitButton disabled={isSubmitting}>
@@ -194,7 +195,6 @@ export default function App({ api, onSignOut }) {
                       color={color}
                       onDelete={(e) => {
                         e.stopPropagation();
-                        // handleDeleteTag(id);
                         handleConfirmDeleteTag(id);
                       }}
                       onSelect={handleAddTagToNote}
@@ -213,6 +213,10 @@ export default function App({ api, onSignOut }) {
           value={tag}
           onChange={handleTagChange}
           list="tags"
+          // TODO: disallow only spaces
+          pattern="[a-zA-Z0-9 ]+"
+          onInvalid={(e) => e.target.setCustomValidity('Must be alphanumeric')}
+          required
         />
         {/* <datalist id="tags"> */}
         {/*   {(recentTags || []).map((t) => ( */}
