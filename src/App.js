@@ -194,7 +194,6 @@ export default function App({ api, onSignOut }) {
                       color={color}
                       onDelete={(e) => {
                         e.stopPropagation();
-                        // handleDeleteTag(id);
                         handleConfirmDeleteTag(id);
                       }}
                       onSelect={handleAddTagToNote}
@@ -213,6 +212,9 @@ export default function App({ api, onSignOut }) {
           value={tag}
           onChange={handleTagChange}
           list="tags"
+          pattern="[a-zA-Z0-9]"
+          invalidMessage="Must be alphanumeric"
+          required
         />
         {/* <datalist id="tags"> */}
         {/*   {(recentTags || []).map((t) => ( */}
