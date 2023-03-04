@@ -213,8 +213,8 @@ export default function App({ api, onSignOut }) {
           value={tag}
           onChange={handleTagChange}
           list="tags"
-          // TODO: disallow only spaces
-          pattern="[a-zA-Z0-9 ]+"
+          // Allow only alhphanumeric with spaces between words
+          pattern="^[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*$"
           onInvalid={(e) => e.target.setCustomValidity('Must be alphanumeric')}
           required
         />
