@@ -29,10 +29,11 @@ export default function ModalProvider({ children }) {
           onClick={closeModal}
         >
           <Box
-            role="dialog"
             // TODO: aria-labelledby
-            position="absolute"
+            role="dialog"
+            // TODO: Expose a way to control position
             p="2em"
+            m="2em"
             onClick={(e) => {
               e.stopPropagation();
             }}

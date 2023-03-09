@@ -218,13 +218,6 @@ export default function App({ api, onSignOut }) {
           onInvalid={(e) => e.target.setCustomValidity('Must be alphanumeric')}
           required
         />
-        {/* <datalist id="tags"> */}
-        {/*   {(recentTags || []).map((t) => ( */}
-        {/*     <option key={t.text} value={t.text}> */}
-        {/*       {t.text} */}
-        {/*     </option> */}
-        {/*   ))} */}
-        {/* </datalist> */}
         <SubmitButton>Add a new tag</SubmitButton>
       </Box>
       <Box m="3em 0">
