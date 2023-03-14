@@ -41,7 +41,7 @@ describe('Notes', () => {
       id: 1,
       newTagIds: [1],
       oldTagIds: [1],
-      note: 'I have been sufficiently updated',
+      text: 'I have been sufficiently updated',
     });
     await waitForElementToBeRemoved(
       screen.queryByRole('button', { name: /update/i })
@@ -70,7 +70,7 @@ describe('Notes', () => {
       id: 1,
       newTagIds: [1, 2],
       oldTagIds: [1],
-      note: 'quick note',
+      text: 'quick note',
     });
     await waitForElementToBeRemoved(
       screen.queryByRole('button', { name: /update/i })
@@ -111,7 +111,7 @@ describe('Notes', () => {
       id: 1,
       newTagIds: [],
       oldTagIds: [1],
-      note: 'quick note',
+      text: 'quick note',
     });
     await waitForElementToBeRemoved(
       screen.queryByRole('button', { name: /update/i })

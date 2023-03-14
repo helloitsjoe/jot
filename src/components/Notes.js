@@ -39,7 +39,7 @@ function EditNote({
             async (allNotes) => {
               await api.updateNote({
                 id,
-                note,
+                text: note,
                 oldTagIds: initialTags.map((tag) => tag.id),
                 newTagIds: tags.map((tag) => tag.id),
               });
