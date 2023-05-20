@@ -8,7 +8,7 @@ import Button, { SubmitButton } from './Button';
 import { ModalContext } from './Modal';
 import { useCustomSwr, catchSwr } from '../utils';
 
-export const DELETE_CANCEL_MS = 10_000;
+export const DELETE_CANCEL_MS = 4_000;
 
 function EditNote({
   id,
@@ -115,7 +115,7 @@ function EditNote({
 function defaultWaitForDelete(cb) {
   return setTimeout(() => {
     cb();
-  }, 10_000);
+  }, DELETE_CANCEL_MS);
 }
 
 export default function Notes({
@@ -191,6 +191,7 @@ export default function Notes({
       </Box>
     );
   }
+  console.log('notes', notes);
 
   if (!notes) {
     return <Box>Loading notes...</Box>;

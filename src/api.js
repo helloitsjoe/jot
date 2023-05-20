@@ -4,7 +4,9 @@ import { supabase } from './supabase';
 const validate = (res) => {
   const { data, error } = res;
   if (error) {
-    throw error;
+    const err = new Error(error.message);
+    err.status = error.status;
+    throw err;
   }
   return data;
 };
@@ -121,7 +123,7 @@ export const createApi = (db = supabase) => {
       .map((tag_id) => ({ note_id: id, tag_id }));
 
     const promises = [
-      db.from('notes').update({ id, text }).select(),
+      db.from('notes').update({ text }).eq('id', id).select(),
       db.from('notes_tags').insert(toInsert),
       ...toDelete.map(({ note_id, tag_id }) =>
         db
