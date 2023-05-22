@@ -3,6 +3,8 @@ import useSWR, { SWRConfig } from 'swr';
 
 export const useCustomSwr = (...args) => {
   const rtn = useSWR(...args);
+  // console.log('rtn', rtn.data);
+  // console.log('rtn', rtn.error);
   if (rtn.data instanceof Error) {
     return { ...rtn, data: null, error: rtn.data };
   }

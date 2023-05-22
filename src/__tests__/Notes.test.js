@@ -135,8 +135,4 @@ describe('Notes', () => {
 
     expect(screen.queryByText(/ruh roh/i)).toBeTruthy();
   });
-
-  it('error updating note displays error message', async () => {
-    //
-  });
 });

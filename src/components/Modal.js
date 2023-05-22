@@ -3,6 +3,13 @@ import Box from './Box';
 
 export const ModalContext = React.createContext({});
 
+export const withModal = (Component) => (props) =>
+  (
+    <ModalProvider>
+      <Component {...props} />
+    </ModalProvider>
+  );
+
 export default function ModalProvider({ children }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [modalContent, setModalContent] = React.useState();

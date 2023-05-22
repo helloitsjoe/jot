@@ -191,7 +191,6 @@ export default function Notes({
       </Box>
     );
   }
-  console.log('notes', notes);
 
   if (!notes) {
     return <Box>Loading notes...</Box>;

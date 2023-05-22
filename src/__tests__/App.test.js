@@ -16,16 +16,17 @@ import {
 import RawApp from '../App';
 import RawNotes, { DELETE_CANCEL_MS } from '../components/Notes';
 import { withSWR } from '../utils';
-import ModalProvider from '../components/Modal';
+import { withModal } from '../components/Modal';
 
-const App = withSWR(RawApp);
-const Notes = withSWR(RawNotes);
+const App = withSWR(withModal(RawApp));
+const Notes = withSWR(withModal(RawNotes));
 
 let api;
 
 beforeEach(() => {
   api = {
     deleteNote: jest.fn().mockResolvedValue(),
+    updateNote: jest.fn().mockResolvedValue(),
     deleteTag: jest.fn().mockResolvedValue(),
     loadNotes: jest.fn().mockResolvedValue(mockNotes),
     loadTags: jest.fn().mockResolvedValue(mockTags),
@@ -120,11 +121,7 @@ describe('App', () => {
     });
 
     it('deletes a note after cancel period', async () => {
-      render(
-        <ModalProvider>
-          <App api={api} />
-        </ModalProvider>
-      );
+      render(<App api={api} />);
 
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.queryByTestId('note-1-delete'));
@@ -137,11 +134,7 @@ describe('App', () => {
     });
 
     it('deletes multiple notes', async () => {
-      render(
-        <ModalProvider>
-          <App api={api} />
-        </ModalProvider>
-      );
+      render(<App api={api} />);
 
       await screen.findByText(/quick note/i);
       expect(screen.findByText(/work reminder/i)).toBeTruthy();
@@ -170,11 +163,7 @@ describe('App', () => {
     });
 
     it('does not delete a note after canceling', async () => {
-      render(
-        <ModalProvider>
-          <Notes notes={mockNotes} api={api} />
-        </ModalProvider>
-      );
+      render(<Notes notes={mockNotes} api={api} />);
 
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.queryByTestId('note-1-delete'));
@@ -190,11 +179,7 @@ describe('App', () => {
     });
 
     it('shows canceled note after canceling only one', async () => {
-      render(
-        <ModalProvider>
-          <App api={api} />
-        </ModalProvider>
-      );
+      render(<App api={api} />);
 
       await screen.findByText(/quick note/i);
       expect(screen.findByText(/work reminder/i)).toBeTruthy();
@@ -250,17 +235,36 @@ describe('App', () => {
 
     it('shows error when deleting a note', async () => {
       api.deleteNote = jest.fn().mockRejectedValue(new Error('delete failed!'));
-      render(
-        <ModalProvider>
-          <App api={api} />
-        </ModalProvider>
-      );
+      render(<App api={api} />);
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.getByTestId(`note-${mockNoteQuick.id}-delete`));
       jest.advanceTimersByTime(DELETE_CANCEL_MS - 50);
       await waitFor(() => {
         expect(api.deleteNote).toBeCalledWith({ id: 1 });
         expect(screen.queryByText(/delete failed/i)).toBeTruthy();
+      });
+    });
+
+    it('error updating note displays error message', async () => {
+      api.updateNote = jest.fn().mockRejectedValue(new Error('update failed!'));
+
+      render(<App api={api} />);
+      await screen.findByText(/quick note/i);
+      fireEvent.click(screen.getByTestId(`note-${mockNoteQuick.id}-edit`));
+      fireEvent.click(
+        within(screen.getByLabelText('notes-form')).getByTestId('tag-1-delete')
+      );
+      fireEvent.submit(screen.getByRole('button', { name: /update/i }));
+      await waitFor(() => {
+        expect(api.updateNote).toBeCalledWith({
+          id: 1,
+          newTagIds: [],
+          oldTagIds: [1],
+          text: 'quick note',
+        });
+      });
+      await waitFor(() => {
+        expect(screen.queryByText(/update failed!/i)).toBeTruthy();
       });
     });
   });
@@ -313,11 +317,7 @@ describe('App', () => {
     });
 
     it('deletes a tag after confirming', async () => {
-      render(
-        <ModalProvider>
-          <App api={api} />
-        </ModalProvider>
-      );
+      render(<App api={api} />);
       await screen.findByText(/meta/i);
       fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));
       expect(api.deleteTag).not.toBeCalled();
@@ -329,11 +329,7 @@ describe('App', () => {
     });
 
     it('does not delete a tag if delete is canceled', async () => {
-      render(
-        <ModalProvider>
-          <App api={api} />
-        </ModalProvider>
-      );
+      render(<App api={api} />);
       await screen.findByText(/meta/i);
       fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));
       expect(api.deleteTag).not.toBeCalled();
@@ -376,11 +372,7 @@ describe('App', () => {
 
     it('shows error when deleting a tag', async () => {
       api.deleteTag = jest.fn().mockRejectedValue(new Error('delete failed!'));
-      render(
-        <ModalProvider>
-          <App api={api} />
-        </ModalProvider>
-      );
+      render(<App api={api} />);
       await screen.findByText(/meta/i);
       fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));
       fireEvent.click(screen.getByRole('button', { name: /delete/i }));
