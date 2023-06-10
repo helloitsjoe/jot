@@ -231,8 +231,7 @@ describe('Tags', () => {
         }
       });
 
-      // Not sure why this isn't hitting the patch handler
-      xit('throws if updating tag fails', async () => {
+      it('throws if updating tag fails', async () => {
         expect.assertions(1);
         server.use(errorUpdateTagsHandler);
         const api = createApi();

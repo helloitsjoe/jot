@@ -97,12 +97,17 @@ export const createApi = (db = supabase) => {
 
     const promises = [
       ...tag_ids.map((id) =>
-        db.from('tags').update({ id, updated_at: new Date().toISOString() })
+        db
+          .from('tags')
+          .update({ updated_at: new Date().toISOString() })
+          .eq('id', id)
       ),
       db.from('notes_tags').insert(toInsert),
     ];
 
-    await Promise.all(promises);
+    const resp = await Promise.all(promises);
+
+    resp.forEach(validate);
 
     return note;
   };
@@ -134,9 +139,9 @@ export const createApi = (db = supabase) => {
       ),
     ];
 
-    // notes_tags response is unused
+    // notes_tags response is unused but still validate for errors
     const [noteRes, notesTagsRes] = await Promise.all(promises);
-    console.log('notesTagsRes', notesTagsRes);
+    validate(notesTagsRes);
     const [note] = validate(noteRes);
     return note;
   };
@@ -168,7 +173,6 @@ export const createApi = (db = supabase) => {
         }
       )
       .select();
-    console.log('res', res);
 
     const [newTag] = validate(res);
 
