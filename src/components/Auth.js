@@ -37,13 +37,20 @@ export default function AuthProvider({ api, children }) {
 
   if (!user) {
     return (
-      <LogIn
-        api={api}
-        onSuccess={(res) => {
-          setUser(res);
-          setStatus(SUCCESS);
-        }}
-      />
+      <>
+        <LogIn
+          api={api}
+          onSuccess={(res) => {
+            setUser(res);
+            setStatus(SUCCESS);
+          }}
+        />
+        {status === ERROR && (
+          <Box display="flex" justifyContent="center" color="red">
+            {errorMessage}
+          </Box>
+        )}
+      </>
     );
   }
 
