@@ -4,7 +4,6 @@ import Box from './Box';
 import Tag from './Tag';
 import Input from './Input';
 import Button, { SubmitButton } from './Button';
-// import ConfirmDelete from './ConfirmDelete';
 import { ModalContext } from './Modal';
 import { useCustomSwr, catchSwr } from '../utils';
 

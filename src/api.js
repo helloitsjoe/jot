@@ -78,7 +78,6 @@ export const createApi = (db = supabase) => {
   };
 
   const addNote = async (text, tag_ids) => {
-    // TODO: updated_at
     const { id: user_id } = await getUser();
 
     // TODO: Batch notes and notes_tags
@@ -147,7 +146,6 @@ export const createApi = (db = supabase) => {
   };
 
   const addTag = async ({ text, color }) => {
-    // TODO: updated_at
     if (!text || !color) {
       throw new Error('Text and color are required for tags!');
     }
