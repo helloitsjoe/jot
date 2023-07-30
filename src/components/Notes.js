@@ -2,119 +2,72 @@ import React from 'react';
 import { useSWRConfig } from 'swr';
 import Box from './Box';
 import Tag from './Tag';
-import Input from './Input';
-import Button, { SubmitButton } from './Button';
+import Button from './Button';
+import EditNote from './EditNote';
 import { ModalContext } from './Modal';
-import { useCustomSwr, catchSwr } from '../utils';
+import { catchSwr } from '../utils';
 
 export const DELETE_CANCEL_MS = 4_000;
-
-function EditNote({
-  id,
-  initialNoteText = '',
-  initialTags = [],
-  api,
-  onCancel,
-  onSuccess,
-}) {
-  const { data: recentTags } = useCustomSwr('tags', api.loadTags);
-  const { mutate } = useSWRConfig();
-
-  const [note, setNote] = React.useState(initialNoteText);
-  const [tags, setTags] = React.useState(initialTags);
-
-  const handleNoteChange = (e) => setNote(e.target.value);
-  const handleAddTagToNote = (newTag) => setTags((prev) => [...prev, newTag]);
-
-  return (
-    <>
-      <Box
-        as="form"
-        aria-label="notes-form"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          mutate(
-            'notes',
-            async (allNotes) => {
-              await api.updateNote({
-                id,
-                text: note,
-                oldTagIds: initialTags.map((tag) => tag.id),
-                newTagIds: tags.map((tag) => tag.id),
-              });
-              onSuccess();
-              return allNotes.map((prevNote) => {
-                if (prevNote.id === id) {
-                  return { ...prevNote, id, text: note, tags };
-                }
-                return prevNote;
-              });
-            },
-            { revalidate: false }
-            // TODO: Better error handling. Currently hides all notes, forces user to refresh
-          ).catch(catchSwr(mutate, 'notes'));
-        }}
-        m="1em 0"
-      >
-        <Input
-          width="auto"
-          label={<h3>Update Note</h3>}
-          value={note}
-          onChange={handleNoteChange}
-          autoFocus
-        />
-        <SubmitButton>Update</SubmitButton>
-        <Button onClick={onCancel}>Cancel</Button>
-        {tags.length > 0 && (
-          <Box borderBottom="1px solid gray" p="1em 0" mb="1em">
-            {tags.map(({ id: tagId, text, color }) => {
-              return (
-                <Tag
-                  id={tagId}
-                  key={text}
-                  color={color}
-                  onDelete={() => {
-                    setTags((p) => p.filter((t) => t.text !== text));
-                  }}
-                >
-                  {text}
-                </Tag>
-              );
-            })}
-          </Box>
-        )}
-      </Box>
-
-      <Box>
-        {recentTags?.length > 0 ? (
-          <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
-            {recentTags
-              .filter((recent) => !tags.some((t) => t.id === recent.id))
-              .map(({ id: tagId, text, color }) => {
-                return (
-                  <Tag
-                    id={tagId}
-                    key={tagId}
-                    color={color}
-                    onSelect={handleAddTagToNote}
-                  >
-                    {text}
-                  </Tag>
-                );
-              })}
-          </Box>
-        ) : (
-          <p>No recent tags!</p>
-        )}
-      </Box>
-    </>
-  );
-}
 
 function defaultWaitForDelete(cb) {
   return setTimeout(() => {
     cb();
   }, DELETE_CANCEL_MS);
+}
+
+function GroupedNotes({ notes }) {
+  const notesByTag = (notes || []).reduce((acc, note) => {
+    note.tags.forEach((tag) => {
+      if (!acc.get(tag.text)) {
+        acc.set(tag.text, { notes: [], meta: tag });
+      }
+      acc.get(tag.text).notes.push(note);
+    });
+    return acc;
+  }, new Map());
+
+  console.log('notesByTag', notesByTag);
+
+  return (
+    <Box display="flex" flexDirection="column" gap="1em" mt="1em">
+      {[...notesByTag.entries()]
+        .sort(([, { meta: a }], [, { meta: b }]) => {
+          if (a.updated_at === b.updated_at) return 0;
+          return a.updated_at < b.updated_at ? 1 : -1;
+        })
+        .map(([tag, { notes: n, meta }]) => {
+          return (
+            <Box
+              key={tag}
+              bg={meta.color}
+              borderRadius="0.5em"
+              border={`1px solid ${meta.color}`}
+              display="flex"
+              flexDirection="column"
+            >
+              <Box p="0.25em" color="black" m="auto">
+                {tag}
+              </Box>
+              <Box bg="black" borderRadius="0.5em">
+                {n.map(({ text }) => {
+                  return (
+                    <Box
+                      justifyContent="space-between"
+                      display="flex"
+                      p="1em"
+                      key={text}
+                      borderBottom={`1px solid ${meta.color}`}
+                    >
+                      {text}
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
+          );
+        })}
+    </Box>
+  );
 }
 
 export default function Notes({
@@ -127,11 +80,14 @@ export default function Notes({
 
   const [notesToDelete, setNotesToDelete] = React.useState({});
   const [activeTags, setActiveTags] = React.useState(new Set());
+  const [groupByTag, setGroupByTag] = React.useState(false);
 
   const timeouts = React.useRef({});
 
   const { openModal, closeModal, setModalContent } =
     React.useContext(ModalContext);
+
+  const toggleSetGroupByTag = () => setGroupByTag((g) => !g);
 
   const handleDeleteNote = (id) => {
     // Optimistic data should:
@@ -208,6 +164,11 @@ export default function Notes({
 
   return (
     <Box>
+      <Box display="flex" justifyContent="flex-end">
+        <Button onClick={toggleSetGroupByTag}>
+          {groupByTag ? 'See all notes' : 'Group by tag'}
+        </Button>
+      </Box>
       {activeTags.length > 0 && (
         <Box>
           <Box>Filtering by:</Box>
@@ -227,58 +188,62 @@ export default function Notes({
           })}
         </Box>
       )}
-      {filteredNotes.map(({ text, id, tags }) => {
-        const deleting = notesToDelete[id] === true;
-        return (
-          <Box
-            key={id}
-            borderRadius="0.5em"
-            border={deleting ? '1px solid gray' : '1px solid blueviolet'}
-            justifyContent="space-between"
-            display="flex"
-            p="1em"
-            m="0.5em 0"
-          >
-            <Box display="flex" flex="1" flexDirection="column">
-              <Box>{text}</Box>
-              <Box m="0.5em 0" display="flex" gap="1em">
-                {tags.map((tag) => (
-                  <Tag
-                    key={tag.text}
-                    color={deleting ? 'gray' : tag.color}
-                    onSelect={() =>
-                      setActiveTags((a) => [...new Set([...a, tag])])
-                    }
-                  >
-                    {tag.text}
-                  </Tag>
-                ))}
+      {groupByTag ? (
+        <GroupedNotes notes={notes} />
+      ) : (
+        filteredNotes.map(({ text, id, tags }) => {
+          const deleting = notesToDelete[id] === true;
+          return (
+            <Box
+              key={id}
+              borderRadius="0.5em"
+              border={deleting ? '1px solid gray' : '1px solid blueviolet'}
+              justifyContent="space-between"
+              display="flex"
+              p="1em"
+              m="0.5em 0"
+            >
+              <Box display="flex" flex="1" flexDirection="column">
+                <Box>{text}</Box>
+                <Box m="0.5em 0" display="flex" gap="1em">
+                  {tags.map((tag) => (
+                    <Tag
+                      key={tag.text}
+                      color={deleting ? 'gray' : tag.color}
+                      onSelect={() =>
+                        setActiveTags((a) => [...new Set([...a, tag])])
+                      }
+                    >
+                      {tag.text}
+                    </Tag>
+                  ))}
+                </Box>
               </Box>
+              <Button
+                textOnly
+                onClick={() => openNoteEditModal({ text, id, tags })}
+                display="flex"
+                data-testid={`note-${id}-edit`}
+              >
+                <span className="material-symbols-outlined">edit_square</span>
+              </Button>
+              <Button
+                textOnly
+                onClick={() =>
+                  deleting
+                    ? handleCancelDeleteNote(id)
+                    : handleOptimisticDeleteNote(id)
+                }
+                display="flex"
+                alignSelf="flex-start"
+                data-testid={`note-${id}-${deleting ? 'cancel' : 'delete'}`}
+              >
+                {deleting ? 'Cancel' : 'X'}
+              </Button>
             </Box>
-            <Button
-              textOnly
-              onClick={() => openNoteEditModal({ text, id, tags })}
-              display="flex"
-              data-testid={`note-${id}-edit`}
-            >
-              <span className="material-symbols-outlined">edit_square</span>
-            </Button>
-            <Button
-              textOnly
-              onClick={() =>
-                deleting
-                  ? handleCancelDeleteNote(id)
-                  : handleOptimisticDeleteNote(id)
-              }
-              display="flex"
-              alignSelf="flex-start"
-              data-testid={`note-${id}-${deleting ? 'cancel' : 'delete'}`}
-            >
-              {deleting ? 'Cancel' : 'X'}
-            </Button>
-          </Box>
-        );
-      })}
+          );
+        })
+      )}
     </Box>
   );
 }

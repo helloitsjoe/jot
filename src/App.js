@@ -51,7 +51,7 @@ export default function App({ api, onSignOut }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleNoteChange = (e) => setNote(e.target.value);
-  const handleTagChange = (e) => setTag(e.target.value.toLowerCase());
+  const handleTagChange = (e) => setTag(e.target.value.toLowerCase().trim());
   const handleAddTagToNote = (newTag) => {
     if (tags.find((t) => t.id === newTag.id)) return;
     setTags((prev) => [...prev, newTag]);
@@ -216,7 +216,11 @@ export default function App({ api, onSignOut }) {
           list="tags"
           // Allow only alhphanumeric with spaces between words
           pattern="^[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*$"
-          onInvalid={(e) => e.target.setCustomValidity('Must be alphanumeric')}
+          onInvalid={(e) =>
+            e.target.setCustomValidity(
+              `Must be alphanumeric, received ${e.target.value}`
+            )
+          }
           required
         />
         <SubmitButton>Add a new tag</SubmitButton>
