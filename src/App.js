@@ -51,7 +51,7 @@ export default function App({ api, onSignOut }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleNoteChange = (e) => setNote(e.target.value);
-  const handleTagChange = (e) => setTag(e.target.value.toLowerCase().trim());
+  const handleTagChange = (e) => setTag(e.target.value.toLowerCase());
   const handleAddTagToNote = (newTag) => {
     if (tags.find((t) => t.id === newTag.id)) return;
     setTags((prev) => [...prev, newTag]);
@@ -71,7 +71,7 @@ export default function App({ api, onSignOut }) {
     // TODO: Add tag to note, make sure id propagates
 
     mutateTags(async () => {
-      const newTag = await api.addTag({ text: tag, color });
+      const newTag = await api.addTag({ text: tag.trim(), color });
       setTags((t) => [...t, newTag]);
       setTag('');
     }).catch(catchSwr(mutateTags));
@@ -215,7 +215,7 @@ export default function App({ api, onSignOut }) {
           onChange={handleTagChange}
           list="tags"
           // Allow only alhphanumeric with spaces between words
-          pattern="^[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*$"
+          pattern="^[a-zA-Z0-9_-]+( [a-zA-Z0-9_-]+)*$"
           onInvalid={(e) =>
             e.target.setCustomValidity(
               `Must be alphanumeric, received ${e.target.value}`

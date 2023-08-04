@@ -80,14 +80,22 @@ export default function Notes({
 
   const [notesToDelete, setNotesToDelete] = React.useState({});
   const [activeTags, setActiveTags] = React.useState(new Set());
-  const [groupByTag, setGroupByTag] = React.useState(false);
+  const [groupByTag, setGroupByTag] = React.useState(
+    localStorage.getItem('groupByTag') === 'true'
+  );
 
   const timeouts = React.useRef({});
 
   const { openModal, closeModal, setModalContent } =
     React.useContext(ModalContext);
 
-  const toggleSetGroupByTag = () => setGroupByTag((g) => !g);
+  const toggleSetGroupByTag = () => {
+    setGroupByTag((g) => {
+      const toggled = !g;
+      localStorage.setItem('groupByTag', toggled);
+      return toggled;
+    });
+  };
 
   const handleDeleteNote = (id) => {
     // Optimistic data should:
