@@ -1,13 +1,13 @@
-import * as React from 'react';
-import LogIn from './LogIn';
-import Box from './Box';
-import { SUCCESS, ERROR, LOADING } from '../constants';
+import * as React from "react";
+import LogIn from "./LogIn";
+import Box from "./Box";
+import { SUCCESS, ERROR, LOADING } from "../constants";
 
 const AuthContext = React.createContext();
 
 export default function AuthProvider({ api, children }) {
   const [user, setUser] = React.useState(null);
-  const [errorMessage, setErrorMessage] = React.useState('');
+  const [errorMessage, setErrorMessage] = React.useState("");
   const [status, setStatus] = React.useState(LOADING);
 
   // TODO: Actually sign user out
