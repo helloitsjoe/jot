@@ -1,26 +1,26 @@
-import * as React from "react";
-import { useCustomSwr, catchSwr } from "./utils";
-import Box from "./components/Box";
-import ConfirmDelete from "./components/ConfirmDelete";
-import Tag from "./components/Tag";
-import Notes from "./components/Notes";
-import Input from "./components/Input";
-import { ModalContext } from "./components/Modal";
-import { SubmitButton } from "./components/Button";
+import * as React from 'react';
+import { useCustomSwr, catchSwr } from './utils';
+import Box from './components/Box';
+import ConfirmDelete from './components/ConfirmDelete';
+import Tag from './components/Tag';
+import Notes from './components/Notes';
+import Input from './components/Input';
+import { ModalContext } from './components/Modal';
+import { SubmitButton } from './components/Button';
 
 const getRandomColor = () => {
   const colors = [
-    "tomato",
-    "cornflowerblue",
-    "blueviolet",
-    "orange",
-    "lime",
-    "green",
-    "goldenrod",
-    "dodgerblue",
-    "magenta",
-    "slateblue",
-    "teal",
+    'tomato',
+    'cornflowerblue',
+    'blueviolet',
+    'orange',
+    'lime',
+    'green',
+    'goldenrod',
+    'dodgerblue',
+    'magenta',
+    'slateblue',
+    'teal',
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 };
@@ -33,19 +33,19 @@ export default function App({ api, onSignOut }) {
     data: recentTags,
     error: fetchTagErr,
     mutate: mutateTags,
-  } = useCustomSwr("tags", api.loadTags);
+  } = useCustomSwr('tags', api.loadTags);
 
   const {
     data: notes,
     error: fetchNotesErr,
     mutate: mutateNotes,
-  } = useCustomSwr("notes", api.loadNotes);
+  } = useCustomSwr('notes', api.loadNotes);
 
   const { openModal, closeModal, setModalContent } =
     React.useContext(ModalContext);
 
-  const [note, setNote] = React.useState("");
-  const [tag, setTag] = React.useState("");
+  const [note, setNote] = React.useState('');
+  const [tag, setTag] = React.useState('');
   // const [errorMessage, setErrorMessage] = React.useState('');
   const [tags, setTags] = React.useState([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -63,7 +63,7 @@ export default function App({ api, onSignOut }) {
     const existingTag = recentTags.find((r) => r.text === tag);
     if (existingTag) {
       setTags((t) => [...t, existingTag]);
-      setTag("");
+      setTag('');
       return;
     }
 
@@ -73,7 +73,7 @@ export default function App({ api, onSignOut }) {
     mutateTags(async () => {
       const newTag = await api.addTag({ text: tag.trim(), color });
       setTags((t) => [...t, newTag]);
-      setTag("");
+      setTag('');
     }).catch(catchSwr(mutateTags));
   };
 
@@ -109,8 +109,8 @@ export default function App({ api, onSignOut }) {
         setIsSubmitting(true);
         await api.addNote(note, tagIds);
         setIsSubmitting(false);
-        setNote("");
-        setTag("");
+        setNote('');
+        setTag('');
         setTags([]);
       },
       { optimisticData }
@@ -143,7 +143,7 @@ export default function App({ api, onSignOut }) {
           autoFocus
         />
         <SubmitButton disabled={isSubmitting}>
-          {isSubmitting ? "Adding..." : "Submit"}
+          {isSubmitting ? 'Adding...' : 'Submit'}
         </SubmitButton>
         {tags.length > 0 && (
           <Box borderBottom="1px solid gray" p="1em 0" mb="1em">
@@ -172,10 +172,10 @@ export default function App({ api, onSignOut }) {
         )}
         {(() => {
           if (!recentTags) {
-            return "Loading...";
+            return 'Loading...';
           }
 
-          console.log("recentTags", recentTags);
+          console.log('recentTags', recentTags);
           const sortedTags = recentTags.sort((a, b) => {
             if (a.updated_at === b.updated_at) return 0;
             return a.updated_at < b.updated_at ? 1 : -1;

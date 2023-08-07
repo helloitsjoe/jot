@@ -15,58 +15,37 @@ function defaultWaitForDelete(cb) {
   }, DELETE_CANCEL_MS);
 }
 
-function GroupedNotes({ notes }) {
-  const notesByTag = (notes || []).reduce((acc, note) => {
-    note.tags.forEach((tag) => {
-      if (!acc.get(tag.text)) {
-        acc.set(tag.text, { notes: [], meta: tag });
-      }
-      acc.get(tag.text).notes.push(note);
-    });
-    return acc;
-  }, new Map());
-
-  console.log('notesByTag', notesByTag);
-
+function EditButton({ text, id, tags, openNoteEditModal }) {
   return (
-    <Box display="flex" flexDirection="column" gap="1em" mt="1em">
-      {[...notesByTag.entries()]
-        .sort(([, { meta: a }], [, { meta: b }]) => {
-          if (a.updated_at === b.updated_at) return 0;
-          return a.updated_at < b.updated_at ? 1 : -1;
-        })
-        .map(([tag, { notes: n, meta }]) => {
-          return (
-            <Box
-              key={tag}
-              bg={meta.color}
-              borderRadius="0.5em"
-              border={`1px solid ${meta.color}`}
-              display="flex"
-              flexDirection="column"
-            >
-              <Box p="0.25em" color="black" m="auto">
-                {tag}
-              </Box>
-              <Box bg="black" borderRadius="0.5em">
-                {n.map(({ text }) => {
-                  return (
-                    <Box
-                      justifyContent="space-between"
-                      display="flex"
-                      p="1em"
-                      key={text}
-                      borderBottom={`1px solid ${meta.color}`}
-                    >
-                      {text}
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Box>
-          );
-        })}
-    </Box>
+    <Button
+      textOnly
+      onClick={() => openNoteEditModal({ text, id, tags })}
+      display="flex"
+      data-testid={`note-${id}-edit`}
+    >
+      <span className="material-symbols-outlined">edit_square</span>
+    </Button>
+  );
+}
+
+function DeleteButton({
+  id,
+  deleting,
+  handleCancelDeleteNote,
+  handleOptimisticDeleteNote,
+}) {
+  return (
+    <Button
+      textOnly
+      onClick={() =>
+        deleting ? handleCancelDeleteNote(id) : handleOptimisticDeleteNote(id)
+      }
+      display="flex"
+      alignSelf="flex-start"
+      data-testid={`note-${id}-${deleting ? 'cancel' : 'delete'}`}
+    >
+      {deleting ? 'Cancel' : 'X'}
+    </Button>
   );
 }
 
@@ -81,7 +60,7 @@ export default function Notes({
   const [notesToDelete, setNotesToDelete] = React.useState({});
   const [activeTags, setActiveTags] = React.useState(new Set());
   const [groupByTag, setGroupByTag] = React.useState(
-    localStorage.getItem('groupByTag') === 'true'
+    localStorage.getItem('groupByTag') === 'true' || true
   );
 
   const timeouts = React.useRef({});
@@ -170,6 +149,16 @@ export default function Notes({
       })
     : sortedNotes;
 
+  const notesByTag = (notes || []).reduce((acc, note) => {
+    note.tags.forEach((tag) => {
+      if (!acc.get(tag.text)) {
+        acc.set(tag.text, { notes: [], meta: tag });
+      }
+      acc.get(tag.text).notes.push(note);
+    });
+    return acc;
+  }, new Map());
+
   return (
     <Box>
       <Box display="flex" justifyContent="flex-end">
@@ -197,7 +186,57 @@ export default function Notes({
         </Box>
       )}
       {groupByTag ? (
-        <GroupedNotes notes={notes} />
+        <Box display="flex" flexDirection="column" gap="1em" mt="1em">
+          {[...notesByTag.entries()]
+            .sort(([, { meta: a }], [, { meta: b }]) => {
+              if (a.updated_at === b.updated_at) return 0;
+              return a.updated_at < b.updated_at ? 1 : -1;
+            })
+            .map(([tag, { notes: n, meta }]) => {
+              return (
+                <Box
+                  key={tag}
+                  bg={meta.color}
+                  borderRadius="0.5em"
+                  border={`1px solid ${meta.color}`}
+                  display="flex"
+                  flexDirection="column"
+                >
+                  <Box p="0.25em" color="black" m="auto">
+                    {tag}
+                  </Box>
+                  <Box bg="black" borderRadius="0.5em">
+                    {n.map(({ id, text, tags }) => {
+                      return (
+                        <Box
+                          justifyContent="space-between"
+                          display="flex"
+                          p="1em"
+                          key={text}
+                          borderBottom={`1px solid ${meta.color}`}
+                        >
+                          {text}
+                          <Box display="flex">
+                            <EditButton
+                              {...{ id, text, tags, openNoteEditModal }}
+                            />
+                            <DeleteButton
+                              {...{
+                                id,
+                                deleting: notesToDelete[id] === true,
+                                handleCancelDeleteNote,
+                                handleOptimisticDeleteNote,
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </Box>
+              );
+            })}
+        </Box>
       ) : (
         filteredNotes.map(({ text, id, tags }) => {
           const deleting = notesToDelete[id] === true;
@@ -227,27 +266,15 @@ export default function Notes({
                   ))}
                 </Box>
               </Box>
-              <Button
-                textOnly
-                onClick={() => openNoteEditModal({ text, id, tags })}
-                display="flex"
-                data-testid={`note-${id}-edit`}
-              >
-                <span className="material-symbols-outlined">edit_square</span>
-              </Button>
-              <Button
-                textOnly
-                onClick={() =>
-                  deleting
-                    ? handleCancelDeleteNote(id)
-                    : handleOptimisticDeleteNote(id)
-                }
-                display="flex"
-                alignSelf="flex-start"
-                data-testid={`note-${id}-${deleting ? 'cancel' : 'delete'}`}
-              >
-                {deleting ? 'Cancel' : 'X'}
-              </Button>
+              <EditButton {...{ id, text, tags, openNoteEditModal }} />
+              <DeleteButton
+                {...{
+                  id,
+                  deleting,
+                  handleCancelDeleteNote,
+                  handleOptimisticDeleteNote,
+                }}
+              />
             </Box>
           );
         })

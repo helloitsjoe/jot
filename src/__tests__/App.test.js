@@ -73,25 +73,6 @@ describe('App', () => {
       expect(api.addNote).not.toBeCalled();
     });
 
-    it('filters notes when a tag is clicked', async () => {
-      render(<Notes notes={mockNotes} api={api} />);
-
-      expect(screen.queryByText('meta')).toBeTruthy();
-      expect(screen.queryByText('quick note')).toBeTruthy();
-
-      expect(screen.queryByText('work')).toBeTruthy();
-      expect(screen.queryByText('work reminder')).toBeTruthy();
-
-      fireEvent.click(screen.queryByText('work'));
-
-      expect(screen.queryByText('meta')).not.toBeTruthy();
-      expect(screen.queryByText('quick note')).not.toBeTruthy();
-
-      // Should show tag in filter and on note
-      expect(screen.queryAllByText('work').length).toBe(2);
-      expect(screen.queryByText('work reminder')).toBeTruthy();
-    });
-
     it('adds a tag to a note', async () => {
       api.loadNotes.mockResolvedValue([]);
       render(<App api={api} />);

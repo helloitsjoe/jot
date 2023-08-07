@@ -1,22 +1,22 @@
-import * as React from "react";
-import Box from "./Box";
-import { SubmitButton } from "./Button";
-import Input from "./Input";
+import * as React from 'react';
+import Box from './Box';
+import { SubmitButton } from './Button';
+import Input from './Input';
 
-const LOADING = "LOADING";
-const SUCCESS = "SUCCESS";
-const ERROR = "ERROR";
+const LOADING = 'LOADING';
+const SUCCESS = 'SUCCESS';
+const ERROR = 'ERROR';
 
 export default function LogIn({ api, onSuccess }) {
   const [status, setStatus] = React.useState(SUCCESS);
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [errorMessage, setErrorMessage] = React.useState("");
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [errorMessage, setErrorMessage] = React.useState('');
 
   const handleSignIn = (e) => {
     e.preventDefault();
     setStatus(LOADING);
-    setErrorMessage("");
+    setErrorMessage('');
     api
       .signIn({ email, password })
       .then((data) => {
@@ -27,7 +27,7 @@ export default function LogIn({ api, onSuccess }) {
         console.error(err);
         setStatus(ERROR);
         if (err.status >= 400 && err.status < 500) {
-          setErrorMessage("Invalid username or password");
+          setErrorMessage('Invalid username or password');
         } else {
           setErrorMessage(err.message);
         }

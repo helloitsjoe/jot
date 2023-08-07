@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabase } from './supabase';
 
 // Supabase returns an error in 200 response, unwrap and throw if it exists.
 const validate = (res) => {
@@ -35,7 +35,7 @@ export const createApi = (db = supabase) => {
 
   const getUser = async () => {
     const res = await db.auth.getUser();
-    console.log("res", res);
+    console.log('res', res);
     const { user } = validate(res);
     return user;
   };
@@ -73,7 +73,7 @@ export const createApi = (db = supabase) => {
   };
 
   const addUser = async ({ id }) => {
-    const res = await db.from("users").insert([{ id }]);
+    const res = await db.from('users').insert([{ id }]);
     const [user] = validate(res);
     return user;
   };
@@ -83,7 +83,7 @@ export const createApi = (db = supabase) => {
 
     // TODO: Batch notes and notes_tags
     const res = await db
-      .from("notes")
+      .from('notes')
       .insert([{ user_id, text, tag_ids }])
       .select();
 
@@ -98,11 +98,11 @@ export const createApi = (db = supabase) => {
     const promises = [
       ...tag_ids.map((id) =>
         db
-          .from("tags")
+          .from('tags')
           .update({ updated_at: new Date().toISOString() })
-          .eq("id", id)
+          .eq('id', id)
       ),
-      db.from("notes_tags").insert(toInsert),
+      db.from('notes_tags').insert(toInsert),
     ];
 
     const resp = await Promise.all(promises);
@@ -128,14 +128,14 @@ export const createApi = (db = supabase) => {
       .map((tag_id) => ({ note_id: id, tag_id }));
 
     const promises = [
-      db.from("notes").update({ text }).eq("id", id).select(),
-      db.from("notes_tags").insert(toInsert),
+      db.from('notes').update({ text }).eq('id', id).select(),
+      db.from('notes_tags').insert(toInsert),
       ...toDelete.map(({ note_id, tag_id }) =>
         db
-          .from("notes_tags")
+          .from('notes_tags')
           .delete()
-          .eq("note_id", note_id)
-          .eq("tag_id", tag_id)
+          .eq('note_id', note_id)
+          .eq('tag_id', tag_id)
       ),
     ];
 
@@ -148,16 +148,16 @@ export const createApi = (db = supabase) => {
 
   const addTag = async ({ text, color }) => {
     if (!text || !color) {
-      throw new Error("Text and color are required for tags!");
+      throw new Error('Text and color are required for tags!');
     }
 
     const user = await getUser();
 
-    console.log("user", user);
+    console.log('user', user);
 
     // Tags are required to have user, text, color
     const res = await db
-      .from("tags")
+      .from('tags')
       .insert(
         [
           {
@@ -168,7 +168,7 @@ export const createApi = (db = supabase) => {
           },
         ],
         {
-          return: "representation",
+          return: 'representation',
         }
       )
       .select();
@@ -180,36 +180,36 @@ export const createApi = (db = supabase) => {
 
   const updateTag = async ({ id, color, text }) => {
     const res = await db
-      .from("tags")
+      .from('tags')
       .update({ id, color, text, updated_at: new Date().toISOString() });
     return validate(res);
   };
 
   // TODO: Soft delete
   const deleteTag = async ({ id }) => {
-    await db.from("notes_tags").delete().eq("tag_id", id).then(validate);
-    const res = await db.from("tags").delete().eq("id", id);
-    console.log("deleted", res);
+    await db.from('notes_tags').delete().eq('tag_id', id).then(validate);
+    const res = await db.from('tags').delete().eq('id', id);
+    console.log('deleted', res);
     return validate(res);
   };
 
   const deleteNote = async ({ id }) => {
-    await db.from("notes_tags").delete().eq("note_id", id).then(validate);
-    const res = await db.from("notes").delete().eq("id", id);
+    await db.from('notes_tags').delete().eq('note_id', id).then(validate);
+    const res = await db.from('notes').delete().eq('id', id);
     return validate(res);
   };
 
   const loadTags = async () => {
-    console.log("loading tags...");
-    const res = await db.from("tags").select("*");
+    console.log('loading tags...');
+    const res = await db.from('tags').select('*');
     return validate(res) || [];
   };
 
   const loadNotes = async () => {
-    console.log("loading notes......");
-    const notesPromise = db.from("notes").select("*").then(validate);
+    console.log('loading notes......');
+    const notesPromise = db.from('notes').select('*').then(validate);
     const notesTagsPromise = db
-      .from("notes_tags")
+      .from('notes_tags')
       .select(
         `
       notes (

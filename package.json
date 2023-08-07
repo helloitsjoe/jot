@@ -12,6 +12,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "prettier": {
+    "singleQuote": true
+  },
   "devDependencies": {
     "@babel/core": "^7.13.10",
     "@babel/eslint-parser": "^7.15.0",

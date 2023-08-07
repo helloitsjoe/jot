@@ -121,6 +121,9 @@ describe('Notes', () => {
   it('selecting a tag filters by that tag', async () => {
     render(<Notes api={api} notes={mockNotes} />);
 
+    // Click to see all notes first
+    fireEvent.click(screen.getByText(/see all notes/i));
+
     expect(screen.queryByText(/work reminder/i)).toBeTruthy();
     expect(screen.queryByText(/quick note/i)).toBeTruthy();
 
