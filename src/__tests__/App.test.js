@@ -320,6 +320,36 @@ describe('App', () => {
         screen.queryByRole('button', { name: /delete/i })
       ).not.toBeTruthy();
     });
+
+    it('shows all notes when clicking show all', async () => {
+      const extraTags = [
+        ...mockTags,
+        { id: 3, text: 'another one', color: 'red' },
+        { id: 4, text: 'and another', color: 'blue' },
+        { id: 5, text: 'yet another', color: 'green' },
+        { id: 6, text: 'sixth', color: 'orange' },
+      ];
+
+      api.loadTags = jest.fn().mockResolvedValue(extraTags);
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+      expect(screen.queryByText(/meta/i)).toBeTruthy();
+      expect(screen.queryByText(/work/i)).toBeTruthy();
+      expect(screen.queryByText(/another one/i)).toBeTruthy();
+      expect(screen.queryByText(/and another/i)).toBeTruthy();
+      expect(screen.queryByText(/yet another/i)).toBeTruthy();
+      expect(screen.queryByText(/sixth/i)).not.toBeTruthy();
+      expect(screen.queryByText(/show all/i)).toBeTruthy();
+
+      fireEvent.click(screen.getByRole('button', { name: /show all/i }));
+      expect(screen.queryByText(/meta/i)).toBeTruthy();
+      expect(screen.queryByText(/work/i)).toBeTruthy();
+      expect(screen.queryByText(/another one/i)).toBeTruthy();
+      expect(screen.queryByText(/and another/i)).toBeTruthy();
+      expect(screen.queryByText(/yet another/i)).toBeTruthy();
+      expect(screen.queryByText(/sixth/i)).toBeTruthy();
+      expect(screen.queryByText(/show all/i)).not.toBeTruthy();
+    });
   });
 
   describe('unhappy tags', () => {

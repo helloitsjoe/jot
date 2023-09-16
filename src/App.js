@@ -6,7 +6,7 @@ import Tag from './components/Tag';
 import Notes from './components/Notes';
 import Input from './components/Input';
 import { ModalContext } from './components/Modal';
-import { SubmitButton } from './components/Button';
+import Button, { SubmitButton } from './components/Button';
 
 const getRandomColor = () => {
   const colors = [
@@ -49,6 +49,7 @@ export default function App({ api, onSignOut }) {
   // const [errorMessage, setErrorMessage] = React.useState('');
   const [tags, setTags] = React.useState([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [showAllTags, setShowAllTags] = React.useState(false);
 
   const handleNoteChange = (e) => setNote(e.target.value);
   const handleTagChange = (e) => setTag(e.target.value.toLowerCase());
@@ -181,9 +182,11 @@ export default function App({ api, onSignOut }) {
             return a.updated_at < b.updated_at ? 1 : -1;
           });
 
+          const tagsToShow = showAllTags ? sortedTags : sortedTags.slice(0, 5);
+
           return sortedTags.length > 0 ? (
             <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
-              {sortedTags
+              {tagsToShow
                 .filter(({ text, id }) => {
                   if (tags.some((t) => t.id === id)) return false;
                   return !tag || text.includes(tag);
@@ -204,6 +207,9 @@ export default function App({ api, onSignOut }) {
                     </Tag>
                   );
                 })}
+              {!showAllTags && (
+                <Button onClick={() => setShowAllTags(true)}>Show all</Button>
+              )}
             </Box>
           ) : (
             <p>No recent tags!</p>
