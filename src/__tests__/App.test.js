@@ -324,10 +324,12 @@ describe('App', () => {
     it('shows all notes when clicking show all', async () => {
       const extraTags = [
         ...mockTags,
-        { id: 3, text: 'another one', color: 'red' },
-        { id: 4, text: 'and another', color: 'blue' },
-        { id: 5, text: 'yet another', color: 'green' },
+        { id: 3, text: 'third', color: 'red' },
+        { id: 4, text: 'fourth', color: 'blue' },
+        { id: 5, text: 'fifth', color: 'green' },
         { id: 6, text: 'sixth', color: 'orange' },
+        { id: 7, text: 'seventh', color: 'purple' },
+        { id: 8, text: 'eighth', color: 'yellow' },
       ];
 
       api.loadTags = jest.fn().mockResolvedValue(extraTags);
@@ -335,19 +337,23 @@ describe('App', () => {
       await screen.findByText(/meta/i);
       expect(screen.queryByText(/meta/i)).toBeTruthy();
       expect(screen.queryByText(/work/i)).toBeTruthy();
-      expect(screen.queryByText(/another one/i)).toBeTruthy();
-      expect(screen.queryByText(/and another/i)).toBeTruthy();
-      expect(screen.queryByText(/yet another/i)).toBeTruthy();
-      expect(screen.queryByText(/sixth/i)).not.toBeTruthy();
+      expect(screen.queryByText(/third/i)).toBeTruthy();
+      expect(screen.queryByText(/fourth/i)).toBeTruthy();
+      expect(screen.queryByText(/fifth/i)).toBeTruthy();
+      expect(screen.queryByText(/sixth/i)).toBeTruthy();
+      expect(screen.queryByText(/seventh/i)).toBeTruthy();
+      expect(screen.queryByText(/eighth/i)).not.toBeTruthy();
       expect(screen.queryByText(/show all/i)).toBeTruthy();
 
       fireEvent.click(screen.getByRole('button', { name: /show all/i }));
       expect(screen.queryByText(/meta/i)).toBeTruthy();
       expect(screen.queryByText(/work/i)).toBeTruthy();
-      expect(screen.queryByText(/another one/i)).toBeTruthy();
-      expect(screen.queryByText(/and another/i)).toBeTruthy();
-      expect(screen.queryByText(/yet another/i)).toBeTruthy();
+      expect(screen.queryByText(/third/i)).toBeTruthy();
+      expect(screen.queryByText(/fourth/i)).toBeTruthy();
+      expect(screen.queryByText(/fifth/i)).toBeTruthy();
       expect(screen.queryByText(/sixth/i)).toBeTruthy();
+      expect(screen.queryByText(/seventh/i)).toBeTruthy();
+      expect(screen.queryByText(/eighth/i)).toBeTruthy();
       expect(screen.queryByText(/show all/i)).not.toBeTruthy();
     });
   });

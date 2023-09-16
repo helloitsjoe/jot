@@ -25,6 +25,8 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
+const MAX_TAGS = 7;
+
 // Create an optimistic tempId for a key
 const createTempId = () => Date.now();
 
@@ -176,43 +178,48 @@ export default function App({ api, onSignOut }) {
             return 'Loading...';
           }
 
-          console.log('recentTags', recentTags);
+          if (recentTags.length === 0) {
+            return <p>No recent tags!</p>;
+          }
+
           const sortedTags = recentTags.sort((a, b) => {
             if (a.updated_at === b.updated_at) return 0;
             return a.updated_at < b.updated_at ? 1 : -1;
           });
 
-          const tagsToShow = showAllTags ? sortedTags : sortedTags.slice(0, 5);
+          const filteredTags = sortedTags.filter(({ text, id }) => {
+            if (tags.some((t) => t.id === id)) return false;
+            return !tag || text.includes(tag);
+          });
 
-          return sortedTags.length > 0 ? (
+          const tagsToShow = showAllTags
+            ? filteredTags
+            : filteredTags.slice(0, MAX_TAGS);
+
+          return (
             <Box m="0.5em 0" display="flex" flexWrap="wrap" gap="1em">
-              {tagsToShow
-                .filter(({ text, id }) => {
-                  if (tags.some((t) => t.id === id)) return false;
-                  return !tag || text.includes(tag);
-                })
-                .map(({ id, text, color }) => {
-                  return (
-                    <Tag
-                      id={id}
-                      key={id}
-                      color={color}
-                      onDelete={(e) => {
-                        e.stopPropagation();
-                        handleConfirmDeleteTag(id);
-                      }}
-                      onSelect={handleAddTagToNote}
-                    >
-                      {text}
-                    </Tag>
-                  );
-                })}
+              {tagsToShow.map(({ id, text, color }) => {
+                return (
+                  <Tag
+                    id={id}
+                    key={id}
+                    color={color}
+                    onDelete={(e) => {
+                      e.stopPropagation();
+                      handleConfirmDeleteTag(id);
+                    }}
+                    onSelect={handleAddTagToNote}
+                  >
+                    {text}
+                  </Tag>
+                );
+              })}
               {!showAllTags && (
-                <Button onClick={() => setShowAllTags(true)}>Show all</Button>
+                <Button textOnly onClick={() => setShowAllTags(true)}>
+                  ... Show all tags
+                </Button>
               )}
             </Box>
-          ) : (
-            <p>No recent tags!</p>
           );
         })()}
         <Input
