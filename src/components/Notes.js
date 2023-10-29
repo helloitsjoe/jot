@@ -150,7 +150,13 @@ export default function Notes({
     : sortedNotes;
 
   const notesByTag = (notes || []).reduce((acc, note) => {
-    note.tags.forEach((tag) => {
+    console.log('note', note);
+    console.log('note.tags', note.tags);
+    const tags = note.tags.length
+      ? note.tags
+      : [{ text: 'untagged', color: 'gray' }];
+
+    tags.forEach((tag) => {
       if (!acc.get(tag.text)) {
         acc.set(tag.text, { notes: [], meta: tag });
       }
@@ -202,7 +208,7 @@ export default function Notes({
                   display="flex"
                   flexDirection="column"
                 >
-                  <Box p="0.25em" color="black" m="auto">
+                  <Box p="0.25em" color="black" m="auto" fontWeight="bold">
                     {tag}
                   </Box>
                   <Box bg="black" borderRadius="0.5em">
