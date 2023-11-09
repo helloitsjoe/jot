@@ -105,16 +105,20 @@ export default function App({ api, onSignOut }) {
 
   const handleAddNote = async (e) => {
     e.preventDefault();
-    const tagIds = tags.map(({ id }) => id);
     const optimisticData = [...notes, { text: note, tags, id: createTempId() }];
     mutateNotes(
       async () => {
         setIsSubmitting(true);
-        await api.addNote(note, tagIds);
+        await api.addNote(
+          note,
+          tags.map((t) => t.id)
+        );
         setIsSubmitting(false);
         setNote('');
         setTag('');
         setTags([]);
+        // Trigger re-fetch of tags to re-order
+        mutateTags();
       },
       { optimisticData }
     ).catch(catchSwr(mutateNotes));
@@ -214,11 +218,9 @@ export default function App({ api, onSignOut }) {
                   </Tag>
                 );
               })}
-              {!showAllTags && (
-                <Button textOnly onClick={() => setShowAllTags(true)}>
-                  ... Show all tags
-                </Button>
-              )}
+              <Button textOnly onClick={() => setShowAllTags((show) => !show)}>
+                ... See {showAllTags ? 'fewer' : 'all'} tags
+              </Button>
             </Box>
           );
         })()}

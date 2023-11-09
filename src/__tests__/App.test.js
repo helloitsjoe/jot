@@ -66,6 +66,33 @@ describe('App', () => {
       expect(api.loadNotes).toBeCalledTimes(2);
     });
 
+    it('moves a tag to the beginning of the list when it is added to a note', async () => {
+      const reverse = (arr) => [...arr].reverse();
+      api.loadTags = jest
+        .fn()
+        .mockResolvedValueOnce(mockTags)
+        .mockResolvedValueOnce(reverse(mockTags));
+      render(<App api={api} />);
+      await screen.findByText(/quick note/i);
+      fireEvent.change(screen.getByLabelText(/add a note/i), {
+        target: { value: 'another note' },
+      });
+      screen.debug();
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      expect(tagForm.textContent).toMatch(/meta(.*)work/i);
+
+      // Click on the second tag to add it to the note
+      fireEvent.click(within(tagForm).queryByText('work'));
+
+      fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
+      await waitForElementToBeRemoved(() => screen.getByText(/adding.../i));
+      await waitFor(() => {
+        expect(
+          screen.getByRole('form', { name: 'new-tag-form' }).textContent
+        ).toMatch(/work(.*)meta/i);
+      });
+    });
+
     it('does not add an empty note', async () => {
       render(<App api={api} />);
       await screen.findByText(/quick note/i);
@@ -321,7 +348,7 @@ describe('App', () => {
       ).not.toBeTruthy();
     });
 
-    it('shows all notes when clicking show all', async () => {
+    it('shows all notes when clicking see all', async () => {
       const extraTags = [
         ...mockTags,
         { id: 3, text: 'third', color: 'red' },
@@ -343,9 +370,9 @@ describe('App', () => {
       expect(screen.queryByText(/sixth/i)).toBeTruthy();
       expect(screen.queryByText(/seventh/i)).toBeTruthy();
       expect(screen.queryByText(/eighth/i)).not.toBeTruthy();
-      expect(screen.queryByText(/show all/i)).toBeTruthy();
+      expect(screen.queryByText(/see all tags/i)).toBeTruthy();
 
-      fireEvent.click(screen.getByRole('button', { name: /show all/i }));
+      fireEvent.click(screen.getByRole('button', { name: /see all tags/i }));
       expect(screen.queryByText(/meta/i)).toBeTruthy();
       expect(screen.queryByText(/work/i)).toBeTruthy();
       expect(screen.queryByText(/third/i)).toBeTruthy();
@@ -354,7 +381,16 @@ describe('App', () => {
       expect(screen.queryByText(/sixth/i)).toBeTruthy();
       expect(screen.queryByText(/seventh/i)).toBeTruthy();
       expect(screen.queryByText(/eighth/i)).toBeTruthy();
-      expect(screen.queryByText(/show all/i)).not.toBeTruthy();
+
+      fireEvent.click(screen.getByRole('button', { name: /see fewer tags/i }));
+      expect(screen.queryByText(/meta/i)).toBeTruthy();
+      expect(screen.queryByText(/work/i)).toBeTruthy();
+      expect(screen.queryByText(/third/i)).toBeTruthy();
+      expect(screen.queryByText(/fourth/i)).toBeTruthy();
+      expect(screen.queryByText(/fifth/i)).toBeTruthy();
+      expect(screen.queryByText(/sixth/i)).toBeTruthy();
+      expect(screen.queryByText(/seventh/i)).toBeTruthy();
+      expect(screen.queryByText(/eighth/i)).not.toBeTruthy();
     });
   });
 
