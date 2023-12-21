@@ -9,23 +9,3 @@ const config = makeWebpackConfig({
 });
 
 module.exports = config;
-
-// module.exports = {
-//   ...config,
-//   entry: './src/index.tsx',
-//   output: {
-//     filename: './public/index.js',
-//   },
-//   devtool: 'source-map',
-//   resolve: {
-//     extensions: ['', '.webpack.js', '.web.js', '.ts', '.tsx', '.js'],
-//   },
-//   module: {
-//     ...config.module,
-//     rules: [
-//       ...config.module.rules,
-//       { test: /\.tsx?$/, loader: 'ts-loader' },
-//       { test: /\.js$/, loader: 'source-map-loader' },
-//     ],
-//   },
-// };

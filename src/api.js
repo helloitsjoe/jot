@@ -34,9 +34,11 @@ export const createApi = (db = supabase) => {
   const getSession = () => db.auth.getSession();
 
   const getUser = async () => {
-    const res = await db.auth.getUser();
+    const res = await db.auth.getSession();
     console.log('res', res);
-    const { user } = validate(res);
+    const {
+      session: { user },
+    } = validate(res);
     return user;
   };
 
