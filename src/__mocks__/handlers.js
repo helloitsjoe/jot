@@ -20,9 +20,6 @@ export const defaultHandlers = [
   http.delete(NOTES, () => Res.json(true)),
   http.delete(NOTES_TAGS, () => Res.json({})),
   http.post(NOTES_TAGS, async ({ request }) => Res.json(await request.json())),
-  http.delete(NOTES_TAGS, async ({ request }) =>
-    Res.json(await request.json())
-  ),
   http.post(TOKEN, () => Res.json(mockTokenResponse)),
 ];
 

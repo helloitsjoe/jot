@@ -3,6 +3,8 @@
  * required for Jest to function when running JSDOM tests.
  * These HAVE to be require's and HAVE to be in this exact
  * order, since "undici" depends on the "TextEncoder" global API.
+ * This comes from the msw documentation:
+ * https://mswjs.io/docs/migrations/1.x-to-2.x/#frequent-issues
  */
 
 const { TextDecoder, TextEncoder } = require('node:util');
@@ -19,13 +21,8 @@ const { Blob, File } = require('node:buffer');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { fetch, Headers, FormData, Request, Response } = require('undici');
 
-const myFetch = (...args) => {
-  console.log('args', args);
-  return fetch(...args);
-};
-
 Object.defineProperties(globalThis, {
-  fetch: { value: myFetch, writable: true },
+  fetch: { value: fetch, writable: true },
   Blob: { value: Blob },
   File: { value: File },
   Headers: { value: Headers },
