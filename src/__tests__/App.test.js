@@ -77,7 +77,6 @@ describe('App', () => {
       fireEvent.change(screen.getByLabelText(/add a note/i), {
         target: { value: 'another note' },
       });
-      screen.debug();
       const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
       expect(tagForm.textContent).toMatch(/meta(.*)work/i);
 

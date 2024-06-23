@@ -36,7 +36,7 @@ afterAll(() => {
 });
 
 describe('getSession', () => {
-  it('', async () => {
+  it('gets user', async () => {
     const api = createApi();
     const user = await api.getUser();
     expect(user).toEqual({ id: '123' });
