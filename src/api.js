@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { createSupabase } from './supabase';
 
 // Supabase returns an error in 200 response, unwrap and throw if it exists.
 const validate = (res) => {
@@ -30,12 +30,11 @@ export const addTagsToNotes = (allNotes, notesTags) => {
   });
 };
 
-export const createApi = (db = supabase) => {
+export const createApi = (db = createSupabase()) => {
   const getSession = () => db.auth.getSession();
 
   const getUser = async () => {
     const res = await db.auth.getUser();
-    console.log('res', res);
     const { user } = validate(res);
     return user;
   };
@@ -189,7 +188,6 @@ export const createApi = (db = supabase) => {
   const deleteTag = async ({ id }) => {
     await db.from('notes_tags').delete().eq('tag_id', id).then(validate);
     const res = await db.from('tags').delete().eq('id', id);
-    console.log('deleted', res);
     return validate(res);
   };
 

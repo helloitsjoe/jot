@@ -1,4 +1,4 @@
-import { rest } from 'msw';
+import { http, HttpResponse as Res } from 'msw';
 import { mockTags, mockUser, mockTokenResponse } from './mock-data';
 
 const BASE_URL = 'https://faxousvhzthjbkpymmvz.supabase.co';
@@ -10,56 +10,52 @@ export const TOKEN = `${BASE_URL}/auth/v1/token`;
 export const NOTES_TAGS = `${BASE_URL}/rest/v1/notes_tags`;
 
 export const defaultHandlers = [
-  rest.get(AUTH, (req, res, ctx) => res(ctx.json(mockUser))),
-  rest.get(TAGS, (req, res, ctx) => res(ctx.json(mockTags))),
-  rest.post(TAGS, (req, res, ctx) => res(ctx.json(req.body))),
-  rest.post(USER, (req, res, ctx) => res(ctx.json(req.body))),
-  rest.post(NOTES, (req, res, ctx) => res(ctx.json(req.body))),
-  rest.patch(TAGS, (req, res, ctx) => res(ctx.json(req.body))),
-  rest.delete(TAGS, (req, res, ctx) => res(ctx.json(true))),
-  rest.delete(NOTES, (req, res, ctx) => res(ctx.json(true))),
-  rest.post(NOTES_TAGS, (req, res, ctx) => res(ctx.json(req.body))),
-  rest.delete(NOTES_TAGS, (req, res, ctx) => res(ctx.json(req.body))),
-  rest.post(TOKEN, (req, res, ctx) => res(ctx.json(mockTokenResponse))),
+  http.get(AUTH, () => Res.json(mockUser)),
+  http.get(TAGS, () => Res.json(mockTags)),
+  http.post(TAGS, async ({ request }) => Res.json(await request.json())),
+  http.post(USER, async ({ request }) => Res.json(await request.json())),
+  http.post(NOTES, async ({ request }) => Res.json(await request.json())),
+  http.patch(TAGS, async ({ request }) => Res.json(await request.json())),
+  http.delete(TAGS, () => Res.json(true)),
+  http.delete(NOTES, () => Res.json(true)),
+  http.delete(NOTES_TAGS, () => Res.json({})),
+  http.post(NOTES_TAGS, async ({ request }) => Res.json(await request.json())),
+  http.post(TOKEN, () => Res.json(mockTokenResponse)),
 ];
 
-export const errorTokenHandler = rest.post(TOKEN, (req, res, ctx) =>
-  res(ctx.status(500), ctx.json({ message: 'token failed' }))
+export const errorTokenHandler = http.post(TOKEN, () =>
+  Res.json({ message: 'token failed' }, { status: 500 })
 );
-export const emptyTagsHandler = rest.get(TAGS, (req, res, ctx) =>
-  res(ctx.json(null))
+export const emptyTagsHandler = http.get(TAGS, () => Res.json(null));
+
+export const errorFetchTagsHandler = http.get(TAGS, () =>
+  Res.json({ message: 'oh heck' }, { status: 500 })
 );
 
-export const errorFetchTagsHandler = rest.get(TAGS, (req, res, ctx) =>
-  res(ctx.status(500), ctx.json({ message: 'oh heck' }))
+export const errorAddTagHandler = http.post(TAGS, () =>
+  Res.json({ message: 'adding failed' }, { status: 500 })
 );
 
-export const errorAddTagHandler = rest.post(TAGS, (req, res, ctx) =>
-  res(ctx.status(500), ctx.json({ message: 'adding failed' }))
+export const errorAddNoteHandler = http.post(NOTES, () =>
+  Res.json({ message: 'adding note failed' }, { status: 500 })
 );
 
-export const errorAddNoteHandler = rest.post(NOTES, (req, res, ctx) =>
-  res(ctx.status(500), ctx.json({ message: 'adding note failed' }))
+export const errorDeleteTagHandler = http.delete(TAGS, () =>
+  Res.json({ message: 'deleting tag failed' }, { status: 500 })
 );
 
-export const errorDeleteTagHandler = rest.delete(TAGS, (req, res, ctx) =>
-  res(ctx.status(500), ctx.json({ message: 'deleting tag failed' }))
+export const errorDeleteNoteHandler = http.delete(NOTES, () =>
+  Res.json({ message: 'deleting note failed' }, { status: 500 })
 );
 
-export const errorDeleteNoteHandler = rest.delete(NOTES, (req, res, ctx) =>
-  res(ctx.status(500), ctx.json({ message: 'deleting note failed' }))
+export const errorDeleteNotesTagsHandler = http.delete(NOTES_TAGS, () =>
+  Res.json({ message: 'deleting notes_tags failed' }, { status: 500 })
 );
 
-export const errorDeleteNotesTagsHandler = rest.delete(
-  NOTES_TAGS,
-  (req, res, ctx) =>
-    res(ctx.status(500), ctx.json({ message: 'deleting notes_tags failed' }))
+export const errorAddNotesTagsHandler = http.post(NOTES, () =>
+  Res.json({ message: 'adding notes_tags failed' }, { status: 500 })
 );
 
-export const errorAddNotesTagsHandler = rest.post(NOTES, (req, res, ctx) =>
-  res(ctx.status(500), ctx.json({ message: 'adding notes_tags failed' }))
-);
-
-export const errorUpdateTagsHandler = rest.patch(TAGS, (req, res, ctx) =>
-  res(ctx.status(500), ctx.json({ message: 'updating tags failed' }))
+export const errorUpdateTagsHandler = http.patch(TAGS, () =>
+  Res.json({ message: 'updating tags failed' }, { status: 500 })
 );
