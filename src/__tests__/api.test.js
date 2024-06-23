@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { addTagsToNotes, createApi } from '../api';
 import { server } from '../__mocks__/server';
 import {

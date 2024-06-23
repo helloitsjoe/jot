@@ -1,5 +1,8 @@
 module.exports = {
   extends: 'helloitsjoe',
+  env: {
+    es2020: true,
+  },
   rules: {
     indent: 'off',
     'react/jsx-curly-newline': 'off',
