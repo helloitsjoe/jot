@@ -348,10 +348,29 @@ describe('App', () => {
       ).not.toBeTruthy();
     });
 
-    it('tag name is editable', async () => {
+    it('moves a tag to the note form when clicked', async () => {
       render(<App api={api} />);
       await screen.findByText(/meta/i);
+
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      expect(within(tagForm).queryByText('meta')).not.toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).toBeTruthy();
+
+      fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));
+      expect(api.deleteTag).not.toBeCalled();
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
     });
+
+    it.todo('tag name is editable');
 
     it.todo('tag color is editable');
 

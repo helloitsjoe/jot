@@ -154,9 +154,10 @@ export default function App({ api, onSignOut }) {
         </SubmitButton>
         {tags.length > 0 && (
           <Box borderBottom="1px solid gray" p="1em 0" mb="1em">
-            {tags.map(({ text, color }) => {
+            {tags.map(({ id, text, color }) => {
               return (
                 <Tag
+                  id={id}
                   key={text}
                   color={color}
                   onDelete={() => {
