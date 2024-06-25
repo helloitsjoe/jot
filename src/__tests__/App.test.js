@@ -27,6 +27,7 @@ beforeEach(() => {
   api = {
     deleteNote: jest.fn().mockResolvedValue(),
     updateNote: jest.fn().mockResolvedValue(),
+    updateTag: jest.fn().mockResolvedValue(),
     deleteTag: jest.fn().mockResolvedValue(),
     loadNotes: jest.fn().mockResolvedValue(mockNotes),
     loadTags: jest.fn().mockResolvedValue(mockTags),
@@ -346,6 +347,13 @@ describe('App', () => {
         screen.queryByRole('button', { name: /delete/i })
       ).not.toBeTruthy();
     });
+
+    it('tag name is editable', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+    });
+
+    it.todo('tag color is editable');
 
     it('shows all notes when clicking see all', async () => {
       const extraTags = [
