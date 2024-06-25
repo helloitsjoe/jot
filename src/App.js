@@ -3,6 +3,7 @@ import { useCustomSwr, catchSwr } from './utils';
 import Box from './components/Box';
 import ConfirmDelete from './components/ConfirmDelete';
 import Tag from './components/Tag';
+import EditTag from './components/EditTag';
 import Notes from './components/Notes';
 import Input from './components/Input';
 import { ModalContext } from './components/Modal';
@@ -103,6 +104,23 @@ export default function App({ api, onSignOut }) {
     openModal();
   };
 
+  const handleEditTag = ({ color, text, id }) => {
+    setModalContent(
+      <EditTag
+        id={id}
+        initialText={text}
+        color={color}
+        api={api}
+        onCancel={closeModal}
+        onSuccess={(newTag) => {
+          setTags((prev) => prev.map((t) => (t.id === id ? newTag : t)));
+          closeModal();
+        }}
+      />
+    );
+    openModal();
+  };
+
   const handleAddNote = async (e) => {
     e.preventDefault();
     const optimisticData = [...notes, { text: note, tags, id: createTempId() }];
@@ -160,7 +178,9 @@ export default function App({ api, onSignOut }) {
                   id={id}
                   key={text}
                   color={color}
-                  onDelete={() => {
+                  onSelect={handleEditTag}
+                  onDelete={(e) => {
+                    e.stopPropagation();
                     setTags((p) => p.filter((t) => t.text !== text));
                   }}
                 >

@@ -150,8 +150,8 @@ export default function Notes({
     : sortedNotes;
 
   const notesByTag = (notes || []).reduce((acc, note) => {
-    console.log('note', note);
-    console.log('note.tags', note.tags);
+    // console.log('note', note);
+    // console.log('note.tags', note.tags);
     const tags = note.tags.length
       ? note.tags
       : [{ text: 'untagged', color: 'gray' }];

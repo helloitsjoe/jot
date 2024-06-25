@@ -27,7 +27,7 @@ beforeEach(() => {
   api = {
     deleteNote: jest.fn().mockResolvedValue(),
     updateNote: jest.fn().mockResolvedValue(),
-    updateTag: jest.fn().mockResolvedValue(),
+    updateTag: jest.fn().mockResolvedValue(mockTagMeta),
     deleteTag: jest.fn().mockResolvedValue(),
     loadNotes: jest.fn().mockResolvedValue(mockNotes),
     loadTags: jest.fn().mockResolvedValue(mockTags),
@@ -370,7 +370,42 @@ describe('App', () => {
       expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
     });
 
-    it.todo('tag name is editable');
+    it('tag name is editable', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      expect(within(tagForm).queryByText('meta')).not.toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).toBeTruthy();
+
+      expect(screen.queryByRole('dialog')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      const dialog = screen.queryByRole('dialog');
+      expect(dialog).toBeTruthy();
+      expect(within(dialog).getByLabelText(/update tag/i).value).toBe('meta');
+
+      fireEvent.change(within(dialog).getByLabelText(/update tag/i), {
+        target: { value: 'not meta' },
+      });
+
+      fireEvent.submit(within(dialog).getByLabelText('tag-edit-form'));
+      expect(api.updateTag).toBeCalledWith({
+        id: mockTagMeta.id,
+        text: 'not meta',
+        color: mockTagMeta.color,
+      });
+
+      await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+    });
 
     it.todo('tag color is editable');
 
