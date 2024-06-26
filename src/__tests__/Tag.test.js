@@ -3,10 +3,6 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import Tag from '../components/Tag';
 
 describe('Tag', () => {
-  it.todo('tag name is editable');
-
-  it.todo('tag color is editable');
-
   it('onSelect is called when text is pressed', () => {
     const onSelect = jest.fn();
     render(<Tag onSelect={onSelect}>Foo</Tag>);

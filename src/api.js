@@ -180,8 +180,12 @@ export const createApi = (db = createSupabase()) => {
   const updateTag = async ({ id, color, text }) => {
     const res = await db
       .from('tags')
-      .update({ id, color, text, updated_at: new Date().toISOString() });
-    return validate(res);
+      .update({ id, color, text, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select();
+
+    const [updatedTag] = validate(res);
+    return updatedTag;
   };
 
   // TODO: Soft delete
