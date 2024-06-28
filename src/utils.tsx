@@ -1,7 +1,10 @@
-import React from 'react';
-import useSWR, { SWRConfig } from 'swr';
+// TODO: Fix this
+/* eslint-disable react/display-name */
+import * as React from 'react';
+import useSWR, { SWRConfig, SWRHook } from 'swr';
 
-export const useCustomSwr = (...args) => {
+export const useCustomSwr: SWRHook = (...args) => {
+  // @ts-expect-error TODO: figure this out
   const rtn = useSWR(...args);
   // console.log('rtn', rtn.data);
   // console.log('rtn', rtn.error);
@@ -11,7 +14,7 @@ export const useCustomSwr = (...args) => {
   return rtn;
 };
 
-export const catchSwr = (mutate, key) => (err) => {
+export const catchSwr = (mutate, key?) => (err) => {
   if (key) {
     mutate(key, err, false);
   } else {

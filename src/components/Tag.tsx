@@ -1,5 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 import Box from './Box';
+
+export interface TagType {
+  id: string;
+  text: string;
+  color: string;
+}
 
 export default function Tag({
   id,
@@ -8,6 +14,12 @@ export default function Tag({
   onSelect = () => {},
   // onEdit,
   onDelete,
+}: {
+  id: string;
+  color: string;
+  children: string;
+  onSelect: ({ text, color, id }: { text; color; id }) => void;
+  onDelete?: (e: Event) => void;
 }) {
   return (
     <Box

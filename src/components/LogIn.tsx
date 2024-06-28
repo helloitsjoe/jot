@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { API } from '../api';
 import Box from './Box';
 import { SubmitButton } from './Button';
 import Input from './Input';
@@ -7,7 +8,15 @@ const LOADING = 'LOADING';
 const SUCCESS = 'SUCCESS';
 const ERROR = 'ERROR';
 
-export default function LogIn({ api, onSuccess }) {
+export default function LogIn({
+  api,
+  onSuccess,
+}: {
+  api: API;
+  // TODO: Fix this
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSuccess: (user: any) => void;
+}) {
   const [status, setStatus] = React.useState(SUCCESS);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');

@@ -1,10 +1,69 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSupabase } from './supabase';
+
+class ResponseError extends Error {
+  status: number;
+}
+
+export interface API {
+  getUser: () => Promise<any>;
+  signUp: ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => Promise<any>;
+  signIn: ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => Promise<any>;
+  signOut: () => Promise<any>;
+  addNote: (text: string, tag_ids: string[]) => Promise<any>;
+  updateNote: ({
+    id,
+    text,
+    oldTagIds,
+    newTagIds,
+  }: {
+    id: string;
+    text: string;
+    oldTagIds: string[];
+    newTagIds: string[];
+  }) => Promise<any>;
+  addTag: ({ text, color }: { text: string; color: string }) => Promise<any>;
+  loadTags: () => Promise<any>;
+  loadNotes: () => Promise<any>;
+  getSession: () => Promise<any>;
+  addUser: ({ id }: { id: string }) => Promise<any>;
+  deleteTag: ({ id }: { id: string }) => Promise<any>;
+  deleteNote: ({ id }: { id: string }) => Promise<any>;
+  updateTag: ({
+    id,
+    color,
+    text,
+  }: {
+    id: string;
+    color: string;
+    text: string;
+  }) => Promise<any>;
+  updateUser: ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => Promise<any>;
+}
 
 // Supabase returns an error in 200 response, unwrap and throw if it exists.
 const validate = (res) => {
   const { data, error } = res;
   if (error) {
-    const err = new Error(error.message);
+    const err = new Error(error.message) as ResponseError;
     err.status = error.status;
     throw err;
   }
@@ -30,7 +89,7 @@ export const addTagsToNotes = (allNotes, notesTags) => {
   });
 };
 
-export const createApi = (db = createSupabase()) => {
+export const createApi = (db = createSupabase()): API => {
   const getSession = () => db.auth.getSession();
 
   const getUser = async () => {
@@ -167,8 +226,9 @@ export const createApi = (db = createSupabase()) => {
           },
         ],
         {
+          // TODO Figure out why this isn't typed correctly
           return: 'representation',
-        }
+        } as any
       )
       .select();
 

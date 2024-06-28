@@ -1,11 +1,20 @@
 import * as React from 'react';
 import LogIn from './LogIn';
 import Box from './Box';
+import type { API } from '../api';
 import { SUCCESS, ERROR, LOADING } from '../constants';
 
-const AuthContext = React.createContext();
+const AuthContext = React.createContext<{ signOut: () => void }>({
+  signOut: () => {},
+});
 
-export default function AuthProvider({ api, children }) {
+export default function AuthProvider({
+  api,
+  children,
+}: {
+  api: API;
+  children: (auth: { signOut: () => void }) => React.ReactNode;
+}) {
   const [user, setUser] = React.useState(null);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [status, setStatus] = React.useState(LOADING);

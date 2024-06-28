@@ -9,7 +9,7 @@ import ModalProvider from './components/Modal';
 
 const api = createApi(createSupabase());
 
-const reload = () => window.location.reload(true);
+const reload = () => window.location.reload();
 onSwipe(Directions.DOWN, reload, { fromTop: true });
 
 const root = createRoot(document.getElementById('root'));

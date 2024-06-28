@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import styled from 'styled-components';
 import {
   color,
@@ -20,8 +21,8 @@ const Box = styled.div`
   ${position}
   ${shadow}
   // TODO: Generalize this?
-  ${({ gap }) => (gap ? `gap: ${gap}` : '')}
-  ${({ transform }) => (transform ? `transform: ${transform}` : '')}
+  ${({ gap }: any) => (gap ? `gap: ${gap}` : '')}
+  ${({ transform }: any) => (transform ? `transform: ${transform}` : '')}
 `;
 
 export default Box;

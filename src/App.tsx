@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { API } from './api';
 import { useCustomSwr, catchSwr } from './utils';
 import Box from './components/Box';
 import ConfirmDelete from './components/ConfirmDelete';
@@ -31,7 +32,13 @@ const MAX_TAGS = 7;
 // Create an optimistic tempId for a key
 const createTempId = () => Date.now();
 
-export default function App({ api, onSignOut }) {
+export default function App({
+  api,
+  onSignOut,
+}: {
+  api: API;
+  onSignOut: () => void;
+}) {
   const {
     data: recentTags,
     error: fetchTagErr,
@@ -111,7 +118,7 @@ export default function App({ api, onSignOut }) {
         initialText={text}
         color={color}
         api={api}
-        onCancel={closeModal}
+        // onCancel={closeModal}
         onSuccess={(newTag) => {
           setTags((prev) => prev.map((t) => (t.id === id ? newTag : t)));
           closeModal();
@@ -249,15 +256,16 @@ export default function App({ api, onSignOut }) {
           label={<h3>Add a tag</h3>}
           value={tag}
           onChange={handleTagChange}
-          list="tags"
+          // list="tags"
           // Allow only alhphanumeric with spaces between words
           pattern="^[a-zA-Z0-9_-]+( [a-zA-Z0-9_-]+)*$"
-          onInvalid={(e) =>
+          required
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onInvalid={(e: any) =>
             e.target.setCustomValidity(
               `Must be alphanumeric, received ${e.target.value}`
             )
           }
-          required
         />
         <SubmitButton>Add a new tag</SubmitButton>
       </Box>
