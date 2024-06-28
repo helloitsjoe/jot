@@ -260,7 +260,9 @@ describe('App', () => {
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.getByTestId(`note-${mockNoteQuick.id}-edit`));
       fireEvent.click(
-        within(screen.getByLabelText('notes-form')).getByTestId('tag-1-delete')
+        within(screen.getByLabelText('note-edit-form')).getByTestId(
+          'tag-1-delete'
+        )
       );
       fireEvent.submit(screen.getByRole('button', { name: /update/i }));
       await waitFor(() => {
@@ -389,8 +391,7 @@ describe('App', () => {
 
       fireEvent.click(screen.queryByText('meta'));
 
-      const dialog = screen.queryByRole('dialog');
-      expect(dialog).toBeTruthy();
+      const dialog = screen.getByRole('dialog');
       expect(within(dialog).getByLabelText(/update tag/i).value).toBe('meta');
 
       fireEvent.change(within(dialog).getByLabelText(/update tag/i), {
@@ -407,7 +408,46 @@ describe('App', () => {
       await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
     });
 
-    it.todo('tag color is editable');
+    it('tag color is editable', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      expect(within(tagForm).queryByText('meta')).not.toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).toBeTruthy();
+
+      expect(screen.queryByRole('dialog')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      const dialog = screen.getByRole('dialog');
+      expect(
+        within(dialog)
+          .getByLabelText(/edit color/i)
+          // Not sure why .value doesn't work here, it returns #000000
+          .getAttribute('value')
+      ).toBe(mockTagMeta.color);
+
+      fireEvent.change(within(dialog).getByLabelText(/edit color/i), {
+        target: { value: '#ffffff' },
+      });
+
+      fireEvent.submit(within(dialog).getByLabelText('tag-edit-form'));
+      expect(api.updateTag).toBeCalledWith({
+        id: mockTagMeta.id,
+        text: 'meta',
+        color: '#ffffff',
+      });
+
+      await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+    });
 
     it('shows all notes when clicking see all', async () => {
       const extraTags = [

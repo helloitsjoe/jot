@@ -35,7 +35,7 @@ export default function EditNote({
     <>
       <Box
         as="form"
-        aria-label="notes-form"
+        aria-label="note-edit-form"
         onSubmit={async (e) => {
           e.preventDefault();
           mutate(

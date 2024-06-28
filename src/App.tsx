@@ -116,7 +116,7 @@ export default function App({
       <EditTag
         id={id}
         initialText={text}
-        color={color}
+        initialColor={color}
         api={api}
         // onCancel={closeModal}
         onSuccess={(newTag) => {
