@@ -99,7 +99,7 @@ describe('Notes', () => {
     await screen.findByRole('button', { name: /update/i });
 
     const dialog = screen.queryByRole('dialog');
-    const form = screen.getByRole('form', { name: 'notes-form' });
+    const form = screen.getByRole('form', { name: 'note-edit-form' });
 
     expect(within(dialog).queryAllByText(/meta/i).length).toBe(1);
     expect(within(form).queryByText(/meta/i)).toBeTruthy();
