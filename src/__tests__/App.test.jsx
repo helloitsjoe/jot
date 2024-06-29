@@ -1,3 +1,4 @@
+import { beforeEach, afterEach, it, describe, expect, vi } from 'vitest';
 import React from 'react';
 import {
   fireEvent,
@@ -25,21 +26,21 @@ let api;
 
 beforeEach(() => {
   api = {
-    deleteNote: jest.fn().mockResolvedValue(),
-    updateNote: jest.fn().mockResolvedValue(),
-    updateTag: jest.fn().mockResolvedValue(mockTagMeta),
-    deleteTag: jest.fn().mockResolvedValue(),
-    loadNotes: jest.fn().mockResolvedValue(mockNotes),
-    loadTags: jest.fn().mockResolvedValue(mockTags),
-    addNote: jest.fn().mockResolvedValue(),
-    addTag: jest.fn().mockResolvedValue(),
+    deleteNote: vi.fn().mockResolvedValue(),
+    updateNote: vi.fn().mockResolvedValue(),
+    updateTag: vi.fn().mockResolvedValue(mockTagMeta),
+    deleteTag: vi.fn().mockResolvedValue(),
+    loadNotes: vi.fn().mockResolvedValue(mockNotes),
+    loadTags: vi.fn().mockResolvedValue(mockTags),
+    addNote: vi.fn().mockResolvedValue(),
+    addTag: vi.fn().mockResolvedValue(),
   };
-  jest.useFakeTimers();
+  vi.useFakeTimers({ shouldAdvanceTime: true });
 });
 
 afterEach(() => {
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
+  vi.runOnlyPendingTimers();
+  vi.useRealTimers();
 });
 
 describe('App', () => {
@@ -69,7 +70,7 @@ describe('App', () => {
 
     it('moves a tag to the beginning of the list when it is added to a note', async () => {
       const reverse = (arr) => [...arr].reverse();
-      api.loadTags = jest
+      api.loadTags = vi
         .fn()
         .mockResolvedValueOnce(mockTags)
         .mockResolvedValueOnce(reverse(mockTags));
@@ -133,7 +134,7 @@ describe('App', () => {
 
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.queryByTestId('note-1-delete'));
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       expect(api.deleteNote).not.toBeCalled();
       await waitFor(() => {
         expect(api.deleteNote).toBeCalledWith({ id: 1 });
@@ -147,7 +148,7 @@ describe('App', () => {
       await screen.findByText(/quick note/i);
       expect(screen.findByText(/work reminder/i)).toBeTruthy();
       fireEvent.click(screen.queryByTestId('note-1-delete'));
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       fireEvent.click(screen.queryByTestId('note-2-delete'));
       expect(api.deleteNote).not.toBeCalled();
 
@@ -161,7 +162,7 @@ describe('App', () => {
         expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
         expect(screen.queryByText(/work reminder/i)).toBeTruthy();
       });
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       await waitFor(() => {
         // Check that both notes are deleted
         expect(api.deleteNote).toBeCalledWith({ id: 2 });
@@ -182,7 +183,7 @@ describe('App', () => {
       expect(
         screen.queryByRole('button', { name: /cancel/i })
       ).not.toBeTruthy();
-      jest.advanceTimersByTime(DELETE_CANCEL_MS);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS);
       expect(api.deleteNote).not.toBeCalled();
     });
 
@@ -192,7 +193,7 @@ describe('App', () => {
       await screen.findByText(/quick note/i);
       expect(screen.findByText(/work reminder/i)).toBeTruthy();
       fireEvent.click(screen.queryByTestId('note-1-delete'));
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
 
       fireEvent.click(screen.queryByTestId('note-2-delete'));
       // Cancel first after clicking second
@@ -208,7 +209,7 @@ describe('App', () => {
         expect(screen.queryByText(/quick note/i)).toBeTruthy();
         expect(screen.queryByText(/work reminder/i)).toBeTruthy();
       });
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       await waitFor(() => {
         // Check that only note 2 is deleted
         expect(api.deleteNote).not.toBeCalledWith({ id: 1 });
@@ -229,7 +230,7 @@ describe('App', () => {
     });
 
     it('shows error when adding a note', async () => {
-      api.addNote = jest.fn().mockRejectedValue(new Error('add failed!'));
+      api.addNote = vi.fn().mockRejectedValue(new Error('add failed!'));
       render(<App api={api} />);
       await screen.findByText(/quick note/i);
       fireEvent.change(screen.getByLabelText(/add a note/i), {
@@ -242,11 +243,11 @@ describe('App', () => {
     });
 
     it('shows error when deleting a note', async () => {
-      api.deleteNote = jest.fn().mockRejectedValue(new Error('delete failed!'));
+      api.deleteNote = vi.fn().mockRejectedValue(new Error('delete failed!'));
       render(<App api={api} />);
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.getByTestId(`note-${mockNoteQuick.id}-delete`));
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 50);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 50);
       await waitFor(() => {
         expect(api.deleteNote).toBeCalledWith({ id: 1 });
         expect(screen.queryByText(/delete failed/i)).toBeTruthy();
@@ -254,7 +255,7 @@ describe('App', () => {
     });
 
     it('error updating note displays error message', async () => {
-      api.updateNote = jest.fn().mockRejectedValue(new Error('update failed!'));
+      api.updateNote = vi.fn().mockRejectedValue(new Error('update failed!'));
 
       render(<App api={api} />);
       await screen.findByText(/quick note/i);
@@ -460,7 +461,7 @@ describe('App', () => {
         { id: 8, text: 'eighth', color: 'yellow' },
       ];
 
-      api.loadTags = jest.fn().mockResolvedValue(extraTags);
+      api.loadTags = vi.fn().mockResolvedValue(extraTags);
       render(<App api={api} />);
       await screen.findByText(/meta/i);
       expect(screen.queryByText(/meta/i)).toBeTruthy();
@@ -525,7 +526,7 @@ describe('App', () => {
     });
 
     it('shows error when deleting a tag', async () => {
-      api.deleteTag = jest.fn().mockRejectedValue(new Error('delete failed!'));
+      api.deleteTag = vi.fn().mockRejectedValue(new Error('delete failed!'));
       render(<App api={api} />);
       await screen.findByText(/meta/i);
       fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));

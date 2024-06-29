@@ -1,10 +1,11 @@
+import { it, describe, expect, vi } from 'vitest';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import Tag from '../components/Tag';
 
 describe('Tag', () => {
   it('onSelect is called when text is pressed', () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     render(<Tag onSelect={onSelect}>Foo</Tag>);
     expect(onSelect).toBeCalledTimes(0);
     fireEvent.click(screen.queryByText('Foo'));
@@ -12,7 +13,7 @@ describe('Tag', () => {
   });
 
   it('onDelete is called when X is pressed', () => {
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
     render(<Tag onDelete={onDelete}>Foo</Tag>);
     expect(onDelete).toBeCalledTimes(0);
     fireEvent.click(screen.queryByText('X'));

@@ -1,3 +1,4 @@
+import { beforeEach, it, describe, expect, vi } from 'vitest';
 import React from 'react';
 import {
   fireEvent,
@@ -17,9 +18,9 @@ let api;
 
 beforeEach(() => {
   api = {
-    loadTags: jest.fn().mockResolvedValue(mockTags),
-    loadNotes: jest.fn().mockResolvedValue(mockNotes),
-    updateNote: jest.fn().mockResolvedValue(),
+    loadTags: vi.fn().mockResolvedValue(mockTags),
+    loadNotes: vi.fn().mockResolvedValue(mockNotes),
+    updateNote: vi.fn().mockResolvedValue(),
   };
 });
 

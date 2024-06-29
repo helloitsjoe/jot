@@ -1,5 +1,3 @@
-// TODO: Fix this
-/* eslint-disable react/display-name */
 import * as React from 'react';
 import useSWR, { SWRConfig, SWRHook } from 'swr';
 
