@@ -18,4 +18,8 @@ export default defineConfig({
       template: 'index.html',
     }),
   ],
+  test: {
+    environment: 'jsdom',
+    testTimeout: 1000,
+  },
 });
