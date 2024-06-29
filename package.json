@@ -8,6 +8,7 @@
     "clean": "rm -rf dist",
     "build": "yarn clean && yarn tsc && vite build",
     "preview": "vite build && vite preview",
+    "lint": "yarn eslint .",
     "dev": "yarn tsc && vite serve"
   },
   "keywords": [],

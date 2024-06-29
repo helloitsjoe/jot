@@ -9,12 +9,15 @@ type ModalContextType = {
 
 export const ModalContext = React.createContext<ModalContextType>({});
 
-export const withModal = (Component) => (props) =>
-  (
-    <ModalProvider>
-      <Component {...props} />
-    </ModalProvider>
-  );
+export const withModal = (Component) => {
+  return function withModal(props) {
+    return (
+      <ModalProvider>
+        <Component {...props} />
+      </ModalProvider>
+    );
+  };
+};
 
 export default function ModalProvider({
   children,
