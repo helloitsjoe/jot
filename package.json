@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
-    "clean": "rm -rf dist && cp -r assets/ dist",
+    "clean": "rm -rf dist",
     "build": "yarn clean && vite build",
     "preview": "vite build && vite preview",
     "dev": "vite serve"
