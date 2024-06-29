@@ -3,10 +3,6 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import Tag from '../components/Tag';
 
-afterEach(() => {
-  document.body.innerHTML = '';
-});
-
 describe('Tag', () => {
   it('onSelect is called when text is pressed', () => {
     const onSelect = vi.fn();

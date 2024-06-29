@@ -41,8 +41,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.runOnlyPendingTimers();
   vi.useRealTimers();
-  vi.restoreAllMocks();
-  document.body.innerHTML = '';
 });
 
 describe('App', () => {

@@ -24,10 +24,6 @@ beforeEach(() => {
   };
 });
 
-afterEach(() => {
-  document.body.innerHTML = '';
-});
-
 describe('Notes', () => {
   it('note is editable', async () => {
     render(

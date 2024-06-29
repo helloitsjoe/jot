@@ -20,6 +20,7 @@ export default defineConfig({
     }),
   ],
   test: {
+    globals: true, // Cleanup after each test
     environment: 'jsdom',
     testTimeout: 1000,
   },
