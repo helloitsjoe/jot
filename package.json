@@ -2,11 +2,12 @@
   "name": "Jot",
   "version": "1.0.0",
   "description": "Quick notes",
+  "type": "module",
   "scripts": {
     "test": "jest",
     "clean": "rm -rf dist && cp -r assets/ dist",
     "build": "yarn clean && vite build",
-    "preview": "vite preview",
+    "preview": "vite build && vite preview",
     "dev": "vite serve"
   },
   "keywords": [],
@@ -34,7 +35,6 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "html-webpack-plugin": "^5.5.3",
     "jest": "^28.0.3",
     "jest-environment-jsdom": "^28.0.2",
     "jest-simple-config": "^0.4.2",
