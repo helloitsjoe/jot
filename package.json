@@ -5,9 +5,9 @@
   "scripts": {
     "test": "jest",
     "clean": "rm -rf dist && cp -r assets/ dist",
-    "build": "yarn clean && webpack --mode production",
-    "watch": "webpack --mode development --watch",
-    "dev": "webpack serve"
+    "build": "yarn clean && vite build",
+    "preview": "vite preview",
+    "dev": "vite serve"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +26,7 @@
     "@testing-library/dom": "^8.1.0",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.1.9",
+    "@vitejs/plugin-react": "^4.3.1",
     "babel-loader": "^8.2.2",
     "eslint": "^7.22.0",
     "eslint-config-helloitsjoe": "^2.0.0",
@@ -43,10 +44,8 @@
     "ts-loader": "^9.3.1",
     "typescript": "^4.8.2",
     "undici": "^6.19.2",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1",
-    "webpack-simple": "^1.7.3"
+    "vite": "^5.3.2",
+    "vite-plugin-html": "^3.2.2"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0-rc.8",

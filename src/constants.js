@@ -1,9 +1,3 @@
-const SUCCESS = 'success';
-const ERROR = 'error';
-const LOADING = 'loading';
-
-module.exports = {
-  SUCCESS,
-  ERROR,
-  LOADING,
-};
+export const SUCCESS = 'success';
+export const ERROR = 'error';
+export const LOADING = 'loading';
