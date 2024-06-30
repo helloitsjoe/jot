@@ -1,3 +1,4 @@
+// TODO: Fix this with supabse cli
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSupabase } from './supabase';
 
@@ -216,20 +217,14 @@ export const createApi = (db = createSupabase()): API => {
     // Tags are required to have user, text, color
     const res = await db
       .from('tags')
-      .insert(
-        [
-          {
-            text: text.toLowerCase(),
-            color,
-            user_id: user.id,
-            updated_at: new Date().toISOString(),
-          },
-        ],
+      .insert([
         {
-          // TODO Figure out why this isn't typed correctly
-          return: 'representation',
-        } as any
-      )
+          text: text.toLowerCase(),
+          color,
+          user_id: user.id,
+          updated_at: new Date().toISOString(),
+        },
+      ])
       .select();
 
     const [newTag] = validate(res);

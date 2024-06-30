@@ -2,10 +2,9 @@ import * as React from 'react';
 import useSWR, { SWRConfig, SWRHook } from 'swr';
 
 export const useCustomSwr: SWRHook = (...args) => {
-  // @ts-expect-error TODO: figure this out
-  const rtn = useSWR(...args);
-  // console.log('rtn', rtn.data);
-  // console.log('rtn', rtn.error);
+  // Using .call here to get around this TS error: "A spred argument must either
+  // have a tuple type or be passed to a rest parameter."
+  const rtn = useSWR.call(null, ...args);
   if (rtn.data instanceof Error) {
     return { ...rtn, data: null, error: rtn.data };
   }

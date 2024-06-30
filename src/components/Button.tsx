@@ -4,9 +4,6 @@ import Box from './Box';
 export default function Button({
   textOnly,
   children,
-  // TODO: I shouldn't have to pass in styled-system props here
-  display,
-  alignSelf,
   onClick = () => {},
   ...props
 }: {
@@ -25,8 +22,6 @@ export default function Button({
         bg="transparent"
         color="gray"
         onClick={onClick}
-        display={display}
-        alignSelf={alignSelf}
         {...props}
       >
         {children}
@@ -51,7 +46,6 @@ export default function Button({
 
 export function SubmitButton({
   children,
-  disabled,
   ...props
 }: {
   children: React.ReactNode;
@@ -65,7 +59,6 @@ export function SubmitButton({
       color="white"
       bg="transparent"
       border="1px solid gray"
-      disabled={disabled}
       {...props}
     >
       {children}

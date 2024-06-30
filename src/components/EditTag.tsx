@@ -16,7 +16,7 @@ export default function EditTag({
   id: string;
   initialColor: string;
   initialText: string;
-  api: API; // TODO
+  api: API;
   onSuccess: (newTag: TagType) => void;
 }) {
   const [newText, setNewText] = React.useState(initialText);

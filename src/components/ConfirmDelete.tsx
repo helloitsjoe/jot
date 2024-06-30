@@ -2,6 +2,7 @@ import * as React from 'react';
 import Box from './Box';
 import Button from './Button';
 
+// TODO: Tab trapping, focus management
 export default function ConfirmDelete({
   onConfirmDelete,
   onCancel,

@@ -11,7 +11,22 @@ import {
   shadow,
 } from 'styled-system';
 
-const Box = styled.div`
+// Ignoring specific props because of this issue:
+// https://github.com/styled-system/styled-system/issues/1044#issuecomment-1104748647
+const Box = styled('div').withConfig({
+  shouldForwardProp: (prop) =>
+    ![
+      'alignSelf',
+      'alignItems',
+      'flexDirection',
+      'flexWrap',
+      'justifyContent',
+      'borderBottom',
+      'borderRadius',
+      'lineHeight',
+      'maxWidth',
+    ].includes(prop),
+})`
   ${color}
   ${space}
   ${layout}
