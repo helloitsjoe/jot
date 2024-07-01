@@ -35,10 +35,6 @@ afterEach(() => {
   server.resetHandlers();
 });
 
-afterEach(() => {
-  server.resetHandlers();
-});
-
 afterAll(() => {
   server.close();
 });
@@ -83,13 +79,14 @@ describe('User', () => {
     });
 
     it('throws if error response', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
       server.use(errorTokenHandler);
       const api = createApi(testOpts);
       try {
         await api.signIn({ email: 'foo@bar.com', password: '1234' });
       } catch (err) {
         expect(err.message).toEqual('token failed');
+        expect(err.status).toEqual(500);
       }
     });
   });

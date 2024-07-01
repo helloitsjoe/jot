@@ -19,8 +19,11 @@ export default function AuthProvider({
   const [errorMessage, setErrorMessage] = React.useState('');
   const [status, setStatus] = React.useState(LOADING);
 
-  // TODO: Actually sign user out
-  const signOut = React.useCallback(() => setUser(null), []);
+  const signOut = React.useCallback(() => {
+    setUser(null);
+    api.signOut();
+  }, []);
+
   const state = React.useRef({ signOut });
 
   React.useEffect(() => {
