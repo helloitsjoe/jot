@@ -2,7 +2,7 @@ import * as React from 'react';
 import Box from './Box';
 
 export interface TagType {
-  id: string;
+  id: number;
   text: string;
   color: string;
 }
@@ -15,7 +15,7 @@ export default function Tag({
   // onEdit,
   onDelete,
 }: {
-  id: string;
+  id: number;
   color: string;
   children: string;
   onSelect: ({ text, color, id }: { text; color; id }) => void;

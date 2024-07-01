@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { API } from '../api';
+import type { API, Tag as TagType } from '../api';
 import { useSWRConfig } from 'swr';
 import Box from './Box';
 import Input from './Input';
@@ -17,7 +17,7 @@ export default function EditNote({
 }: {
   id: string;
   initialNoteText?: string;
-  initialTags?: { id: string; text: string; color: string }[];
+  initialTags?: TagType[];
   api: API;
   onCancel: () => void;
   onSuccess: () => void;

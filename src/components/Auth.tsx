@@ -1,7 +1,7 @@
 import * as React from 'react';
 import LogIn from './LogIn';
 import Box from './Box';
-import type { API } from '../api';
+import type { API, User } from '../api';
 import { SUCCESS, ERROR, LOADING } from '../constants';
 
 const AuthContext = React.createContext<{ signOut: () => void }>({
@@ -15,7 +15,7 @@ export default function AuthProvider({
   api: API;
   children: (auth: { signOut: () => void }) => React.ReactNode;
 }) {
-  const [user, setUser] = React.useState(null);
+  const [user, setUser] = React.useState<User>(null);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [status, setStatus] = React.useState(LOADING);
 

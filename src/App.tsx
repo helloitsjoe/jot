@@ -85,6 +85,7 @@ export default function App({
       const newTag = await api.addTag({ text: tag.trim(), color });
       setTags((t) => [...t, newTag]);
       setTag('');
+      return [newTag, ...tags];
     }).catch(catchSwr(mutateTags));
   };
 
@@ -144,6 +145,7 @@ export default function App({
         setTags([]);
         // Trigger re-fetch of tags to re-order
         mutateTags();
+        return optimisticData;
       },
       { optimisticData }
     ).catch(catchSwr(mutateNotes));

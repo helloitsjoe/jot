@@ -1,77 +1,28 @@
-// TODO: Fix this with supabse cli
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSupabase } from './supabase';
+import type { Tables } from './types/supabase';
+import type { AuthError, PostgrestError } from '@supabase/supabase-js';
+export type { User } from '@supabase/auth-js';
 
-class ResponseError extends Error {
-  status: number;
-}
+export type Note = Tables<'notes'>;
+export type Tag = Tables<'tags'>;
+export type NotesTags = Tables<'notes_tags'>;
+export type API = ReturnType<typeof createApi>;
 
-export interface API {
-  getUser: () => Promise<any>;
-  signUp: ({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }) => Promise<any>;
-  signIn: ({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }) => Promise<any>;
-  signOut: () => Promise<any>;
-  addNote: (text: string, tag_ids: string[]) => Promise<any>;
-  updateNote: ({
-    id,
-    text,
-    oldTagIds,
-    newTagIds,
-  }: {
-    id: string;
-    text: string;
-    oldTagIds: string[];
-    newTagIds: string[];
-  }) => Promise<any>;
-  addTag: ({ text, color }: { text: string; color: string }) => Promise<any>;
-  loadTags: () => Promise<any>;
-  loadNotes: () => Promise<any>;
-  getSession: () => Promise<any>;
-  addUser: ({ id }: { id: string }) => Promise<any>;
-  deleteTag: ({ id }: { id: string }) => Promise<any>;
-  deleteNote: ({ id }: { id: string }) => Promise<any>;
-  updateTag: ({
-    id,
-    color,
-    text,
-  }: {
-    id: string;
-    color: string;
-    text: string;
-  }) => Promise<any>;
-  updateUser: ({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }) => Promise<any>;
-}
+type ResponseError = AuthError | PostgrestError;
 
 // Supabase returns an error in 200 response, unwrap and throw if it exists.
-const validate = (res) => {
+const validate = <T>(res: { data?: T; error?: ResponseError }) => {
   const { data, error } = res;
   if (error) {
-    const err = new Error(error.message) as ResponseError;
-    err.status = error.status;
-    throw err;
+    throw error;
   }
   return data;
 };
 
-export const addTagsToNotes = (allNotes, notesTags) => {
+export const addTagsToNotes = (
+  allNotes: Note[],
+  notesTags: { notes: Note; tags: Tag }[]
+) => {
   const notesMap = notesTags.reduce((acc, { notes, tags }) => {
     const noteId = notes.id;
     if (!acc[noteId]) {
@@ -90,11 +41,14 @@ export const addTagsToNotes = (allNotes, notesTags) => {
   });
 };
 
-export const createApi = (db = createSupabase()): API => {
-  const getSession = () => db.auth.getSession();
+// auth.getUser() gets user from session if JWT is not provided. This causes
+// problems in tests where there is no current session. Passing optional jwt
+// only for tests. This is not a great solution.
+export const createApi = ({ jwt, ...clientOptions }) => {
+  const db = createSupabase(clientOptions);
 
   const getUser = async () => {
-    const res = await db.auth.getUser();
+    const res = await db.auth.getUser(jwt);
     const { user } = validate(res);
     return user;
   };
@@ -133,8 +87,7 @@ export const createApi = (db = createSupabase()): API => {
 
   const addUser = async ({ id }) => {
     const res = await db.from('users').insert([{ id }]);
-    const [user] = validate(res);
-    return user;
+    return validate(res);
   };
 
   const addNote = async (text, tag_ids) => {
@@ -298,7 +251,6 @@ export const createApi = (db = createSupabase()): API => {
     addTag,
     loadTags,
     loadNotes,
-    getSession,
     addUser,
     deleteTag,
     deleteNote,

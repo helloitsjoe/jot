@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { API } from '../api';
+import type { API, User } from '../api';
 import Box from './Box';
 import { SubmitButton } from './Button';
 import Input from './Input';
@@ -13,8 +13,7 @@ export default function LogIn({
   onSuccess,
 }: {
   api: API;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSuccess: (user: any) => void;
+  onSuccess: (user: User | null) => void;
 }) {
   const [status, setStatus] = React.useState(SUCCESS);
   const [email, setEmail] = React.useState('');
