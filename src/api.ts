@@ -44,7 +44,7 @@ export const addTagsToNotes = (
 // auth.getUser() gets user from session if JWT is not provided. This causes
 // problems in tests where there is no current session. Passing optional jwt
 // only for tests. This is not a great solution.
-export const createApi = ({ jwt, ...clientOptions }) => {
+export const createApi = ({ jwt = undefined, ...clientOptions } = {}) => {
   const db = createSupabase(clientOptions);
 
   const getUser = async () => {
