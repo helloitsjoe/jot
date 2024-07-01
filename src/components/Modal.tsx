@@ -1,7 +1,13 @@
-import React from 'react';
+import * as React from 'react';
 import Box from './Box';
 
-export const ModalContext = React.createContext({});
+type ModalContextType = {
+  openModal?: () => void;
+  closeModal?: () => void;
+  setModalContent?: (content: React.ReactNode) => void;
+};
+
+export const ModalContext = React.createContext<ModalContextType>({});
 
 export const withModal = (Component) => {
   return function withModal(props) {
@@ -13,9 +19,13 @@ export const withModal = (Component) => {
   };
 };
 
-export default function ModalProvider({ children }) {
+export default function ModalProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [modalContent, setModalContent] = React.useState();
+  const [modalContent, setModalContent] = React.useState<React.ReactNode>();
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);

@@ -22,7 +22,7 @@ export default defineConfig({
   plugins: [
     react(),
     createHtmlPlugin({
-      entry: 'src/index.jsx',
+      entry: 'src/index.tsx',
       template: 'index.html',
     }),
   ],

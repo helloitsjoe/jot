@@ -1,5 +1,7 @@
-import React from 'react';
+import * as React from 'react';
 import Box from './Box';
+import type { TagType } from './Tag';
+import type { API } from '../api';
 import Input from './Input';
 import { SubmitButton } from './Button';
 import { useCustomSwr, catchSwr } from '../utils';
@@ -10,6 +12,12 @@ export default function EditTag({
   initialText,
   api,
   onSuccess,
+}: {
+  id: string;
+  initialColor: string;
+  initialText: string;
+  api: API;
+  onSuccess: (newTag: TagType) => void;
 }) {
   const [newText, setNewText] = React.useState(initialText);
   const [newColor, setNewColor] = React.useState(initialColor);
