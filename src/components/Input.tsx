@@ -6,11 +6,6 @@ export default function Input({
   value,
   type = 'text',
   onChange,
-  pattern,
-  onInvalid,
-  required,
-  autoFocus,
-  width,
   ...props
 }: {
   label: React.ReactNode;
@@ -20,7 +15,7 @@ export default function Input({
   required?: boolean;
   autoFocus?: boolean;
   width?: string;
-  onInvalid?: (e: Event) => void;
+  onInvalid?: (e: React.InvalidEvent<HTMLInputElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
@@ -34,11 +29,6 @@ export default function Input({
         type={type}
         value={value}
         onChange={onChange}
-        pattern={pattern}
-        onInvalid={onInvalid}
-        autoFocus={autoFocus}
-        required={required}
-        width={width}
         {...props}
       />
     </label>

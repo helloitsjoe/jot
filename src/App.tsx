@@ -256,12 +256,10 @@ export default function App({
           label={<h3>Add a tag</h3>}
           value={tag}
           onChange={handleTagChange}
-          // list="tags"
           // Allow only alhphanumeric with spaces between words
           pattern="^[a-zA-Z0-9_-]+( [a-zA-Z0-9_-]+)*$"
           required
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onInvalid={(e: any) =>
+          onInvalid={(e: React.InvalidEvent<HTMLInputElement>) =>
             e.target.setCustomValidity(
               `Must be alphanumeric, received ${e.target.value}`
             )

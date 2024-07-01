@@ -13,6 +13,7 @@ export default function LogIn({
   onSuccess,
 }: {
   api: API;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSuccess: (user: any) => void;
 }) {
   const [status, setStatus] = React.useState(SUCCESS);
