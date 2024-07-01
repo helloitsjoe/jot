@@ -18,6 +18,7 @@ import RawApp from '../App';
 import RawNotes, { DELETE_CANCEL_MS } from '../components/Notes';
 import { withSWR } from '../utils';
 import { withModal } from '../components/Modal';
+import { TOMATO, ORANGE, LIME, GREEN, TEAL, DODGERBLUE } from '../constants';
 
 const App = withSWR(withModal(RawApp));
 const Notes = withSWR(withModal(RawNotes));
@@ -429,12 +430,9 @@ describe('App', () => {
       fireEvent.click(screen.queryByText('meta'));
 
       const dialog = screen.getByRole('dialog');
-      expect(
-        within(dialog)
-          .getByLabelText(/edit color/i)
-          // Not sure why .value doesn't work here, it returns #000000
-          .getAttribute('value')
-      ).toBe(mockTagMeta.color);
+      expect(within(dialog).getByLabelText(/edit color/i).value).toBe(
+        mockTagMeta.color
+      );
 
       fireEvent.change(within(dialog).getByLabelText(/edit color/i), {
         target: { value: '#ffffff' },
@@ -453,12 +451,12 @@ describe('App', () => {
     it('shows all notes when clicking see all', async () => {
       const extraTags = [
         ...mockTags,
-        { id: 3, text: 'third', color: 'red' },
-        { id: 4, text: 'fourth', color: 'blue' },
-        { id: 5, text: 'fifth', color: 'green' },
-        { id: 6, text: 'sixth', color: 'orange' },
-        { id: 7, text: 'seventh', color: 'purple' },
-        { id: 8, text: 'eighth', color: 'yellow' },
+        { id: 3, text: 'third', color: TOMATO },
+        { id: 4, text: 'fourth', color: ORANGE },
+        { id: 5, text: 'fifth', color: LIME },
+        { id: 6, text: 'sixth', color: GREEN },
+        { id: 7, text: 'seventh', color: TEAL },
+        { id: 8, text: 'eighth', color: DODGERBLUE },
       ];
 
       api.loadTags = vi.fn().mockResolvedValue(extraTags);
