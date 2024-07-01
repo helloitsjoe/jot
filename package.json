@@ -8,6 +8,7 @@
     "clean": "rm -rf dist",
     "build": "yarn clean && yarn tsc && vite build",
     "preview": "vite build && vite preview",
+    "generate-types": "npx supabase gen types typescript --project-id 'faxousvhzthjbkpymmvz' --schema public > src/supabase.types.ts",
     "lint": "eslint .",
     "dev": "yarn tsc && vite serve"
   },

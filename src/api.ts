@@ -1,5 +1,5 @@
 import { createSupabase } from './supabase';
-import type { Tables } from './types/supabase';
+import type { Tables } from './supabase.types';
 import type { AuthError, PostgrestError } from '@supabase/supabase-js';
 export type { User } from '@supabase/auth-js';
 
