@@ -1,4 +1,4 @@
-import { afterEach, it, describe, expect, vi } from 'vitest';
+import { it, describe, expect, vi } from 'vitest';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import Tag from '../components/Tag';

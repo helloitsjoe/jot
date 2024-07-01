@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-wrap-multilines */
 import React from 'react';
 import Box from './Box';
 import Input from './Input';

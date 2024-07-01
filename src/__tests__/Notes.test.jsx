@@ -1,4 +1,4 @@
-import { beforeEach, afterEach, it, describe, expect, vi } from 'vitest';
+import { beforeEach, it, describe, expect, vi } from 'vitest';
 import React from 'react';
 import {
   fireEvent,
