@@ -450,6 +450,38 @@ describe('App', () => {
       await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
     });
 
+    it('closes tag dialog without submitting on cancel', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      expect(within(tagForm).queryByText('meta')).not.toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).toBeTruthy();
+
+      expect(screen.queryByRole('dialog')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByLabelText(/update tag/i).value).toBe('meta');
+
+      fireEvent.change(within(dialog).getByLabelText(/update tag/i), {
+        target: { value: 'not meta' },
+      });
+
+      fireEvent.click(within(dialog).getByText(/cancel/i));
+      expect(api.updateTag).not.toBeCalled();
+
+      expect(screen.queryByRole('dialog')).not.toBeTruthy();
+    });
+
     it('shows all notes when clicking see all', async () => {
       const extraTags = [
         ...mockTags,
