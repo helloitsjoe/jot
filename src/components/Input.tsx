@@ -15,6 +15,7 @@ export default function Input({
   required?: boolean;
   autoFocus?: boolean;
   width?: string;
+  name?: string;
   onInvalid?: (e: React.InvalidEvent<HTMLInputElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {

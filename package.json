@@ -9,8 +9,9 @@
     "build": "yarn clean && yarn tsc && vite build",
     "preview": "vite build && vite preview",
     "generate-types": "npx supabase gen types typescript --project-id 'faxousvhzthjbkpymmvz' --schema public > src/supabase.types.ts",
+    "check-types": "tsc",
     "lint": "eslint .",
-    "dev": "yarn tsc && vite serve"
+    "dev": "vite serve"
   },
   "keywords": [],
   "author": "",
