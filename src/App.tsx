@@ -9,21 +9,9 @@ import Notes from './components/Notes';
 import Input from './components/Input';
 import { ModalContext } from './components/Modal';
 import Button, { SubmitButton } from './components/Button';
+import { colors } from './constants';
 
 const getRandomColor = () => {
-  const colors = [
-    'tomato',
-    'cornflowerblue',
-    'blueviolet',
-    'orange',
-    'lime',
-    'green',
-    'goldenrod',
-    'dodgerblue',
-    'magenta',
-    'slateblue',
-    'teal',
-  ];
   return colors[Math.floor(Math.random() * colors.length)];
 };
 

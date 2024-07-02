@@ -1,3 +1,5 @@
+import { LIME, BLUEVIOLET, SLATEBLUE } from '../../src/constants';
+
 // For denormalization tests
 const noteSingleTag = {
   id: 8,
@@ -26,7 +28,7 @@ const tagBee = {
   id: 18,
   created_at: '2022-09-09T03:55:20.038122+00:00',
   text: 'bee',
-  color: 'lime',
+  color: LIME,
   note_ids: null,
   user_id: '82523071-2532-4023-88db-2551344807d9',
 };
@@ -35,7 +37,7 @@ const tagBuzz = {
   id: 19,
   created_at: '2022-09-09T03:55:33.522825+00:00',
   text: 'buzz',
-  color: 'slateblue',
+  color: SLATEBLUE,
   note_ids: null,
   user_id: '82523071-2532-4023-88db-2551344807d9',
 };
@@ -58,8 +60,8 @@ const notesTags = [
 const allNotes = [noteSingleTag, noteMultiTags, noteNoTags];
 
 // For component tests
-const mockTagMeta = { text: 'meta', id: 1, color: 'lime' };
-const mockTagWork = { text: 'work', id: 2, color: 'blueviolet' };
+const mockTagMeta = { text: 'meta', id: 1, color: LIME };
+const mockTagWork = { text: 'work', id: 2, color: BLUEVIOLET };
 
 const mockNoteQuick = { text: 'quick note', id: 1, tags: [mockTagMeta] };
 const mockNoteWork = { text: 'work reminder', id: 2, tags: [mockTagWork] };

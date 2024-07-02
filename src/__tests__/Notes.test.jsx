@@ -11,6 +11,7 @@ import { mockTags, mockNotes } from '../__mocks__/mock-data';
 import RawNotes from '../components/Notes';
 import { withSWR } from '../utils';
 import ModalProvider from '../components/Modal';
+import { LIME } from '../constants';
 
 const Notes = withSWR(RawNotes);
 
@@ -58,7 +59,7 @@ describe('Notes', () => {
 
     expect(mockNotes[0]).toEqual({
       id: 1,
-      tags: [{ color: 'lime', id: 1, text: 'meta' }],
+      tags: [{ color: LIME, id: 1, text: 'meta' }],
       text: 'quick note',
     });
 
@@ -87,7 +88,7 @@ describe('Notes', () => {
 
     expect(mockNotes[0]).toEqual({
       id: 1,
-      tags: [{ color: 'lime', id: 1, text: 'meta' }],
+      tags: [{ color: LIME, id: 1, text: 'meta' }],
       text: 'quick note',
     });
 
