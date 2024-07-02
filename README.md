@@ -1,4 +1,6 @@
-# Jot: Quick notes
+# :pencil: Jot: Quick notes
+
+https://helloitsjoe.github.io/jot
 
 ---
 
