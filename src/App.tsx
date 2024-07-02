@@ -107,7 +107,7 @@ export default function App({
         initialText={text}
         initialColor={color}
         api={api}
-        // onCancel={closeModal}
+        onCancel={closeModal}
         onSuccess={(newTag) => {
           setTags((prev) => prev.map((t) => (t.id === id ? newTag : t)));
           closeModal();

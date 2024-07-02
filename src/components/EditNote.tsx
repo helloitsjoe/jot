@@ -63,6 +63,7 @@ export default function EditNote({
       >
         <Input
           width="auto"
+          name="note-edit-input"
           label={<h3>Update Note</h3>}
           value={note}
           onChange={handleNoteChange}

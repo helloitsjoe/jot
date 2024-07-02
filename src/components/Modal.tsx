@@ -27,8 +27,21 @@ export default function ModalProvider({
   const [isOpen, setIsOpen] = React.useState(false);
   const [modalContent, setModalContent] = React.useState<React.ReactNode>();
 
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => setIsOpen(false);
+  const keydownListener = React.useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+  }, []);
+
+  const openModal = () => {
+    window.addEventListener('keydown', keydownListener);
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    window.removeEventListener('keydown', keydownListener);
+    setIsOpen(false);
+  };
 
   const value = React.useMemo(
     () => ({ openModal, closeModal, setModalContent }),
@@ -54,9 +67,7 @@ export default function ModalProvider({
             // TODO: Expose a way to control position
             p="2em"
             m="2em"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
+            onClick={(e) => e.stopPropagation()}
             border="1px solid lime"
             borderRadius="0.4em"
             bg="black"

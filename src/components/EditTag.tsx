@@ -3,7 +3,7 @@ import Box from './Box';
 import type { TagType } from './Tag';
 import type { API } from '../api';
 import Input from './Input';
-import { SubmitButton } from './Button';
+import Button, { SubmitButton } from './Button';
 import { useCustomSwr, catchSwr, namedColorToHex } from '../utils';
 
 export default function EditTag({
@@ -12,12 +12,14 @@ export default function EditTag({
   initialText,
   api,
   onSuccess,
+  onCancel,
 }: {
   id: string;
   initialColor: string;
   initialText: string;
   api: API;
   onSuccess: (newTag: TagType) => void;
+  onCancel: () => void;
 }) {
   const [newText, setNewText] = React.useState(initialText);
   const [newColor, setNewColor] = React.useState(namedColorToHex(initialColor));
@@ -50,6 +52,7 @@ export default function EditTag({
             Update Tag
           </Box>
         }
+        name="tag-edit-input"
         value={newText}
         onChange={(e) => {
           setNewText(e.target.value);
@@ -67,6 +70,7 @@ export default function EditTag({
           onChange={(e) => setNewColor(e.target.value)}
         />
         <SubmitButton>Submit</SubmitButton>
+        <Button onClick={onCancel}>Cancel</Button>
       </Box>
     </Box>
   );
