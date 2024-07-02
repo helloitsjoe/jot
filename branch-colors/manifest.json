@@ -1,0 +1,15 @@
+{
+  "short_name": "Jot",
+  "name": "Jot",
+  "icons": [
+    {
+      "src": "jot.png",
+      "sizes": "114x114",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "blueviolet",
+  "background_color": "#000"
+}
