@@ -4,7 +4,7 @@ import type { TagType } from './Tag';
 import type { API } from '../api';
 import Input from './Input';
 import Button, { SubmitButton } from './Button';
-import { useCustomSwr, catchSwr, namedColorToHex } from '../utils';
+import { useCustomSwr, catchSwr } from '../utils';
 
 export default function EditTag({
   id,
@@ -22,7 +22,7 @@ export default function EditTag({
   onCancel: () => void;
 }) {
   const [newText, setNewText] = React.useState(initialText);
-  const [newColor, setNewColor] = React.useState(namedColorToHex(initialColor));
+  const [newColor, setNewColor] = React.useState(initialColor);
   const { mutate: mutateTags } = useCustomSwr('tags');
 
   return (
