@@ -1,18 +1,5 @@
 import * as React from 'react';
 import useSWR, { SWRConfig, SWRHook } from 'swr';
-import {
-  TOMATO,
-  CORNFLOWERBLUE,
-  BLUEVIOLET,
-  ORANGE,
-  LIME,
-  GREEN,
-  GOLDENROD,
-  DODGERBLUE,
-  MAGENTA,
-  SLATEBLUE,
-  TEAL,
-} from './constants';
 
 export const useCustomSwr: SWRHook = (...args) => {
   // Using .call here to get around this TS error: "A spred argument must either
@@ -47,23 +34,4 @@ export const withSWR = (Component) => {
       </SWRConfig>
     );
   };
-};
-
-// TODO: Remove this when all existing tests are updated to hex values
-export const namedColorToHex = (color: string) => {
-  return (
-    {
-      tomato: TOMATO,
-      cornflowerblue: CORNFLOWERBLUE,
-      blueviolet: BLUEVIOLET,
-      orange: ORANGE,
-      lime: LIME,
-      green: GREEN,
-      goldenrod: GOLDENROD,
-      dodgerblue: DODGERBLUE,
-      magenta: MAGENTA,
-      slateblue: SLATEBLUE,
-      teal: TEAL,
-    }[color] || color
-  );
 };
