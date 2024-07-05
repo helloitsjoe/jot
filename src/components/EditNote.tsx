@@ -1,4 +1,5 @@
-import React from 'react';
+import * as React from 'react';
+import type { API, Tag as TagType } from '../api';
 import { useSWRConfig } from 'swr';
 import Box from './Box';
 import Input from './Input';
@@ -13,6 +14,13 @@ export default function EditNote({
   api,
   onCancel,
   onSuccess,
+}: {
+  id: string;
+  initialNoteText?: string;
+  initialTags?: TagType[];
+  api: API;
+  onCancel: () => void;
+  onSuccess: () => void;
 }) {
   const { data: recentTags } = useCustomSwr('tags', api.loadTags);
   const { mutate } = useSWRConfig();
@@ -27,7 +35,7 @@ export default function EditNote({
     <>
       <Box
         as="form"
-        aria-label="notes-form"
+        aria-label="note-edit-form"
         onSubmit={async (e) => {
           e.preventDefault();
           mutate(
@@ -55,6 +63,7 @@ export default function EditNote({
       >
         <Input
           width="auto"
+          name="note-edit-input"
           label={<h3>Update Note</h3>}
           value={note}
           onChange={handleNoteChange}
@@ -70,6 +79,7 @@ export default function EditNote({
                   id={tagId}
                   key={text}
                   color={color}
+                  onSelect={() => {}}
                   onDelete={() => {
                     setTags((p) => p.filter((t) => t.text !== text));
                   }}

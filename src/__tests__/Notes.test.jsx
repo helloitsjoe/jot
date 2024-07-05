@@ -1,3 +1,4 @@
+import { beforeEach, it, describe, expect, vi } from 'vitest';
 import React from 'react';
 import {
   fireEvent,
@@ -10,6 +11,7 @@ import { mockTags, mockNotes } from '../__mocks__/mock-data';
 import RawNotes from '../components/Notes';
 import { withSWR } from '../utils';
 import ModalProvider from '../components/Modal';
+import { LIME } from '../constants';
 
 const Notes = withSWR(RawNotes);
 
@@ -17,9 +19,9 @@ let api;
 
 beforeEach(() => {
   api = {
-    loadTags: jest.fn().mockResolvedValue(mockTags),
-    loadNotes: jest.fn().mockResolvedValue(mockNotes),
-    updateNote: jest.fn().mockResolvedValue(),
+    loadTags: vi.fn().mockResolvedValue(mockTags),
+    loadNotes: vi.fn().mockResolvedValue(mockNotes),
+    updateNote: vi.fn().mockResolvedValue(),
   };
 });
 
@@ -57,7 +59,7 @@ describe('Notes', () => {
 
     expect(mockNotes[0]).toEqual({
       id: 1,
-      tags: [{ color: 'lime', id: 1, text: 'meta' }],
+      tags: [{ color: LIME, id: 1, text: 'meta' }],
       text: 'quick note',
     });
 
@@ -86,7 +88,7 @@ describe('Notes', () => {
 
     expect(mockNotes[0]).toEqual({
       id: 1,
-      tags: [{ color: 'lime', id: 1, text: 'meta' }],
+      tags: [{ color: LIME, id: 1, text: 'meta' }],
       text: 'quick note',
     });
 
@@ -94,7 +96,7 @@ describe('Notes', () => {
     await screen.findByRole('button', { name: /update/i });
 
     const dialog = screen.queryByRole('dialog');
-    const form = screen.getByRole('form', { name: 'notes-form' });
+    const form = screen.getByRole('form', { name: 'note-edit-form' });
 
     expect(within(dialog).queryAllByText(/meta/i).length).toBe(1);
     expect(within(form).queryByText(/meta/i)).toBeTruthy();

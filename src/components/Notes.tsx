@@ -1,11 +1,19 @@
-import React from 'react';
+import * as React from 'react';
 import { useSWRConfig } from 'swr';
 import Box from './Box';
-import Tag from './Tag';
+import type { API } from '../api';
+import Tag, { TagType } from './Tag';
 import Button from './Button';
 import EditNote from './EditNote';
 import { ModalContext } from './Modal';
 import { catchSwr } from '../utils';
+
+export interface NoteType {
+  id: string;
+  text: string;
+  tags: TagType[];
+  created_at: number;
+}
 
 export const DELETE_CANCEL_MS = 4_000;
 
@@ -15,7 +23,25 @@ function defaultWaitForDelete(cb) {
   }, DELETE_CANCEL_MS);
 }
 
-function EditButton({ text, id, tags, openNoteEditModal }) {
+function EditButton({
+  text,
+  id,
+  tags,
+  openNoteEditModal,
+}: {
+  text: string;
+  id: string;
+  tags: TagType[];
+  openNoteEditModal: ({
+    text,
+    id,
+    tags,
+  }: {
+    text: string;
+    id: string;
+    tags: TagType[];
+  }) => void;
+}) {
   return (
     <Button
       textOnly
@@ -33,6 +59,11 @@ function DeleteButton({
   deleting,
   handleCancelDeleteNote,
   handleOptimisticDeleteNote,
+}: {
+  id: string;
+  deleting: boolean;
+  handleCancelDeleteNote: (id: string) => void;
+  handleOptimisticDeleteNote: (id: string) => void;
 }) {
   return (
     <Button
@@ -54,12 +85,17 @@ export default function Notes({
   error,
   api,
   waitForDelete = defaultWaitForDelete,
+}: {
+  notes: NoteType[];
+  error: Error;
+  api: API;
+  waitForDelete?: (cb: () => void) => NodeJS.Timeout;
 }) {
   const { mutate } = useSWRConfig();
 
   const [notesToDelete, setNotesToDelete] = React.useState({});
-  const [activeTags, setActiveTags] = React.useState(new Set());
-  const [groupByTag, setGroupByTag] = React.useState(
+  const [activeTags, setActiveTags] = React.useState<TagType[]>([]);
+  const [groupByTag, setGroupByTag] = React.useState<boolean>(
     localStorage.getItem('groupByTag') === 'true' || true
   );
 
@@ -71,7 +107,7 @@ export default function Notes({
   const toggleSetGroupByTag = () => {
     setGroupByTag((g) => {
       const toggled = !g;
-      localStorage.setItem('groupByTag', toggled);
+      localStorage.setItem('groupByTag', String(toggled));
       return toggled;
     });
   };
@@ -150,7 +186,13 @@ export default function Notes({
     : sortedNotes;
 
   const notesByTag = (notes || []).reduce((acc, note) => {
-    note.tags.forEach((tag) => {
+    // console.log('note', note);
+    // console.log('note.tags', note.tags);
+    const tags = note.tags.length
+      ? note.tags
+      : [{ text: 'untagged', color: 'gray' }];
+
+    tags.forEach((tag) => {
       if (!acc.get(tag.text)) {
         acc.set(tag.text, { notes: [], meta: tag });
       }
@@ -173,6 +215,7 @@ export default function Notes({
             return (
               <Box key={id}>
                 <Tag
+                  id={id}
                   color={color}
                   onSelect={() =>
                     setActiveTags((a) => a.filter((t) => t.id !== id))
@@ -202,7 +245,7 @@ export default function Notes({
                   display="flex"
                   flexDirection="column"
                 >
-                  <Box p="0.25em" color="black" m="auto">
+                  <Box p="0.25em" color="black" m="auto" fontWeight="bold">
                     {tag}
                   </Box>
                   <Box bg="black" borderRadius="0.5em">
@@ -255,6 +298,7 @@ export default function Notes({
                 <Box m="0.5em 0" display="flex" gap="1em">
                   {tags.map((tag) => (
                     <Tag
+                      id={tag.id}
                       key={tag.text}
                       color={deleting ? 'gray' : tag.color}
                       onSelect={() =>

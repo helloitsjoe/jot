@@ -1,27 +1,17 @@
 import * as React from 'react';
+import { API } from './api';
 import { useCustomSwr, catchSwr } from './utils';
 import Box from './components/Box';
 import ConfirmDelete from './components/ConfirmDelete';
 import Tag from './components/Tag';
+import EditTag from './components/EditTag';
 import Notes from './components/Notes';
 import Input from './components/Input';
 import { ModalContext } from './components/Modal';
 import Button, { SubmitButton } from './components/Button';
+import { colors } from './constants';
 
 const getRandomColor = () => {
-  const colors = [
-    'tomato',
-    'cornflowerblue',
-    'blueviolet',
-    'orange',
-    'lime',
-    'green',
-    'goldenrod',
-    'dodgerblue',
-    'magenta',
-    'slateblue',
-    'teal',
-  ];
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
@@ -30,7 +20,13 @@ const MAX_TAGS = 7;
 // Create an optimistic tempId for a key
 const createTempId = () => Date.now();
 
-export default function App({ api, onSignOut }) {
+export default function App({
+  api,
+  onSignOut,
+}: {
+  api: API;
+  onSignOut: () => void;
+}) {
   const {
     data: recentTags,
     error: fetchTagErr,
@@ -77,6 +73,7 @@ export default function App({ api, onSignOut }) {
       const newTag = await api.addTag({ text: tag.trim(), color });
       setTags((t) => [...t, newTag]);
       setTag('');
+      return [newTag, ...tags];
     }).catch(catchSwr(mutateTags));
   };
 
@@ -103,18 +100,40 @@ export default function App({ api, onSignOut }) {
     openModal();
   };
 
+  const handleEditTag = ({ color, text, id }) => {
+    setModalContent(
+      <EditTag
+        id={id}
+        initialText={text}
+        initialColor={color}
+        api={api}
+        onCancel={closeModal}
+        onSuccess={(newTag) => {
+          setTags((prev) => prev.map((t) => (t.id === id ? newTag : t)));
+          closeModal();
+        }}
+      />
+    );
+    openModal();
+  };
+
   const handleAddNote = async (e) => {
     e.preventDefault();
-    const tagIds = tags.map(({ id }) => id);
     const optimisticData = [...notes, { text: note, tags, id: createTempId() }];
     mutateNotes(
       async () => {
         setIsSubmitting(true);
-        await api.addNote(note, tagIds);
+        await api.addNote(
+          note,
+          tags.map((t) => t.id)
+        );
         setIsSubmitting(false);
         setNote('');
         setTag('');
         setTags([]);
+        // Trigger re-fetch of tags to re-order
+        mutateTags();
+        return optimisticData;
       },
       { optimisticData }
     ).catch(catchSwr(mutateNotes));
@@ -150,12 +169,15 @@ export default function App({ api, onSignOut }) {
         </SubmitButton>
         {tags.length > 0 && (
           <Box borderBottom="1px solid gray" p="1em 0" mb="1em">
-            {tags.map(({ text, color }) => {
+            {tags.map(({ id, text, color }) => {
               return (
                 <Tag
+                  id={id}
                   key={text}
                   color={color}
-                  onDelete={() => {
+                  onSelect={handleEditTag}
+                  onDelete={(e) => {
+                    e.stopPropagation();
                     setTags((p) => p.filter((t) => t.text !== text));
                   }}
                 >
@@ -214,11 +236,9 @@ export default function App({ api, onSignOut }) {
                   </Tag>
                 );
               })}
-              {!showAllTags && (
-                <Button textOnly onClick={() => setShowAllTags(true)}>
-                  ... Show all tags
-                </Button>
-              )}
+              <Button textOnly onClick={() => setShowAllTags((show) => !show)}>
+                ... See {showAllTags ? 'fewer' : 'all'} tags
+              </Button>
             </Box>
           );
         })()}
@@ -226,15 +246,14 @@ export default function App({ api, onSignOut }) {
           label={<h3>Add a tag</h3>}
           value={tag}
           onChange={handleTagChange}
-          list="tags"
           // Allow only alhphanumeric with spaces between words
           pattern="^[a-zA-Z0-9_-]+( [a-zA-Z0-9_-]+)*$"
-          onInvalid={(e) =>
+          required
+          onInvalid={(e: React.InvalidEvent<HTMLInputElement>) =>
             e.target.setCustomValidity(
               `Must be alphanumeric, received ${e.target.value}`
             )
           }
-          required
         />
         <SubmitButton>Add a new tag</SubmitButton>
       </Box>
