@@ -1,4 +1,5 @@
 import * as React from 'react';
+import styled from 'styled-components';
 import { useSWRConfig } from 'swr';
 import Box from './Box';
 import type { API } from '../api';
@@ -22,6 +23,10 @@ function defaultWaitForDelete(cb) {
     cb();
   }, DELETE_CANCEL_MS);
 }
+
+const NoteText = styled.div`
+  word-break: break-word;
+`;
 
 function EditButton({
   text,
@@ -258,7 +263,7 @@ export default function Notes({
                           key={text}
                           borderBottom={`1px solid ${meta.color}`}
                         >
-                          {text}
+                          <NoteText>{text}</NoteText>
                           <Box display="flex">
                             <EditButton
                               {...{ id, text, tags, openNoteEditModal }}
