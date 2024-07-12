@@ -195,6 +195,20 @@ export default function App({
             {fetchTagErr.message}
           </Box>
         )}
+        <Input
+          label={<h3>Add a tag</h3>}
+          value={tag}
+          onChange={handleTagChange}
+          // Allow only alhphanumeric with spaces between words
+          pattern="^[a-zA-Z0-9_-]+( [a-zA-Z0-9_-]+)*$"
+          required
+          onInvalid={(e: React.InvalidEvent<HTMLInputElement>) =>
+            e.target.setCustomValidity(
+              `Must be alphanumeric, received ${e.target.value}`
+            )
+          }
+        />
+        <SubmitButton>Add a new tag</SubmitButton>
         {(() => {
           if (!recentTags) {
             return 'Loading...';
@@ -242,20 +256,6 @@ export default function App({
             </Box>
           );
         })()}
-        <Input
-          label={<h3>Add a tag</h3>}
-          value={tag}
-          onChange={handleTagChange}
-          // Allow only alhphanumeric with spaces between words
-          pattern="^[a-zA-Z0-9_-]+( [a-zA-Z0-9_-]+)*$"
-          required
-          onInvalid={(e: React.InvalidEvent<HTMLInputElement>) =>
-            e.target.setCustomValidity(
-              `Must be alphanumeric, received ${e.target.value}`
-            )
-          }
-        />
-        <SubmitButton>Add a new tag</SubmitButton>
       </Box>
       <Box m="3em 0">
         <h3>Existing notes</h3>
