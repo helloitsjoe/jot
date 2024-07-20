@@ -24,6 +24,7 @@ export default function EditTag({
   const [newText, setNewText] = React.useState(initialText);
   const [newColor, setNewColor] = React.useState(initialColor);
   const { mutate: mutateTags } = useCustomSwr('tags');
+  const { mutate: mutateNotes } = useCustomSwr('notes');
 
   return (
     <Box
@@ -42,7 +43,12 @@ export default function EditTag({
             return allTags.map((tag) => (tag.id === id ? updatedTag : tag));
           },
           { revalidate: true }
-        ).catch(catchSwr(mutateTags));
+        )
+          .then(() => {
+            // Refresh notes to get new tag color
+            return mutateNotes().catch(catchSwr(mutateNotes));
+          })
+          .catch(catchSwr(mutateTags));
       }}
     >
       <Input
