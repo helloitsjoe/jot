@@ -9,7 +9,7 @@ import Notes from './components/Notes';
 import Input from './components/Input';
 import { ModalContext } from './components/Modal';
 import Button, { SubmitButton } from './components/Button';
-import { colors, getRandomColor } from './colors';
+import { getRandomColor } from './colors';
 
 const MAX_TAGS = 7;
 
