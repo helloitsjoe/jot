@@ -4,6 +4,7 @@ import type { TagType } from './Tag';
 import type { API } from '../api';
 import Input from './Input';
 import Button, { SubmitButton } from './Button';
+import { getRandomColor } from '../colors';
 import { useCustomSwr, catchSwr } from '../utils';
 
 export default function EditTag({
@@ -25,6 +26,10 @@ export default function EditTag({
   const [newColor, setNewColor] = React.useState(initialColor);
   const { mutate: mutateTags } = useCustomSwr('tags');
   const { mutate: mutateNotes } = useCustomSwr('notes');
+
+  function handleRandomizeColor() {
+    setNewColor(getRandomColor());
+  }
 
   return (
     <Box
@@ -75,6 +80,7 @@ export default function EditTag({
           }
           onChange={(e) => setNewColor(e.target.value)}
         />
+        <Button onClick={handleRandomizeColor}>Randomize</Button>
         <SubmitButton>Submit</SubmitButton>
         <Button onClick={onCancel}>Cancel</Button>
       </Box>

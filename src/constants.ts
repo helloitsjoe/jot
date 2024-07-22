@@ -18,22 +18,3 @@ export const LIGHTPINK = '#FFC0CB';
 export const LIGHTPURPLE = '#E4C0FF';
 export const LIGHTBLUE = '#ADD8E6';
 export const LIGHTSALMON = '#FFA07A';
-
-export const colors = [
-  TOMATO,
-  CORNFLOWERBLUE,
-  BLUEVIOLET,
-  ORANGE,
-  LIME,
-  GREEN,
-  GOLDENROD,
-  DODGERBLUE,
-  MAGENTA,
-  SLATEBLUE,
-  TEAL,
-  MINTGREEN,
-  LIGHTPINK,
-  LIGHTPURPLE,
-  LIGHTBLUE,
-  LIGHTSALMON,
-];

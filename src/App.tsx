@@ -9,11 +9,7 @@ import Notes from './components/Notes';
 import Input from './components/Input';
 import { ModalContext } from './components/Modal';
 import Button, { SubmitButton } from './components/Button';
-import { colors } from './constants';
-
-const getRandomColor = () => {
-  return colors[Math.floor(Math.random() * colors.length)];
-};
+import { colors, getRandomColor } from './colors';
 
 const MAX_TAGS = 7;
 
@@ -109,6 +105,7 @@ export default function App({
         api={api}
         onCancel={closeModal}
         onSuccess={(newTag) => {
+          console.log('newTag', newTag);
           setTags((prev) => prev.map((t) => (t.id === id ? newTag : t)));
           closeModal();
         }}
