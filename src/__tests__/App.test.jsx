@@ -394,9 +394,9 @@ describe('App', () => {
       fireEvent.click(screen.queryByText('meta'));
 
       const dialog = screen.getByRole('dialog');
-      expect(within(dialog).getByLabelText(/update tag/i).value).toBe('meta');
+      expect(within(dialog).getByLabelText(/edit label/i).value).toBe('meta');
 
-      fireEvent.change(within(dialog).getByLabelText(/update tag/i), {
+      fireEvent.change(within(dialog).getByLabelText(/edit label/i), {
         target: { value: 'not meta' },
       });
 
@@ -468,9 +468,9 @@ describe('App', () => {
       fireEvent.click(screen.queryByText('meta'));
 
       const dialog = screen.getByRole('dialog');
-      expect(within(dialog).getByLabelText(/update tag/i).value).toBe('meta');
+      expect(within(dialog).getByLabelText(/edit label/i).value).toBe('meta');
 
-      fireEvent.change(within(dialog).getByLabelText(/update tag/i), {
+      fireEvent.change(within(dialog).getByLabelText(/edit label/i), {
         target: { value: 'not meta' },
       });
 

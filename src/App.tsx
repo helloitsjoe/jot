@@ -73,7 +73,7 @@ export default function App({
     }).catch(catchSwr(mutateTags));
   };
 
-  const handleDeleteTag = (id) => {
+  const handleDeleteTag = (id: number) => {
     const optimisticData = recentTags.filter((t) => t.id !== id);
     return mutateTags(
       async () => {
@@ -86,7 +86,7 @@ export default function App({
     ).catch(catchSwr(mutateTags));
   };
 
-  const handleConfirmDeleteTag = (id) => {
+  const handleConfirmDeleteTag = (id: number) => {
     setModalContent(
       <ConfirmDelete
         onConfirmDelete={() => handleDeleteTag(id).then(closeModal)}
