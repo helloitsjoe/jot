@@ -7,6 +7,17 @@ export default function Input({
   type = 'text',
   onChange,
   ...props
+}: {
+  label: React.ReactNode;
+  value: string;
+  type?: string;
+  pattern?: string;
+  required?: boolean;
+  autoFocus?: boolean;
+  width?: string;
+  name?: string;
+  onInvalid?: (e: React.InvalidEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <label>

@@ -1,3 +1,4 @@
+import { beforeEach, afterEach, it, describe, expect, vi } from 'vitest';
 import React from 'react';
 import {
   fireEvent,
@@ -17,6 +18,7 @@ import RawApp from '../App';
 import RawNotes, { DELETE_CANCEL_MS } from '../components/Notes';
 import { withSWR } from '../utils';
 import { withModal } from '../components/Modal';
+import { TOMATO, ORANGE, LIME, GREEN, TEAL, DODGERBLUE } from '../constants';
 
 const App = withSWR(withModal(RawApp));
 const Notes = withSWR(withModal(RawNotes));
@@ -25,20 +27,21 @@ let api;
 
 beforeEach(() => {
   api = {
-    deleteNote: jest.fn().mockResolvedValue(),
-    updateNote: jest.fn().mockResolvedValue(),
-    deleteTag: jest.fn().mockResolvedValue(),
-    loadNotes: jest.fn().mockResolvedValue(mockNotes),
-    loadTags: jest.fn().mockResolvedValue(mockTags),
-    addNote: jest.fn().mockResolvedValue(),
-    addTag: jest.fn().mockResolvedValue(),
+    deleteNote: vi.fn().mockResolvedValue(),
+    updateNote: vi.fn().mockResolvedValue(),
+    updateTag: vi.fn().mockResolvedValue(mockTagMeta),
+    deleteTag: vi.fn().mockResolvedValue(),
+    loadNotes: vi.fn().mockResolvedValue(mockNotes),
+    loadTags: vi.fn().mockResolvedValue(mockTags),
+    addNote: vi.fn().mockResolvedValue(),
+    addTag: vi.fn().mockResolvedValue(),
   };
-  jest.useFakeTimers();
+  vi.useFakeTimers({ shouldAdvanceTime: true });
 });
 
 afterEach(() => {
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
+  vi.runOnlyPendingTimers();
+  vi.useRealTimers();
 });
 
 describe('App', () => {
@@ -64,6 +67,32 @@ describe('App', () => {
 
       expect(api.addNote).toBeCalledWith('another note', []);
       expect(api.loadNotes).toBeCalledTimes(2);
+    });
+
+    it('moves a tag to the beginning of the list when it is added to a note', async () => {
+      const reverse = (arr) => [...arr].reverse();
+      api.loadTags = vi
+        .fn()
+        .mockResolvedValueOnce(mockTags)
+        .mockResolvedValueOnce(reverse(mockTags));
+      render(<App api={api} />);
+      await screen.findByText(/quick note/i);
+      fireEvent.change(screen.getByLabelText(/add a note/i), {
+        target: { value: 'another note' },
+      });
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      expect(tagForm.textContent).toMatch(/meta(.*)work/i);
+
+      // Click on the second tag to add it to the note
+      fireEvent.click(within(tagForm).queryByText('work'));
+
+      fireEvent.click(screen.queryByRole('button', { name: /submit/i }));
+      await waitForElementToBeRemoved(() => screen.getByText(/adding.../i));
+      await waitFor(() => {
+        expect(
+          screen.getByRole('form', { name: 'new-tag-form' }).textContent
+        ).toMatch(/work(.*)meta/i);
+      });
     });
 
     it('does not add an empty note', async () => {
@@ -106,7 +135,7 @@ describe('App', () => {
 
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.queryByTestId('note-1-delete'));
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       expect(api.deleteNote).not.toBeCalled();
       await waitFor(() => {
         expect(api.deleteNote).toBeCalledWith({ id: 1 });
@@ -120,7 +149,7 @@ describe('App', () => {
       await screen.findByText(/quick note/i);
       expect(screen.findByText(/work reminder/i)).toBeTruthy();
       fireEvent.click(screen.queryByTestId('note-1-delete'));
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       fireEvent.click(screen.queryByTestId('note-2-delete'));
       expect(api.deleteNote).not.toBeCalled();
 
@@ -134,7 +163,7 @@ describe('App', () => {
         expect(screen.queryByText(/quick note/i)).not.toBeTruthy();
         expect(screen.queryByText(/work reminder/i)).toBeTruthy();
       });
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       await waitFor(() => {
         // Check that both notes are deleted
         expect(api.deleteNote).toBeCalledWith({ id: 2 });
@@ -155,7 +184,7 @@ describe('App', () => {
       expect(
         screen.queryByRole('button', { name: /cancel/i })
       ).not.toBeTruthy();
-      jest.advanceTimersByTime(DELETE_CANCEL_MS);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS);
       expect(api.deleteNote).not.toBeCalled();
     });
 
@@ -165,7 +194,7 @@ describe('App', () => {
       await screen.findByText(/quick note/i);
       expect(screen.findByText(/work reminder/i)).toBeTruthy();
       fireEvent.click(screen.queryByTestId('note-1-delete'));
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
 
       fireEvent.click(screen.queryByTestId('note-2-delete'));
       // Cancel first after clicking second
@@ -181,7 +210,7 @@ describe('App', () => {
         expect(screen.queryByText(/quick note/i)).toBeTruthy();
         expect(screen.queryByText(/work reminder/i)).toBeTruthy();
       });
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 100);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 100);
       await waitFor(() => {
         // Check that only note 2 is deleted
         expect(api.deleteNote).not.toBeCalledWith({ id: 1 });
@@ -202,7 +231,7 @@ describe('App', () => {
     });
 
     it('shows error when adding a note', async () => {
-      api.addNote = jest.fn().mockRejectedValue(new Error('add failed!'));
+      api.addNote = vi.fn().mockRejectedValue(new Error('add failed!'));
       render(<App api={api} />);
       await screen.findByText(/quick note/i);
       fireEvent.change(screen.getByLabelText(/add a note/i), {
@@ -215,11 +244,11 @@ describe('App', () => {
     });
 
     it('shows error when deleting a note', async () => {
-      api.deleteNote = jest.fn().mockRejectedValue(new Error('delete failed!'));
+      api.deleteNote = vi.fn().mockRejectedValue(new Error('delete failed!'));
       render(<App api={api} />);
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.getByTestId(`note-${mockNoteQuick.id}-delete`));
-      jest.advanceTimersByTime(DELETE_CANCEL_MS - 50);
+      vi.advanceTimersByTime(DELETE_CANCEL_MS - 50);
       await waitFor(() => {
         expect(api.deleteNote).toBeCalledWith({ id: 1 });
         expect(screen.queryByText(/delete failed/i)).toBeTruthy();
@@ -227,13 +256,15 @@ describe('App', () => {
     });
 
     it('error updating note displays error message', async () => {
-      api.updateNote = jest.fn().mockRejectedValue(new Error('update failed!'));
+      api.updateNote = vi.fn().mockRejectedValue(new Error('update failed!'));
 
       render(<App api={api} />);
       await screen.findByText(/quick note/i);
       fireEvent.click(screen.getByTestId(`note-${mockNoteQuick.id}-edit`));
       fireEvent.click(
-        within(screen.getByLabelText('notes-form')).getByTestId('tag-1-delete')
+        within(screen.getByLabelText('note-edit-form')).getByTestId(
+          'tag-1-delete'
+        )
       );
       fireEvent.submit(screen.getByRole('button', { name: /update/i }));
       await waitFor(() => {
@@ -321,18 +352,146 @@ describe('App', () => {
       ).not.toBeTruthy();
     });
 
-    it('shows all notes when clicking show all', async () => {
+    it('moves a tag to the note form when clicked', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      expect(within(tagForm).queryByText('meta')).not.toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).toBeTruthy();
+
+      fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));
+      expect(api.deleteTag).not.toBeCalled();
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+    });
+
+    it('tag name is editable', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      expect(within(tagForm).queryByText('meta')).not.toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).toBeTruthy();
+
+      expect(screen.queryByRole('dialog')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByLabelText(/edit label/i).value).toBe('meta');
+
+      fireEvent.change(within(dialog).getByLabelText(/edit label/i), {
+        target: { value: 'not meta' },
+      });
+
+      fireEvent.submit(within(dialog).getByLabelText('tag-edit-form'));
+      expect(api.updateTag).toBeCalledWith({
+        id: mockTagMeta.id,
+        text: 'not meta',
+        color: mockTagMeta.color,
+      });
+
+      await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+    });
+
+    it('tag color is editable', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      expect(within(tagForm).queryByText('meta')).not.toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).toBeTruthy();
+
+      expect(screen.queryByRole('dialog')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByLabelText(/edit color/i).value).toBe(
+        mockTagMeta.color
+      );
+
+      fireEvent.change(within(dialog).getByLabelText(/edit color/i), {
+        target: { value: '#ffffff' },
+      });
+
+      fireEvent.submit(within(dialog).getByLabelText('tag-edit-form'));
+      expect(api.updateTag).toBeCalledWith({
+        id: mockTagMeta.id,
+        text: 'meta',
+        color: '#ffffff',
+      });
+
+      await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+    });
+
+    it('closes tag dialog without submitting on cancel', async () => {
+      render(<App api={api} />);
+      await screen.findByText(/meta/i);
+
+      const tagForm = screen.getByRole('form', { name: 'new-tag-form' });
+      const noteForm = screen.getByRole('form', { name: 'new-note-form' });
+
+      expect(within(tagForm).queryByText('meta')).toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      expect(within(tagForm).queryByText('meta')).not.toBeTruthy();
+      expect(within(noteForm).queryByText('meta')).toBeTruthy();
+
+      expect(screen.queryByRole('dialog')).not.toBeTruthy();
+
+      fireEvent.click(screen.queryByText('meta'));
+
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByLabelText(/edit label/i).value).toBe('meta');
+
+      fireEvent.change(within(dialog).getByLabelText(/edit label/i), {
+        target: { value: 'not meta' },
+      });
+
+      fireEvent.click(within(dialog).getByText(/cancel/i));
+      expect(api.updateTag).not.toBeCalled();
+
+      expect(screen.queryByRole('dialog')).not.toBeTruthy();
+    });
+
+    it('shows all notes when clicking see all', async () => {
       const extraTags = [
         ...mockTags,
-        { id: 3, text: 'third', color: 'red' },
-        { id: 4, text: 'fourth', color: 'blue' },
-        { id: 5, text: 'fifth', color: 'green' },
-        { id: 6, text: 'sixth', color: 'orange' },
-        { id: 7, text: 'seventh', color: 'purple' },
-        { id: 8, text: 'eighth', color: 'yellow' },
+        { id: 3, text: 'third', color: TOMATO },
+        { id: 4, text: 'fourth', color: ORANGE },
+        { id: 5, text: 'fifth', color: LIME },
+        { id: 6, text: 'sixth', color: GREEN },
+        { id: 7, text: 'seventh', color: TEAL },
+        { id: 8, text: 'eighth', color: DODGERBLUE },
       ];
 
-      api.loadTags = jest.fn().mockResolvedValue(extraTags);
+      api.loadTags = vi.fn().mockResolvedValue(extraTags);
       render(<App api={api} />);
       await screen.findByText(/meta/i);
       expect(screen.queryByText(/meta/i)).toBeTruthy();
@@ -343,9 +502,9 @@ describe('App', () => {
       expect(screen.queryByText(/sixth/i)).toBeTruthy();
       expect(screen.queryByText(/seventh/i)).toBeTruthy();
       expect(screen.queryByText(/eighth/i)).not.toBeTruthy();
-      expect(screen.queryByText(/show all/i)).toBeTruthy();
+      expect(screen.queryByText(/see all tags/i)).toBeTruthy();
 
-      fireEvent.click(screen.getByRole('button', { name: /show all/i }));
+      fireEvent.click(screen.getByRole('button', { name: /see all tags/i }));
       expect(screen.queryByText(/meta/i)).toBeTruthy();
       expect(screen.queryByText(/work/i)).toBeTruthy();
       expect(screen.queryByText(/third/i)).toBeTruthy();
@@ -354,7 +513,16 @@ describe('App', () => {
       expect(screen.queryByText(/sixth/i)).toBeTruthy();
       expect(screen.queryByText(/seventh/i)).toBeTruthy();
       expect(screen.queryByText(/eighth/i)).toBeTruthy();
-      expect(screen.queryByText(/show all/i)).not.toBeTruthy();
+
+      fireEvent.click(screen.getByRole('button', { name: /see fewer tags/i }));
+      expect(screen.queryByText(/meta/i)).toBeTruthy();
+      expect(screen.queryByText(/work/i)).toBeTruthy();
+      expect(screen.queryByText(/third/i)).toBeTruthy();
+      expect(screen.queryByText(/fourth/i)).toBeTruthy();
+      expect(screen.queryByText(/fifth/i)).toBeTruthy();
+      expect(screen.queryByText(/sixth/i)).toBeTruthy();
+      expect(screen.queryByText(/seventh/i)).toBeTruthy();
+      expect(screen.queryByText(/eighth/i)).not.toBeTruthy();
     });
   });
 
@@ -388,7 +556,7 @@ describe('App', () => {
     });
 
     it('shows error when deleting a tag', async () => {
-      api.deleteTag = jest.fn().mockRejectedValue(new Error('delete failed!'));
+      api.deleteTag = vi.fn().mockRejectedValue(new Error('delete failed!'));
       render(<App api={api} />);
       await screen.findByText(/meta/i);
       fireEvent.click(screen.getByTestId(`tag-${mockTagMeta.id}-delete`));

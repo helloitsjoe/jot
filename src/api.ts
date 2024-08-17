@@ -1,17 +1,28 @@
-import { supabase } from './supabase';
+import { createSupabase } from './supabase';
+import type { Tables } from './supabase.types';
+import type { AuthError, PostgrestError } from '@supabase/supabase-js';
+export type { User } from '@supabase/auth-js';
+
+export type Note = Tables<'notes'>;
+export type Tag = Tables<'tags'>;
+export type NotesTags = Tables<'notes_tags'>;
+export type API = ReturnType<typeof createApi>;
+
+type ResponseError = AuthError | PostgrestError;
 
 // Supabase returns an error in 200 response, unwrap and throw if it exists.
-const validate = (res) => {
+const validate = <T>(res: { data?: T; error?: ResponseError }) => {
   const { data, error } = res;
   if (error) {
-    const err = new Error(error.message);
-    err.status = error.status;
-    throw err;
+    throw error;
   }
   return data;
 };
 
-export const addTagsToNotes = (allNotes, notesTags) => {
+export const addTagsToNotes = (
+  allNotes: Note[],
+  notesTags: { notes: Note; tags: Tag }[]
+) => {
   const notesMap = notesTags.reduce((acc, { notes, tags }) => {
     const noteId = notes.id;
     if (!acc[noteId]) {
@@ -30,12 +41,14 @@ export const addTagsToNotes = (allNotes, notesTags) => {
   });
 };
 
-export const createApi = (db = supabase) => {
-  const getSession = () => db.auth.getSession();
+// auth.getUser() gets user from session if JWT is not provided. This causes
+// problems in tests where there is no current session. Passing optional jwt
+// only for tests. This is not a great solution.
+export const createApi = ({ jwt = undefined, ...clientOptions } = {}) => {
+  const db = createSupabase(clientOptions);
 
   const getUser = async () => {
-    const res = await db.auth.getUser();
-    console.log('res', res);
+    const res = await db.auth.getUser(jwt);
     const { user } = validate(res);
     return user;
   };
@@ -74,8 +87,7 @@ export const createApi = (db = supabase) => {
 
   const addUser = async ({ id }) => {
     const res = await db.from('users').insert([{ id }]);
-    const [user] = validate(res);
-    return user;
+    return validate(res);
   };
 
   const addNote = async (text, tag_ids) => {
@@ -158,19 +170,14 @@ export const createApi = (db = supabase) => {
     // Tags are required to have user, text, color
     const res = await db
       .from('tags')
-      .insert(
-        [
-          {
-            text: text.toLowerCase(),
-            color,
-            user_id: user.id,
-            updated_at: new Date().toISOString(),
-          },
-        ],
+      .insert([
         {
-          return: 'representation',
-        }
-      )
+          text: text.toLowerCase(),
+          color,
+          user_id: user.id,
+          updated_at: new Date().toISOString(),
+        },
+      ])
       .select();
 
     const [newTag] = validate(res);
@@ -181,15 +188,18 @@ export const createApi = (db = supabase) => {
   const updateTag = async ({ id, color, text }) => {
     const res = await db
       .from('tags')
-      .update({ id, color, text, updated_at: new Date().toISOString() });
-    return validate(res);
+      .update({ id, color, text, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select();
+
+    const [updatedTag] = validate(res);
+    return updatedTag;
   };
 
   // TODO: Soft delete
   const deleteTag = async ({ id }) => {
     await db.from('notes_tags').delete().eq('tag_id', id).then(validate);
     const res = await db.from('tags').delete().eq('id', id);
-    console.log('deleted', res);
     return validate(res);
   };
 
@@ -241,7 +251,6 @@ export const createApi = (db = supabase) => {
     addTag,
     loadTags,
     loadNotes,
-    getSession,
     addUser,
     deleteTag,
     deleteNote,
